@@ -115,6 +115,9 @@
     (class "fish")
     (icon "images/creatures/fish/f8.png"))
   (object
+    (class "fish-swimming")
+    (icon "images/creatures/fish_swimming/fish.png"))
+  (object
     (class "skullyhop")
     (icon "images/creatures/skullyhop/s-jump.png"))
   (object

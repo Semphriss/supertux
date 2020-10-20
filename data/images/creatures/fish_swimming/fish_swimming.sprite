@@ -1,0 +1,33 @@
+(supertux-sprite
+ (action
+  (name "right")
+  (fps 10)
+  (loops 1)
+  (hitbox 6 9 42 32)
+  (images "fish.png"))
+ (action
+  (name "left")
+  (hitbox 18 9 42 32)
+  (mirror-action "right"))
+ (action
+  (name "r-turn-l")
+  (fps 15)
+  (loops 1)
+  (hitbox 10 10 50 32)
+  (images "fish_turn_0.png"
+          "fish_turn_1.png"
+		  "fish_turn_2.png"))
+ (action
+  (name "l-turn-r")
+  (hitbox 6 10 50 32)
+  (mirror-action "r-turn-l"))
+ (action
+  (name "iced-right")
+  (hitbox 6 9 42 32)
+  (images "iced_left.png"))
+ (action
+  (name "iced-left")
+  (hitbox 18 9 42 32)
+  (mirror-action "iced-right"))
+)
+

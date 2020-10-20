@@ -37,6 +37,7 @@ BadguySelectMenu::BadguySelectMenu(std::vector<std::string>* badguys_) :
     all_badguys.push_back("darttrap");
     all_badguys.push_back("dispenser");
     all_badguys.push_back("fish");
+    all_badguys.push_back("fish-swimming");
     all_badguys.push_back("flame");
     all_badguys.push_back("flyingsnowball");
     all_badguys.push_back("ghostflame");

@@ -1,0 +1,53 @@
+//  SuperTux
+//  Copyright (C) 2020 A. Semphris <semphris@protonmail.com>
+//
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+#ifndef HEADER_SUPERTUX_BADGUY_FISH_SWIMMING_HPP
+#define HEADER_SUPERTUX_BADGUY_FISH_SWIMMING_HPP
+
+#include "badguy/badguy.hpp"
+
+class FishSwimming final : public BadGuy
+{
+public:
+  FishSwimming(const ReaderMapping& reader);
+
+  virtual void initialize() override;
+  virtual void collision_solid(const CollisionHit& hit) override;
+  virtual void active_update(float dt_sec) override;
+
+  virtual void freeze() override;
+  virtual void unfreeze() override;
+  virtual bool is_freezable() const override;
+  virtual std::string get_class() const override { return "fish-swimming"; }
+  virtual std::string get_display_name() const override { return _("Swimming Fish"); }
+
+private:
+  enum FishState {
+    SWIMMING,
+    TURNING
+  };
+
+  FishState state;
+  float turn_timer;
+
+private:
+  FishSwimming(const FishSwimming&) = delete;
+  FishSwimming& operator=(const FishSwimming&) = delete;
+};
+
+#endif
+
+/* EOF */
