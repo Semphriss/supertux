@@ -29,7 +29,7 @@ FishSwimming::FishSwimming(const ReaderMapping& reader) :
 void
 FishSwimming::initialize()
 {
-  m_physic.set_velocity_x(m_dir == Direction::LEFT ? -64 : 64);
+  m_physic.set_velocity_x(m_dir == Direction::LEFT ? -256 : 256);
   m_sprite->set_action(m_dir == Direction::LEFT ? "left" : "right");
   state = FishState::SWIMMING;
 }
@@ -69,9 +69,13 @@ FishSwimming::active_update(float dt_sec) {
     if (turn_timer <= 0.f) {
       turn_timer = 0.f;
       m_sprite->set_action(m_dir == Direction::LEFT ? "left" : "right");
-      m_physic.set_velocity_x(m_dir == Direction::LEFT ? -64 : 64);
+      m_physic.set_velocity_x(m_physic.get_velocity_x()/2 + (m_dir == Direction::LEFT ? -128.f : 128.f));
       state = FishState::SWIMMING;
     }
+  }
+
+  if (state == FishState::SWIMMING) {
+    m_physic.set_velocity_x(m_physic.get_velocity_x()/1.02f + (m_dir == Direction::LEFT ? -1.f : 1.f));
   }
 }
 
