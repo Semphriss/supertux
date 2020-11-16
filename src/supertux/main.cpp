@@ -45,6 +45,8 @@ extern "C" {
 #include "gui/dialog.hpp"
 #include "gui/menu_manager.hpp"
 #include "math/random.hpp"
+#include "network/test_client.hpp"
+#include "network/test_server.hpp"
 #include "object/player.hpp"
 #include "object/spawnpoint.hpp"
 #include "physfs/physfs_file_system.hpp"
@@ -545,6 +547,14 @@ Main::launch_game(const CommandLineArguments& args)
     if (args.editor)
     {
       m_screen_manager->push_screen(std::make_unique<Editor>());
+    }
+    else if (args.test_server)
+    {
+      screen_manager.push_screen(std::make_unique<TestServer>());
+    }
+    else if (args.test_client)
+    {
+      screen_manager.push_screen(std::make_unique<TestClient>());
     }
     else
     {
