@@ -125,7 +125,9 @@ public:
   /** The collision group */
   CollisionGroup m_group;
 
-private:
+  // TODO: Revert this "public" to a "private" and refactor the code so savestates don't need direct access
+  // @see MovingObject::backup() and MovingObject::restore()
+public:
   /** this is only here for internal collision detection use (don't touch this
       from outside collision detection code)
 
