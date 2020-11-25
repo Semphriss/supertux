@@ -11,10 +11,13 @@ jobs:
 
     strategy:
       matrix:
-        os: [macos-latest, ubuntu-latest]
+        os: [ubuntu-latest]
 
     steps:
     - uses: actions/checkout@v2
+
+    - name: Install dependencies
+      run: sudo apt install cmake build-essential automake clang-6.0 g++-8 libc++-dev libogg-dev libvorbis-dev libopenal-dev libboost-all-dev libsdl2-dev libsdl2-image-dev libfreetype6-dev libfribidi-dev libglib2.0-dev gtk-doc-tools rpm sshpass
 
     - name: Create Build Environment
       run: cmake -E make_directory ${{runner.workspace}}/build
