@@ -1,17 +1,17 @@
-name: CMake
+name: Debug
 
 on: [push]
 
 env:
   BUILD_TYPE: Release
 
-strategy:
-  matrix:
-    os: [windows-latest, macos-latest, ubuntu-latest]
-
 jobs:
   build:
     runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
 
     steps:
     - uses: actions/checkout@v2
