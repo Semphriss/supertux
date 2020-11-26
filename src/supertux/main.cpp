@@ -338,12 +338,17 @@ PhysfsSubsystem::~PhysfsSubsystem()
   PHYSFS_deinit();
 }
 
-SDLSubsystem::SDLSubsystem()
+SDLSubsystem::SDLSubsystem(const CommandLineArguments& args)
 {
-  Uint32 flags = SDL_INIT_TIMER | SDL_INIT_VIDEO;
+  Uint32 flags = SDL_INIT_TIMER;
+  if (!args.headless)
+  {
+    flags |= SDL_INIT_VIDEO;
 #ifndef UBUNTU_TOUCH
-  flags |= SDL_INIT_JOYSTICK | SDL_INIT_GAMECONTROLLER;
+    flags |= SDL_INIT_JOYSTICK | SDL_INIT_GAMECONTROLLER;
 #endif
+  }
+
   if (SDL_Init(flags) < 0)
   {
     std::stringstream msg;
@@ -413,7 +418,7 @@ Main::resave(const std::string& input_filename, const std::string& output_filena
 void
 Main::launch_game(const CommandLineArguments& args)
 {
-  m_sdl_subsystem.reset(new SDLSubsystem());
+  m_sdl_subsystem.reset(new SDLSubsystem(args));
   m_console_buffer.reset(new ConsoleBuffer());
 
   s_timelog.log("controller");
@@ -550,11 +555,11 @@ Main::launch_game(const CommandLineArguments& args)
     }
     else if (args.test_server)
     {
-      screen_manager.push_screen(std::make_unique<TestServer>());
+      m_screen_manager->push_screen(std::make_unique<TestServer>());
     }
     else if (args.test_client)
     {
-      screen_manager.push_screen(std::make_unique<TestClient>());
+      m_screen_manager->push_screen(std::make_unique<TestClient>());
     }
     else
     {

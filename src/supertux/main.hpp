@@ -67,7 +67,7 @@ public:
 class SDLSubsystem final
 {
 public:
-  SDLSubsystem();
+  SDLSubsystem(const CommandLineArguments& args);
   ~SDLSubsystem();
 };
 
