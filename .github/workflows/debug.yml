@@ -38,7 +38,7 @@ jobs:
     - name: Create packages
       working-directory: ${{runner.workspace}}/build
       shell: bash
-      run: ${{runner.workspace}}/.scripts/package.sh
+      run: ../.scripts/package.sh
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v2
