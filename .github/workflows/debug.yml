@@ -44,7 +44,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: Linux AppImage and source code
-        path: ${{runner.workspace}}/build/s3-upload/*
+        path: ${{runner.workspace}}/supertux/build/s3-upload/*
 
   macos_clang:
     runs-on: ${{ matrix.os }}
