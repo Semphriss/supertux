@@ -36,6 +36,10 @@ public:
   virtual IntegrationStatus get_status() const override { return IntegrationStatus(); }
 
 private:
+  void on_connect(std::unique_ptr<Connection> connection);
+  void on_receive(Connection* connection, std::string data);
+
+private:
   network::Server m_server;
   std::unique_ptr<network::ConnectionPool> m_pool;
 
