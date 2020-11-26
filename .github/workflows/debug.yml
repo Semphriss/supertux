@@ -6,7 +6,7 @@ env:
   BUILD_TYPE: Release
 
 jobs:
-  build:
+  linux_gcc:
     runs-on: ${{ matrix.os }}
 
     strategy:
@@ -34,3 +34,32 @@ jobs:
       working-directory: ${{runner.workspace}}/build
       shell: bash
       run: cmake --build . --config $BUILD_TYPE
+
+  macos_clang:
+    runs-on: ${{ matrix.os }}
+    
+    strategy:
+      matrix:
+        os: [macos-latest]
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Install dependencies
+      run: brew install cmake bash libogg libvorbis glew openal-soft sdl2 sdl2_image sdl2_ttf freetype raqm curl-openssl fribidi
+
+    - name: Checkout submodules
+      run: git submodule update --init --recursive
+
+    - name: Create Build Environment
+      run: mkdir ${{runner.workspace}}/build
+
+    - name: Configure CMake
+      shell: bash
+      working-directory: ${{runner.workspace}}/build
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DWARNINGS=ON -DWERROR=ON -DGLBINDING_ENABLED=$USE_GLBINDING -DBUILD_TESTS=ON -DCMAKE_INSTALL_MESSAGE=NEVER -DCMAKE_INSTALL_PREFIX=/usr -DINSTALL_SUBDIR_BIN=bin -DINSTALL_SUBDIR_SHARE=share/supertux2
+
+    - name: Build
+      working-directory: ${{runner.workspace}}/build
+      shell: bash
+      run: make -j3
