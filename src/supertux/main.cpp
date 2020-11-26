@@ -557,11 +557,11 @@ Main::launch_game(const CommandLineArguments& args)
     }
     else if (args.test_server)
     {
-      screen_manager.push_screen(std::make_unique<TestServer>());
+      m_screen_manager->push_screen(std::make_unique<TestServer>());
     }
     else if (args.test_client)
     {
-      screen_manager.push_screen(std::make_unique<TestClient>());
+      m_screen_manager->push_screen(std::make_unique<TestClient>());
     }
     else
     {
