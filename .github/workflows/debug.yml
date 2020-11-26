@@ -21,7 +21,7 @@ jobs:
 
     - name: Checkout submodules
       run: git submodule update --init --recursive
-      
+
     - name: Create Build Environment
       run: cmake -E make_directory ${{runner.workspace}}/build
 
@@ -35,9 +35,20 @@ jobs:
       shell: bash
       run: cmake --build . --config $BUILD_TYPE
 
+    - name: Create packages
+      working-directory: ${{runner.workspace}}/build
+      shell: bash
+      run: ${{runner.workspace}}/.scripts/package.sh
+
+    - name: Upload artifacts
+    - uses: actions/upload-artifact@v2
+      with:
+        name: Linux AppImage and source code
+        path: ${{runner.workspace}}/build/s3-upload/*
+
   macos_clang:
     runs-on: ${{ matrix.os }}
-    
+
     strategy:
       matrix:
         os: [macos-latest]
