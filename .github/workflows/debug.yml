@@ -32,11 +32,16 @@ jobs:
 
     - name: Build
       shell: bash
+      working-directory: ${{runner.workspace}}/build
       run: pwd; ls; cmake --build . --config $BUILD_TYPE
 
     - name: Create packages
       shell: bash
-      run: pwd; ls; ${{runner.workspace}}/supertux/.scripts/package.sh
+      working-directory: ${{runner.workspace}}/build
+      run: pwd; ls; ls ${{runner.workspace}}/supertux; ${{runner.workspace}}/supertux/.scripts/package.sh
+      
+    - name: Check paths
+      run: ls ${{runner.workspace}}; ls ${{runner.workspace}}/supertux/; ls ${{runner.workspace}}/supertux/build/; ls ${{runner.workspace}}/supertux/build/s3-upload/
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v2
