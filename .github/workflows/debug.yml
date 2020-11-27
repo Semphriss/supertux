@@ -41,7 +41,7 @@ jobs:
       run: pwd; ls; ls ${{runner.workspace}}/supertux; ${{runner.workspace}}/supertux/.scripts/package.sh
       
     - name: Check paths
-      run: ls ${{runner.workspace}}; ls ${{runner.workspace}}/supertux/; ls ${{runner.workspace}}/supertux/build/; ls ${{runner.workspace}}/supertux/build/s3-upload/
+      run: ls ${{runner.workspace}}; echo "##########"; ls ${{runner.workspace}}/supertux/; echo "##########"; ls ${{runner.workspace}}/build/; echo "##########"; ls ${{runner.workspace}}/supertux/build/s3-upload/
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v2
