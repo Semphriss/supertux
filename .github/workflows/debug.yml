@@ -23,22 +23,20 @@ jobs:
       run: git submodule update --init --recursive
 
     - name: Create Build Environment
-      run: cmake -E make_directory ${{runner.workspace}}/build
+      run: pwd; ls; cmake -E make_directory ${{runner.workspace}}/build
 
     - name: Configure CMake
       shell: bash
       working-directory: ${{runner.workspace}}/build
-      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+      run: pwd; ls; cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE
 
     - name: Build
-      working-directory: ${{runner.workspace}}/build
       shell: bash
-      run: cmake --build . --config $BUILD_TYPE
+      run: pwd; ls; cmake --build . --config $BUILD_TYPE
 
     - name: Create packages
-      working-directory: ${{runner.workspace}}/build
       shell: bash
-      run: ${{runner.workspace}}/supertux/.scripts/package.sh
+      run: pwd; ls; ${{runner.workspace}}/supertux/.scripts/package.sh
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v2
