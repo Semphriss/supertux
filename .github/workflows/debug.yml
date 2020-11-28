@@ -23,25 +23,25 @@ jobs:
       run: git submodule update --init --recursive
 
     - name: Create Build Environment
-      run: pwd; ls; cmake -E make_directory ${{runner.workspace}}/build
+      run: pwd; ls; cmake -E make_directory ${{runner.workspace}}/supertux/build
 
     - name: Configure CMake
       shell: bash
-      working-directory: ${{runner.workspace}}/build
+      working-directory: ${{runner.workspace}}/supertux/build
       run: pwd; ls; cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE
 
     - name: Build
       shell: bash
-      working-directory: ${{runner.workspace}}/build
+      working-directory: ${{runner.workspace}}/supertux/build
       run: pwd; ls; cmake --build . --config $BUILD_TYPE
 
     - name: Create packages
       shell: bash
-      working-directory: ${{runner.workspace}}/build
+      working-directory: ${{runner.workspace}}/supertux/build
       run: pwd; ls; ls ${{runner.workspace}}/supertux; ${{runner.workspace}}/supertux/.scripts/package.sh
       
     - name: Check paths
-      run: ls ${{runner.workspace}}; echo "##########"; ls ${{runner.workspace}}/supertux/; echo "##########"; ls ${{runner.workspace}}/build/; echo "##########"; ls ${{runner.workspace}}/build/s3-upload/
+      run: ls ${{runner.workspace}}; echo "##########"; ls ${{runner.workspace}}/supertux/; echo "##########"; ls ${{runner.workspace}}/supertux/build/; echo "##########"; ls ${{runner.workspace}}/supertux/build/s3-upload/
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v2
