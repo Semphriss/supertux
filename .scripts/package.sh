@@ -2,17 +2,17 @@
 
 shopt -s nullglob
 
-if [ "$TRAVIS_OS_NAME" = "osx" ] && [ "$PACKAGE" = "ON" ]; then
-    sudo chmod -R +w /usr/local/Cellar
-    cpack -G Bundle;
-fi
+#if [ "$GITHUB_OS_NAME" = "osx" ]; then
+#    sudo chmod -R +w /usr/local/Cellar
+#    cpack -G Bundle;
+#fi
 
-if [ "$TRAVIS_OS_NAME" = "linux" ] && [ "$PACKAGE" = "ON" ]; then
+#if [ "$GITHUB_OS_NAME" = "linux" ]; then
     cpack --config CPackSourceConfig.cmake -G TGZ;
     ../.scripts/build_appimage.sh
     #extract built appimages for uploading
     mv ~/out/* .
-fi
+#fi
 
 mkdir s3-upload
 mv SuperTux* s3-upload/
