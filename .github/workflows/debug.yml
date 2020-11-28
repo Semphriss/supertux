@@ -7,11 +7,15 @@ env:
 
 jobs:
   linux_gcc:
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
+#    runs-on: ${{ matrix.os }}
 
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
+    env:
+      GITHUB_TARGET_OS: linux
+
+#    strategy:
+#      matrix:
+#        os: [ubuntu-latest]
 
     steps:
     - uses: actions/checkout@v2
@@ -23,31 +27,34 @@ jobs:
       run: git submodule update --init --recursive
 
     - name: Create Build Environment
-      run: pwd; ls; cmake -E make_directory ${{runner.workspace}}/supertux/build
+      run: cmake -E make_directory ${{runner.workspace}}/supertux/build
 
     - name: Configure CMake
       shell: bash
       working-directory: ${{runner.workspace}}/supertux/build
-      run: pwd; ls; cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE
 
     - name: Build
       shell: bash
       working-directory: ${{runner.workspace}}/supertux/build
-      run: pwd; ls; cmake --build . --config $BUILD_TYPE
+      run: cmake --build . --config $BUILD_TYPE
 
     - name: Create packages
       shell: bash
       working-directory: ${{runner.workspace}}/supertux/build
-      run: pwd; ls; ls ${{runner.workspace}}/supertux; ${{runner.workspace}}/supertux/.scripts/package.sh
-      
-    - name: Check paths
-      run: ls ${{runner.workspace}}; echo "##########"; ls ${{runner.workspace}}/supertux/; echo "##########"; ls ${{runner.workspace}}/supertux/build/; echo "##########"; ls ${{runner.workspace}}/supertux/build/s3-upload/
+      run: ${{runner.workspace}}/supertux/.scripts/package.sh
 
-    - name: Upload artifacts
+    - name: Upload source
       uses: actions/upload-artifact@v2
       with:
-        name: Linux AppImage and source code
-        path: ${{runner.workspace}}/supertux/build/s3-upload/*
+        name: source
+        path: ${{runner.workspace}}/supertux/build/s3-upload/*.tar.gz
+
+    - name: Upload AppImage
+      uses: actions/upload-artifact@v2
+      with:
+        name: linux_appimage
+        path: ${{runner.workspace}}/supertux/build/s3-upload/*.AppImage
 
   macos_clang:
     runs-on: ${{ matrix.os }}
