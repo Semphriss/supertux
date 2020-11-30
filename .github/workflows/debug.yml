@@ -48,7 +48,7 @@ jobs:
     - name: Run tests
       shell: bash
       working-directory: ${{runner.workspace}}/supertux/build
-      run: ./tests_supertux2
+      run: ./test_supertux2
 
     - name: Create packages
       shell: bash
