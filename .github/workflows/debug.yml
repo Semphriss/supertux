@@ -7,6 +7,7 @@ env:
 
 jobs:
   linux_gcc:
+    if: "!contains(github.event.head_commit.message, 'ci skip') && !contains(github.event.head_commit.message, 'skip ci')"
     runs-on: ubuntu-latest
 #    runs-on: ${{ matrix.os }}
 
@@ -68,6 +69,7 @@ jobs:
         path: ${{runner.workspace}}/supertux/build/s3-upload/*.AppImage
 
   macos_clang:
+    if: "!contains(github.event.head_commit.message, 'ci skip') && !contains(github.event.head_commit.message, 'skip ci')"
     runs-on: ${{ matrix.os }}
 
     strategy:
