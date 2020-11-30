@@ -27,17 +27,28 @@ jobs:
       run: git submodule update --init --recursive
 
     - name: Create Build Environment
-      run: cmake -E make_directory ${{runner.workspace}}/supertux/build
+      run: mkdir ${{runner.workspace}}/supertux/build
 
     - name: Configure CMake
       shell: bash
       working-directory: ${{runner.workspace}}/supertux/build
-      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+      # TODO: add -DGLBINDING_ENABLED=$USE_GLBINDING
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DWARNINGS=ON -DWERROR=ON -DBUILD_TESTS=ON -DCMAKE_INSTALL_MESSAGE=NEVER -DCMAKE_INSTALL_PREFIX=/usr -DINSTALL_SUBDIR_BIN=bin -DINSTALL_SUBDIR_SHARE=share/supertux2
 
     - name: Build
       shell: bash
       working-directory: ${{runner.workspace}}/supertux/build
-      run: cmake --build . --config $BUILD_TYPE
+      run: make VERBOSE=1
+
+    - name: Try install
+      shell: bash
+      working-directory: ${{runner.workspace}}/supertux/build
+      run: make install DESTDIR="/tmp/supertux-$BUILD_TYPE" VERBOSE=1
+
+    - name: Run tests
+      shell: bash
+      working-directory: ${{runner.workspace}}/supertux/build
+      run: ./tests_supertux2
 
     - name: Create packages
       shell: bash
@@ -78,7 +89,7 @@ jobs:
     - name: Configure CMake
       shell: bash
       working-directory: ${{runner.workspace}}/build
-      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DWARNINGS=ON -DWERROR=ON -DGLBINDING_ENABLED=$USE_GLBINDING -DBUILD_TESTS=ON -DCMAKE_INSTALL_MESSAGE=NEVER -DCMAKE_INSTALL_PREFIX=/usr -DINSTALL_SUBDIR_BIN=bin -DINSTALL_SUBDIR_SHARE=share/supertux2
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DWARNINGS=ON -DWERROR=ON -DBUILD_TESTS=ON -DCMAKE_INSTALL_MESSAGE=NEVER -DCMAKE_INSTALL_PREFIX=/usr -DINSTALL_SUBDIR_BIN=bin -DINSTALL_SUBDIR_SHARE=share/supertux2
 
     - name: Build
       working-directory: ${{runner.workspace}}/build
