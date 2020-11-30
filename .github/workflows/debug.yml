@@ -39,7 +39,7 @@ jobs:
     - name: Build
       shell: bash
       working-directory: ${{runner.workspace}}/supertux/build
-      run: make VERBOSE=1
+      run: make -j3 VERBOSE=1
 
     - name: Try install
       shell: bash
@@ -100,4 +100,4 @@ jobs:
     - name: Build
       working-directory: ${{runner.workspace}}/build
       shell: bash
-      run: make -j3
+      run: make -j3 VERBOSE=1
