@@ -7,7 +7,7 @@ env:
 
 jobs:
   linux_gcc:
-    if: "!contains(github.event.head_commit.message, 'ci skip') && !contains(github.event.head_commit.message, 'skip ci')"
+    if: "!contains(github.event.head_commit.message, 'ci skip') && !contains(github.event.head_commit.message, 'skip ci') && !contains(github.event.head_commit.message, 'skip linux')"
     runs-on: ubuntu-latest
 #    runs-on: ${{ matrix.os }}
 
@@ -69,12 +69,12 @@ jobs:
         path: ${{runner.workspace}}/supertux/build/s3-upload/*.AppImage
 
   macos_clang:
-    if: "!contains(github.event.head_commit.message, 'ci skip') && !contains(github.event.head_commit.message, 'skip ci')"
+    if: "!contains(github.event.head_commit.message, 'ci skip') && !contains(github.event.head_commit.message, 'skip ci') && !contains(github.event.head_commit.message, 'skip macos')"
     runs-on: macos-latest
 #    runs-on: ${{ matrix.os }}
 
     env:
-      GITHUB_TARGET_OS: linux
+      GITHUB_TARGET_OS: macos
 
 #    strategy:
 #      matrix:
@@ -90,14 +90,42 @@ jobs:
       run: git submodule update --init --recursive
 
     - name: Create Build Environment
-      run: mkdir ${{runner.workspace}}/build
+      run: mkdir ${{runner.workspace}}/supertux/build
 
     - name: Configure CMake
       shell: bash
-      working-directory: ${{runner.workspace}}/build
+      working-directory: ${{runner.workspace}}/supertux/build
+      # TODO: add -DGLBINDING_ENABLED=$USE_GLBINDING
       run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DWARNINGS=ON -DWERROR=ON -DBUILD_TESTS=ON -DCMAKE_INSTALL_MESSAGE=NEVER -DCMAKE_INSTALL_PREFIX=/usr -DINSTALL_SUBDIR_BIN=bin -DINSTALL_SUBDIR_SHARE=share/supertux2
 
     - name: Build
-      working-directory: ${{runner.workspace}}/build
       shell: bash
+      working-directory: ${{runner.workspace}}/supertux/build
       run: make -j3 VERBOSE=1
+
+    - name: Try install
+      shell: bash
+      working-directory: ${{runner.workspace}}/supertux/build
+      run: make install DESTDIR="/tmp/supertux-$BUILD_TYPE" VERBOSE=1
+
+    - name: Run tests
+      shell: bash
+      working-directory: ${{runner.workspace}}/supertux/build
+      run: ./test_supertux2
+
+    - name: Create packages
+      shell: bash
+      working-directory: ${{runner.workspace}}/supertux/build
+      run: ${{runner.workspace}}/supertux/.scripts/package.sh
+
+    - name: Upload source
+      uses: actions/upload-artifact@v2
+      with:
+        name: source
+        path: ${{runner.workspace}}/supertux/build/s3-upload/*.tar.gz
+
+    - name: Upload AppImage
+      uses: actions/upload-artifact@v2
+      with:
+        name: linux_appimage
+        path: ${{runner.workspace}}/supertux/build/s3-upload/*.AppImage
