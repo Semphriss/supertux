@@ -147,7 +147,8 @@ ScreenManager::ScreenManager(VideoSystem& video_system, InputManager& input_mana
   m_speed(1.0),
   m_actions(),
   m_screen_fade(),
-  m_screen_stack()
+  m_screen_stack(),
+  m_headless(false)
 {
 }
 
@@ -591,8 +592,8 @@ void ScreenManager::loop_iter()
     elapsed_ticks -= ms_per_step;
   }
 
-  if ((steps > 0 && !m_screen_stack.empty())
-      || g_debug.draw_redundant_frames) {
+  if (((steps > 0 && !m_screen_stack.empty())
+      || g_debug.draw_redundant_frames) && !m_headless) {
     // Draw a frame
     Compositor compositor(m_video_system);
     draw(compositor, *m_fps_statistics);
@@ -618,9 +619,11 @@ static void g_loop_iter() {
 #endif
 
 void
-ScreenManager::run()
+ScreenManager::run(bool headless)
 {
   Integration::init_all();
+
+  m_headless = headless;
 
   handle_screen_switch();
 #ifdef __EMSCRIPTEN__

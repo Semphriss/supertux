@@ -46,7 +46,7 @@ public:
   ScreenManager(VideoSystem& video_system, InputManager& input_manager);
   ~ScreenManager() override;
 
-  void run();
+  void run(bool headless);
   void quit(std::unique_ptr<ScreenFade> fade = {});
   void set_speed(float speed);
   float get_speed() const;
@@ -102,6 +102,8 @@ private:
 
   std::unique_ptr<ScreenFade> m_screen_fade;
   std::vector<std::unique_ptr<Screen> > m_screen_stack;
+
+  bool m_headless;
 };
 
 #endif
