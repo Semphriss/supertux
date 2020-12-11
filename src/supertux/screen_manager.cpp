@@ -534,7 +534,10 @@ ScreenManager::handle_screen_switch()
   }
 }
 
-void ScreenManager::loop_iter()
+static bool s_headless = false;
+
+void
+ScreenManager::loop_iter()
 {
   // Useful if screens edit their status without switching screens
   Integration::update_status_all(m_screen_stack.back()->get_status());
@@ -599,7 +602,7 @@ void ScreenManager::loop_iter()
   }
 
   if ((steps > 0 && !m_screen_stack.empty())
-      || g_debug.draw_redundant_frames) {
+      || g_debug.draw_redundant_frames && !s_headless) {
     // Draw a frame
     Compositor compositor(m_video_system);
     draw(compositor, *m_fps_statistics);
@@ -619,8 +622,9 @@ static void g_loop_iter() {
 #endif
 
 void
-ScreenManager::run()
+ScreenManager::run(bool headless)
 {
+  s_headless = headless;
   Integration::init_all();
 
   handle_screen_switch();
