@@ -33,6 +33,8 @@ public:
   virtual void update(float dt_sec, const Controller& controller) override {}
   virtual IntegrationStatus get_status() const override { return IntegrationStatus(); }
 
+  virtual IntegrationStatus get_status() const override { return IntegrationStatus(); }
+
 private:
   TestClient(const TestClient&) = delete;
   TestClient& operator=(const TestClient&) = delete;

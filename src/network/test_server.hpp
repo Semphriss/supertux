@@ -36,6 +36,8 @@ public:
   virtual void update(float dt_sec, const Controller& controller) override;
   virtual IntegrationStatus get_status() const override { return IntegrationStatus(); }
 
+  virtual IntegrationStatus get_status() const override { return IntegrationStatus(); }
+
 private:
   void on_connect(std::unique_ptr<network::Connection> connection);
   void on_receive(network::Connection* connection, const std::string& data);
