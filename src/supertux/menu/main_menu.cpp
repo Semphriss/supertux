@@ -21,6 +21,7 @@
 #include "gui/dialog.hpp"
 #include "gui/menu_item.hpp"
 #include "gui/menu_manager.hpp"
+#include "network/join_server_screen.hpp"
 #include "supertux/fadetoblack.hpp"
 #include "supertux/globals.hpp"
 #include "supertux/level.hpp"
@@ -57,6 +58,7 @@ MainMenu::MainMenu()
   // TODO: Manage to build OpenSSL for Emscripten so we can build CURL so we can
   //       build the add-ons so we can re-enable them.
   //       Also see src/addon/downloader.*pp
+  add_entry(MNID_PLAYONLINE, _("Play online"));
   add_entry(MNID_ADDONS, _("Add-ons"));
 #ifdef __EMSCRIPTEN__
   add_entry(MNID_MANAGEASSETS, _("Manage Assets"));
@@ -86,6 +88,16 @@ MainMenu::menu_action(MenuItem& item)
     case MNID_STARTGAME:
       // World selection menu
       MenuManager::instance().push_menu(MenuStorage::WORLDSET_MENU);
+      break;
+
+    case MNID_PLAYONLINE:
+      {
+        MenuManager::instance().clear_menu_stack();
+        std::unique_ptr<Screen> screen(new JoinServerScreen());
+        auto fade = std::make_unique<FadeToBlack>(FadeToBlack::FADEOUT, 0.5);
+        SoundManager::current()->stop_music(0.5);
+        ScreenManager::current()->push_screen(move(screen),move(fade));
+      }
       break;
 
     case MNID_ADDONS:
