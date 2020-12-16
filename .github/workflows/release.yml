@@ -3,7 +3,7 @@ name: Debug
 on:
   push:
     tags:
-      - *
+      - v*
 
 env:
   BUILD_TYPE: RELEASE
