@@ -3,7 +3,7 @@ name: Debug
 on: [push]
 
 env:
-  BUILD_TYPE: Release
+  BUILD_TYPE: DEBUG
 
 jobs:
   linux_gcc:
