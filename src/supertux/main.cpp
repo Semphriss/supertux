@@ -574,7 +574,7 @@ Main::launch_game(const CommandLineArguments& args)
                          "Open Store's Telegram at https://open-store.io/telegram"));
 #endif
 
-  m_screen_manager->run(args.headless.get());
+  m_screen_manager->run(static_cast<bool>(args.headless.get()));
 }
 
 int
