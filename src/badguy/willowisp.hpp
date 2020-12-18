@@ -67,6 +67,9 @@ public:
     ExposedObject<WillOWisp, scripting::WillOWisp>::unexpose(vm, table_idx);
   }
 
+  virtual void backup(Writer& writer) const override;
+  virtual void restore(const ReaderMapping& reader) override;
+
   /** make WillOWisp vanish */
   void vanish();
 

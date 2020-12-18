@@ -46,6 +46,9 @@ public:
 
   virtual void editor_update() override;
 
+  virtual void backup(Writer& writer) const override;
+  virtual void restore(const ReaderMapping& reader) override;
+
   const Vector& get_speed() const { return m_speed; }
 
   /** @name Scriptable Methods

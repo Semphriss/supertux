@@ -45,6 +45,9 @@ public:
   virtual std::string get_class() const override { return "mriceblock"; }
   virtual std::string get_display_name() const override { return _("Iceblock"); }
 
+  virtual void backup(Writer& writer) const override;
+  virtual void restore(const ReaderMapping& reader) override;
+
   bool can_break();
 
 protected:

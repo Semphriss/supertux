@@ -36,6 +36,9 @@ public:
   virtual std::string get_class() const override { return "livefire"; }
   virtual std::string get_display_name() const override { return _("Walking Flame"); }
 
+  virtual void backup(Writer& writer) const override;
+  virtual void restore(const ReaderMapping& reader) override;
+
 private:
   std::string death_sound;
 

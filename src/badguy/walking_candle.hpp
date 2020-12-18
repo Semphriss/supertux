@@ -39,6 +39,9 @@ public:
   virtual std::string get_class() const override { return "walking_candle"; }
   virtual std::string get_display_name() const override { return _("Walking Candle"); }
 
+  virtual void backup(Writer& writer) const override;
+  virtual void restore(const ReaderMapping& reader) override;
+
 private:
   Color lightcolor;
 

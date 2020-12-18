@@ -2066,7 +2066,7 @@ Player::has_grabbed(const std::string& object_name) const
 }
 
 void
-Player::backup(Writer& writer)
+Player::backup(Writer& writer) const
 {
   MovingObject::backup(writer);
 

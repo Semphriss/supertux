@@ -24,6 +24,7 @@
 #include "sprite/sprite.hpp"
 #include "supertux/sector.hpp"
 #include "util/reader_mapping.hpp"
+#include "util/writer.hpp"
 
 static const std::string FLAME_SOUND = "sounds/flame.wav";
 
@@ -140,6 +141,33 @@ void Flame::play_looping_sounds()
 {
   if (sound_source) {
     sound_source->play();
+  }
+}
+
+void
+Flame::backup(Writer& writer) const
+{
+  BadGuy::backup(writer);
+
+  writer.start_list(Flame::get_class());
+  writer.write("angle", angle);
+  writer.write("radius", radius);
+  writer.write("speed", speed);
+  writer.end_list(Flame::get_class());
+}
+
+void
+Flame::restore(const ReaderMapping& reader)
+{
+  BadGuy::restore(reader);
+
+  boost::optional<ReaderMapping> subreader(ReaderMapping(reader.get_doc(), reader.get_sexp()));
+
+  if (reader.get(Flame::get_class().c_str(), subreader))
+  {
+    subreader->get("angle", angle);
+    subreader->get("radius", radius);
+    subreader->get("speed", speed);
   }
 }
 

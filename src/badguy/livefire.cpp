@@ -22,6 +22,8 @@
 #include "object/sprite_particle.hpp"
 #include "sprite/sprite.hpp"
 #include "supertux/sector.hpp"
+#include "util/reader_mapping.hpp"
+#include "util/writer.hpp"
 
 LiveFire::LiveFire(const ReaderMapping& reader) :
   WalkingBadguy(reader, "images/creatures/livefire/livefire.sprite", "left", "right"),
@@ -139,6 +141,32 @@ LiveFire::kill_fall()
   // start dead-script
   run_dead_script();
 }
+
+void
+LiveFire::backup(Writer& writer) const
+{
+  WalkingBadguy::backup(writer);
+
+  writer.start_list(LiveFire::get_class());
+  writer.write("state", state);
+  writer.end_list(LiveFire::get_class());
+}
+
+void
+LiveFire::restore(const ReaderMapping& reader)
+{
+  WalkingBadguy::restore(reader);
+
+  boost::optional<ReaderMapping> subreader(ReaderMapping(reader.get_doc(), reader.get_sexp()));
+
+  if (reader.get(LiveFire::get_class().c_str(), subreader))
+  {
+    int sstate;
+    if (subreader->get("state", sstate))
+      state = static_cast<SState>(sstate);
+  }
+}
+
 
 /* The following defines a sleeping version */
 

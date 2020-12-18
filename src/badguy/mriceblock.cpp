@@ -22,6 +22,8 @@
 #include "object/player.hpp"
 #include "sprite/sprite.hpp"
 #include "supertux/sector.hpp"
+#include "util/reader_mapping.hpp"
+#include "util/writer.hpp"
 
 namespace {
 const float KICKSPEED = 500;
@@ -301,5 +303,44 @@ MrIceBlock::ignite() {
   set_state(ICESTATE_NORMAL);
   BadGuy::ignite();
 }
+
+void
+MrIceBlock::backup(Writer& writer) const
+{
+  WalkingBadguy::backup(writer);
+
+  writer.start_list(MrIceBlock::get_class());
+  writer.write("is_exploding", static_cast<int>(ice_state));
+  writer.start_list("nokick_timer");
+  nokick_timer.backup(writer);
+  writer.end_list("nokick_timer");
+  writer.start_list("flat_timer");
+  flat_timer.backup(writer);
+  writer.end_list("flat_timer");
+  writer.write("squishcount", squishcount);
+  writer.end_list(MrIceBlock::get_class());
+}
+
+void
+MrIceBlock::restore(const ReaderMapping& reader)
+{
+  WalkingBadguy::restore(reader);
+
+  boost::optional<ReaderMapping> subreader(ReaderMapping(reader.get_doc(), reader.get_sexp()));
+
+  if (reader.get(MrIceBlock::get_class().c_str(), subreader))
+  {
+    int state;
+    if (subreader->get("ice_state", state))
+      ice_state = static_cast<IceState>(state);
+    boost::optional<ReaderMapping> subreader2(ReaderMapping(reader.get_doc(), reader.get_sexp()));
+    if (subreader->get("nokick_timer", subreader2))
+      nokick_timer.restore(*subreader2);
+    if (subreader->get("flat_timer", subreader2))
+      flat_timer.restore(*subreader2);
+    subreader->get("squishcount", squishcount);
+  }
+}
+
 
 /* EOF */

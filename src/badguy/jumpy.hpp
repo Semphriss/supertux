@@ -35,6 +35,9 @@ public:
   virtual std::string get_class() const override { return "jumpy"; }
   virtual std::string get_display_name() const override { return _("Jumpy"); }
 
+  virtual void backup(Writer& writer) const override;
+  virtual void restore(const ReaderMapping& reader) override;
+
 private:
   HitResponse hit(const CollisionHit& hit);
 

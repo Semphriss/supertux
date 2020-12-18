@@ -35,6 +35,9 @@ public:
   virtual std::string get_class() const override { return "zeekling"; }
   virtual std::string get_display_name() const override { return _("Zeekling"); }
 
+  virtual void backup(Writer& writer) const override;
+  virtual void restore(const ReaderMapping& reader) override;
+
 private:
   virtual bool collision_squished(GameObject& object) override;
 

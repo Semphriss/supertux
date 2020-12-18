@@ -37,6 +37,9 @@ public:
   
   virtual std::string get_class() const override { return "fallblock"; }
   virtual std::string get_display_name() const override { return _("Falling Platform"); }
+
+  virtual void backup(Writer& writer) const override;
+  virtual void restore(const ReaderMapping& reader) override;
   
 protected:
   enum State

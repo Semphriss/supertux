@@ -33,6 +33,9 @@ public:
   virtual std::string get_class() const override { return "unstable_tile"; }
   virtual std::string get_display_name() const override { return _("Unstable Tile"); }
 
+  virtual void backup(Writer& writer) const override;
+  virtual void restore(const ReaderMapping& reader) override;
+
 private:
   enum State {
     STATE_NORMAL,   /**< default state */

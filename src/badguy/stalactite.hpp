@@ -37,6 +37,9 @@ public:
   virtual std::string get_class() const override { return "stalactite"; }
   virtual std::string get_display_name() const override { return _("Stalactite"); }
 
+  virtual void backup(Writer& writer) const override;
+  virtual void restore(const ReaderMapping& reader) override;
+
   void squish();
 
 protected:

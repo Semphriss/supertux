@@ -23,6 +23,8 @@
 #include "object/player.hpp"
 #include "sprite/sprite.hpp"
 #include "supertux/sector.hpp"
+#include "util/reader_mapping.hpp"
+#include "util/writer.hpp"
 
 static const int SHAKE_RANGE_X = 40;
 static const float SHAKE_TIME = .8f;
@@ -168,6 +170,39 @@ Stalactite::deactivate()
 {
   if (state != STALACTITE_HANGING)
     remove_me();
+}
+
+void
+Stalactite::backup(Writer& writer) const
+{
+  BadGuy::backup(writer);
+
+  writer.start_list(Stalactite::get_class());
+  writer.start_list("timer");
+  timer.backup(writer);
+  writer.end_list("timer");
+  writer.write("state", static_cast<int>(state));
+  // shake_delta needs not to be saved
+  writer.end_list(Stalactite::get_class());
+}
+
+void
+Stalactite::restore(const ReaderMapping& reader)
+{
+  BadGuy::restore(reader);
+
+  boost::optional<ReaderMapping> subreader(ReaderMapping(reader.get_doc(), reader.get_sexp()));
+
+  if (reader.get(Stalactite::get_class().c_str(), subreader))
+  {
+    boost::optional<ReaderMapping> subreader2(ReaderMapping(reader.get_doc(), reader.get_sexp()));
+    if (subreader->get("timer", subreader2))
+      timer.restore(*subreader2);
+    int s;
+    if (subreader->get("state", s))
+      state = static_cast<StalactiteState>(s);
+    // shake_delta needs not to be saved
+  }
 }
 
 /* EOF */

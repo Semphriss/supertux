@@ -39,6 +39,9 @@ public:
   virtual std::string get_class() const override { return "fish"; }
   virtual std::string get_display_name() const override { return _("Fish"); }
 
+  virtual void backup(Writer& writer) const override;
+  virtual void restore(const ReaderMapping& reader) override;
+
 private:
   HitResponse hit(const CollisionHit& );
   void start_waiting();

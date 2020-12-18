@@ -43,6 +43,9 @@ public:
   virtual std::string get_class() const override { return "textscroller"; }
   virtual std::string get_display_name() const override { return _("TextScroller"); }
 
+  virtual void backup(Writer& writer) const override;
+  virtual void restore(const ReaderMapping& reader) override;
+
   void set_default_speed(float default_speed);
   void scroll(float offset);
   bool is_finished() const { return m_finished; }

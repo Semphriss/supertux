@@ -42,6 +42,9 @@ public:
   virtual std::string get_display_name() const override { return _("Rock"); }
   virtual ObjectSettings get_settings() override;
 
+  virtual void backup(Writer& writer) const override;
+  virtual void restore(const ReaderMapping& reader) override;
+
 protected:
   Physic physic;
   bool on_ground;

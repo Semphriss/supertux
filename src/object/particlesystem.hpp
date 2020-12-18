@@ -57,6 +57,9 @@ public:
   virtual std::string get_display_name() const override { return _("Particle system"); }
   virtual ObjectSettings get_settings() override;
 
+  virtual void backup(Writer& writer) const override;
+  virtual void restore(const ReaderMapping& reader) override;
+
   void set_enabled(bool enabled_);
   bool get_enabled() const;
 

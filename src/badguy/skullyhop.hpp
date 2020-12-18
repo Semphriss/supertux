@@ -36,6 +36,9 @@ public:
   virtual std::string get_class() const override { return "skullyhop"; }
   virtual std::string get_display_name() const override { return _("Skullyhop"); }
 
+  virtual void backup(Writer& writer) const override;
+  virtual void restore(const ReaderMapping& reader) override;
+
 private:
   enum SkullyHopState {
     STANDING,

@@ -22,6 +22,8 @@
 #include "object/player.hpp"
 #include "sprite/sprite.hpp"
 #include "supertux/sector.hpp"
+#include "util/reader_mapping.hpp"
+#include "util/writer.hpp"
 
 namespace {
 const float SNAIL_KICK_SPEED = 500;
@@ -359,6 +361,44 @@ bool
 Snail::is_portable() const
 {
   return state == STATE_FLAT && !m_ignited;
+}
+
+void
+Snail::backup(Writer& writer) const
+{
+  BadGuy::backup(writer);
+
+  writer.start_list(Snail::get_class());
+  writer.write("state", static_cast<int>(state));
+  writer.start_list("kicked_delay_timer");
+  kicked_delay_timer.backup(writer);
+  writer.end_list("kicked_delay_timer");
+  writer.start_list("danger_gone_timer");
+  danger_gone_timer.backup(writer);
+  writer.end_list("danger_gone_timer");
+  writer.write("squishcount", squishcount);
+  writer.end_list(Snail::get_class());
+}
+
+void
+Snail::restore(const ReaderMapping& reader)
+{
+  BadGuy::restore(reader);
+
+  boost::optional<ReaderMapping> subreader(ReaderMapping(reader.get_doc(), reader.get_sexp()));
+
+  if (reader.get(Snail::get_class().c_str(), subreader))
+  {
+    int s;
+    if (subreader->get("state", s))
+      state = static_cast<State>(s);
+    boost::optional<ReaderMapping> subreader2(ReaderMapping(reader.get_doc(), reader.get_sexp()));
+    if (subreader->get("kicked_delay_timer", subreader2))
+      kicked_delay_timer.restore(*subreader2);
+    if (subreader->get("danger_gone_timer", subreader2))
+      danger_gone_timer.restore(*subreader2);
+    subreader->get("squishcount", squishcount);
+  }
 }
 
 /* EOF */

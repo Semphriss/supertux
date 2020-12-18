@@ -18,6 +18,8 @@
 
 #include "audio/sound_manager.hpp"
 #include "sprite/sprite.hpp"
+#include "util/reader_mapping.hpp"
+#include "util/writer.hpp"
 
 namespace {
 static const std::string SKULLYHOP_SOUND = "sounds/hop.ogg";
@@ -152,6 +154,37 @@ bool
 SkullyHop::is_freezable() const
 {
   return true;
+}
+
+void
+SkullyHop::backup(Writer& writer) const
+{
+  BadGuy::backup(writer);
+
+  writer.start_list(SkullyHop::get_class());
+  writer.start_list("recover_timer");
+  recover_timer.backup(writer);
+  writer.end_list("recover_timer");
+  writer.write("state", static_cast<int>(state));
+  writer.end_list(SkullyHop::get_class());
+}
+
+void
+SkullyHop::restore(const ReaderMapping& reader)
+{
+  BadGuy::restore(reader);
+
+  boost::optional<ReaderMapping> subreader(ReaderMapping(reader.get_doc(), reader.get_sexp()));
+
+  if (reader.get(SkullyHop::get_class().c_str(), subreader))
+  {
+    boost::optional<ReaderMapping> subreader2(ReaderMapping(reader.get_doc(), reader.get_sexp()));
+    if (subreader->get("recover_timer", subreader2))
+      recover_timer.restore(*subreader2);
+    int s;
+    if (subreader->get("state", s))
+      state = static_cast<SkullyHopState>(s);
+  }
 }
 
 /* EOF */

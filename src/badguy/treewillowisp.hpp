@@ -40,6 +40,9 @@ public:
   virtual void stop_looping_sounds() override;
   virtual void play_looping_sounds() override;
 
+  virtual void backup(Writer& writer) const override;
+  virtual void restore(const ReaderMapping& reader) override;
+
   /** make TreeWillOWisp vanish */
   void vanish();
   void start_sucking(const Vector& suck_target);

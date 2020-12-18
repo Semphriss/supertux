@@ -24,6 +24,7 @@
 #include "sprite/sprite_manager.hpp"
 #include "supertux/sector.hpp"
 #include "util/reader_mapping.hpp"
+#include "util/writer.hpp"
 
 namespace {
 
@@ -252,6 +253,41 @@ void Haywire::play_looping_sounds()
     if (grunting) {
       grunting->play();
     }
+  }
+}
+
+void
+Haywire::backup(Writer& writer) const
+{
+  WalkingBadguy::backup(writer);
+
+  writer.start_list(Haywire::get_class());
+  writer.write("is_exploding", is_exploding);
+  writer.write("time_until_explosion", time_until_explosion);
+  writer.write("is_stunned", is_stunned);
+  writer.write("time_stunned", time_stunned);
+  writer.start_list("stomped_timer");
+  stomped_timer.backup(writer);
+  writer.end_list("stomped_timer");
+  writer.end_list(Haywire::get_class());
+}
+
+void
+Haywire::restore(const ReaderMapping& reader)
+{
+  WalkingBadguy::restore(reader);
+
+  boost::optional<ReaderMapping> subreader(ReaderMapping(reader.get_doc(), reader.get_sexp()));
+
+  if (reader.get(Haywire::get_class().c_str(), subreader))
+  {
+    subreader->get("is_exploding", is_exploding);
+    subreader->get("time_until_explosion", time_until_explosion);
+    subreader->get("is_stunned", is_stunned);
+    subreader->get("time_stunned", time_stunned);
+    boost::optional<ReaderMapping> subreader2(ReaderMapping(reader.get_doc(), reader.get_sexp()));
+    if (subreader->get("stomped_timer", subreader2))
+      stomped_timer.restore(*subreader2);
   }
 }
 

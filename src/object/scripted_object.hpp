@@ -40,6 +40,9 @@ public:
 
   virtual ObjectSettings get_settings() override;
 
+  virtual void backup(Writer& writer) const override;
+  virtual void restore(const ReaderMapping& reader) override;
+
   // --- scripting Interface stuff ---
   void set_action(const std::string& animation);
   std::string get_action() const;

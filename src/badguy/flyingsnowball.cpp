@@ -22,6 +22,8 @@
 #include "object/player.hpp"
 #include "sprite/sprite.hpp"
 #include "supertux/sector.hpp"
+#include "util/reader_mapping.hpp"
+#include "util/writer.hpp"
 
 namespace {
 const float PUFF_INTERVAL_MIN = 4.0f; /**< spawn new puff of smoke at most that often */
@@ -104,6 +106,35 @@ FlyingSnowBall::active_update(float dt_sec)
     puff_timer.start(gameRandom.randf(PUFF_INTERVAL_MIN, PUFF_INTERVAL_MAX));
   }
   
+}
+
+void
+FlyingSnowBall::backup(Writer& writer) const
+{
+  BadGuy::backup(writer);
+
+  writer.start_list(FlyingSnowBall::get_class());
+  writer.write("total_time_elapsed", total_time_elapsed);
+  writer.start_list("puff_timer");
+  puff_timer.backup(writer);
+  writer.end_list("puff_timer");
+  writer.end_list(FlyingSnowBall::get_class());
+}
+
+void
+FlyingSnowBall::restore(const ReaderMapping& reader)
+{
+  BadGuy::restore(reader);
+
+  boost::optional<ReaderMapping> subreader(ReaderMapping(reader.get_doc(), reader.get_sexp()));
+
+  if (reader.get(FlyingSnowBall::get_class().c_str(), subreader))
+  {
+    subreader->get("total_time_elapsed", total_time_elapsed);
+    boost::optional<ReaderMapping> subreader2(ReaderMapping(reader.get_doc(), reader.get_sexp()));
+    if (subreader->get("puff_timer", subreader2))
+      puff_timer.restore(*subreader2);
+  }
 }
 
 /* EOF */

@@ -57,6 +57,9 @@ public:
 
   int get_layer() const { return m_layer; }
 
+  virtual void backup(Writer& writer) const override;
+  virtual void restore(const ReaderMapping& reader) override;
+
 private:
   int m_layer;
   Color m_gradient_top;

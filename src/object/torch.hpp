@@ -43,6 +43,9 @@ public:
   virtual ObjectSettings get_settings() override;
   virtual void after_editor_set() override;
 
+  virtual void backup(Writer& writer) const override;
+  virtual void restore(const ReaderMapping& reader) override;
+
   /** @name Scriptable Methods
       @{ */
   bool get_burning() const; /**< returns true if torch is lighted */

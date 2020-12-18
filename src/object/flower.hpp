@@ -35,6 +35,9 @@ public:
   virtual void draw(DrawingContext& context) override;
   virtual HitResponse collision(GameObject& other, const CollisionHit& hit) override;
 
+  virtual void backup(Writer& writer) const override;
+  virtual void restore(const ReaderMapping& reader) override;
+
 private:
   BonusType type;
   SpritePtr sprite;

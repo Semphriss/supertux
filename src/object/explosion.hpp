@@ -35,6 +35,9 @@ public:
   virtual HitResponse collision(GameObject& other, const CollisionHit& hit) override;
   virtual bool is_saveable() const override { return false; }
 
+  virtual void backup(Writer& writer) const override;
+  virtual void restore(const ReaderMapping& reader) override;
+
   bool hurts() const { return hurt; }
   void hurts (bool val) { hurt = val; }
 

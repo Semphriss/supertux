@@ -48,6 +48,9 @@ public:
 
   virtual void move_to(const Vector& pos) override;
 
+  virtual void backup(Writer& writer) const override;
+  virtual void restore(const ReaderMapping& reader) override;
+
   void collect();
 
 private:
@@ -76,6 +79,9 @@ public:
 
   virtual ObjectSettings get_settings() override;
   virtual void after_editor_set() override;
+
+  virtual void backup(Writer& writer) const override;
+  virtual void restore(const ReaderMapping& reader) override;
 
 private:
   Physic m_physic;

@@ -18,6 +18,8 @@
 
 #include "object/player.hpp"
 #include "sprite/sprite.hpp"
+#include "util/reader_mapping.hpp"
+#include "util/writer.hpp"
 
 static const float PLANT_SPEED = 80;
 static const float WAKE_TIME = .5;
@@ -109,4 +111,36 @@ Plant::ignite()
     m_sprite->set_action(m_dir == Direction::LEFT ? "sleeping-burning-left" : "sleeping-burning-right", 1);
   }
 }
+
+void
+Plant::backup(Writer& writer) const
+{
+  BadGuy::backup(writer);
+
+  writer.start_list(Plant::get_class());
+  writer.start_list("timer");
+  timer.backup(writer);
+  writer.end_list("timer");
+  writer.write("state", static_cast<int>(state));
+  writer.end_list(Plant::get_class());
+}
+
+void
+Plant::restore(const ReaderMapping& reader)
+{
+  BadGuy::restore(reader);
+
+  boost::optional<ReaderMapping> subreader(ReaderMapping(reader.get_doc(), reader.get_sexp()));
+
+  if (reader.get(Plant::get_class().c_str(), subreader))
+  {
+    boost::optional<ReaderMapping> subreader2(ReaderMapping(reader.get_doc(), reader.get_sexp()));
+    if (subreader->get("timer", subreader2))
+      timer.restore(*subreader2);
+    int s;
+    if (subreader->get("state", s))
+      state = static_cast<PlantState>(s);
+  }
+}
+
 /* EOF */

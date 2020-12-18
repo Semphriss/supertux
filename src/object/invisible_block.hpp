@@ -34,6 +34,9 @@ public:
   virtual bool collides(GameObject& other, const CollisionHit& hit) const override;
   virtual HitResponse collision(GameObject& other, const CollisionHit& hit) override;
 
+  virtual void backup(Writer& writer) const override;
+  virtual void restore(const ReaderMapping& reader) override;
+
 private:
   virtual void hit(Player& player) override;
 

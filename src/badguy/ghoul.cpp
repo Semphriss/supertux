@@ -207,4 +207,34 @@ Ghoul::move_to(const Vector& pos)
   set_pos(pos);
 }
 
+void
+Ghoul::backup(Writer& writer) const
+{
+  BadGuy::backup(writer);
+
+  writer.start_list(Ghoul::get_class());
+  writer.write("state", m_mystate);
+  writer.write("flyspeed", m_flyspeed);
+  writer.write("track_range", m_track_range);
+  writer.end_list(Ghoul::get_class());
+}
+
+void
+Ghoul::restore(const ReaderMapping& reader)
+{
+  BadGuy::restore(reader);
+
+  boost::optional<ReaderMapping> subreader(ReaderMapping(reader.get_doc(), reader.get_sexp()));
+
+  if (reader.get(Ghoul::get_class().c_str(), subreader))
+  {
+    int state;
+    if (subreader->get("state", state))
+      m_mystate = static_cast<MyState>(state);
+    subreader->get("flyspeed", m_flyspeed);
+    subreader->get("track_range", m_track_range);
+  }
+}
+
+
 /* EOF */

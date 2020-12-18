@@ -24,6 +24,8 @@
 #include "math/util.hpp"
 #include "sprite/sprite.hpp"
 #include "supertux/sector.hpp"
+#include "util/reader_mapping.hpp"
+#include "util/writer.hpp"
 
 static const float MOLE_WAIT_TIME = 0.2f; /**< time to wait before and after throwing */
 static const float THROW_TIME = 4.6f; /**< time to spend throwing */
@@ -182,5 +184,38 @@ Mole::ignite() {
   run_dead_script();
   SoundManager::current()->play("sounds/fire.ogg", get_pos());
 }
+
+void
+Mole::backup(Writer& writer) const
+{
+  BadGuy::backup(writer);
+
+  writer.start_list(Mole::get_class());
+  writer.start_list("timer");
+  timer.backup(writer);
+  writer.end_list("timer");
+  writer.start_list("throw_timer");
+  throw_timer.backup(writer);
+  writer.end_list("throw_timer");
+  writer.end_list(Mole::get_class());
+}
+
+void
+Mole::restore(const ReaderMapping& reader)
+{
+  BadGuy::restore(reader);
+
+  boost::optional<ReaderMapping> subreader(ReaderMapping(reader.get_doc(), reader.get_sexp()));
+
+  if (reader.get(Mole::get_class().c_str(), subreader))
+  {
+    boost::optional<ReaderMapping> subreader2(ReaderMapping(reader.get_doc(), reader.get_sexp()));
+    if (subreader->get("timer", subreader2))
+      timer.restore(*subreader2);
+    if (subreader->get("throw_timer", subreader2))
+      throw_timer.restore(*subreader2);
+  }
+}
+
 
 /* EOF */

@@ -24,16 +24,19 @@ class Ghoul final : public BadGuy,
 {
 public:
   Ghoul(const ReaderMapping& reader);
-  std::string get_class() const override { return "ghoul"; }
-  std::string get_display_name() const override { return _("Ghoul"); }
-  bool is_freezable() const override;
-  bool is_flammable() const override;
+  virtual std::string get_class() const override { return "ghoul"; }
+  virtual std::string get_display_name() const override { return _("Ghoul"); }
+  virtual bool is_freezable() const override;
+  virtual bool is_flammable() const override;
   
-  void finish_construction() override;
+  virtual void finish_construction() override;
 
-  void activate() override;
-  void deactivate() override;
-  void active_update(float dt_sec) override;
+  virtual void activate() override;
+  virtual void deactivate() override;
+  virtual void active_update(float dt_sec) override;
+
+  virtual void backup(Writer& writer) const override;
+  virtual void restore(const ReaderMapping& reader) override;
   
   void goto_node(int node_no);
   void set_state(const std::string& state);

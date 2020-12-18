@@ -43,6 +43,9 @@ public:
 
   virtual const std::string get_icon_path() const override { return "images/engine/editor/thunderstorm.png"; }
 
+  virtual void backup(Writer& writer) const override;
+  virtual void restore(const ReaderMapping& reader) override;
+
   /** @name Scriptable Methods
       @{ */
 

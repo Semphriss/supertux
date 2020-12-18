@@ -32,6 +32,9 @@ public:
   virtual void active_update(float dt_sec) override;
   virtual bool is_flammable() const override;
 
+  virtual void backup(Writer& writer) const override;
+  virtual void restore(const ReaderMapping& reader) override;
+
 protected:
   virtual bool collision_squished(GameObject& object) override;
 

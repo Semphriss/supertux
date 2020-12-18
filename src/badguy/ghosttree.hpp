@@ -41,6 +41,9 @@ public:
   virtual std::string get_class() const override { return "ghosttree"; }
   virtual std::string get_display_name() const override { return _("Ghost Tree"); }
 
+  virtual void backup(Writer& writer) const override;
+  virtual void restore(const ReaderMapping& reader) override;
+
   void willowisp_died(TreeWillOWisp* willowisp);
   void die();
 

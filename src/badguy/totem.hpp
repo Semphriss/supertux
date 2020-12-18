@@ -35,6 +35,9 @@ public:
   virtual std::string get_class() const override { return "totem"; }
   virtual std::string get_display_name() const override { return _("Totem"); }
 
+  virtual void backup(Writer& writer) const override;
+  virtual void restore(const ReaderMapping& reader) override;
+
 protected:
   virtual bool collision_squished(GameObject& object) override;
   virtual void kill_fall() override;

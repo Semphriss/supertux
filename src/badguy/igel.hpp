@@ -33,6 +33,9 @@ public:
   virtual std::string get_class() const override { return "igel"; }
   virtual std::string get_display_name() const override { return _("Igel"); }
 
+  virtual void backup(Writer& writer) const override;
+  virtual void restore(const ReaderMapping& reader) override;
+
 protected:
   //  virtual bool collision_squished(GameObject& object) override;
   // Enable this and the igel will no longer be butt-jumpable when frozen.

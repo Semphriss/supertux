@@ -60,6 +60,9 @@ public:
     ExposedObject<Dispenser, scripting::Dispenser>::unexpose(vm, table_idx);
   }
 
+  virtual void backup(Writer& writer) const override;
+  virtual void restore(const ReaderMapping& reader) override;
+
   void notify_dead() {
     if (m_limit_dispensed_badguys) {
       m_current_badguys--;

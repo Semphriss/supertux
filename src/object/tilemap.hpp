@@ -61,6 +61,9 @@ public:
 
   virtual void editor_update() override;
 
+  virtual void backup(Writer& writer) const override;
+  virtual void restore(const ReaderMapping& reader) override;
+
   /** Move tilemap until at given node, then stop */
   void goto_node(int node_no);
 

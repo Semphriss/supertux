@@ -25,6 +25,7 @@
 #include "supertux/game_object_factory.hpp"
 #include "supertux/sector.hpp"
 #include "util/reader_mapping.hpp"
+#include "util/writer.hpp"
 
 Dispenser::DispenserType
 Dispenser::DispenserType_from_string(const std::string& type_string)
@@ -465,6 +466,76 @@ void
 Dispenser::after_editor_set()
 {
   set_correct_action();
+}
+
+void
+Dispenser::backup(Writer& writer) const
+{
+  BadGuy::backup(writer);
+
+  writer.start_list(Dispenser::get_class());
+  writer.write("cycle", m_cycle);
+  writer.start_list("badguys");
+  for (auto badguy : m_badguys)
+    writer.write("badguy", badguy);
+  writer.end_list("badguys");
+  writer.write("next_badguy", static_cast<int>(m_next_badguy));
+  writer.start_list("dispense_timer");
+  m_dispense_timer.backup(writer);
+  writer.end_list("dispense_timer");
+  writer.write("autotarget", m_autotarget);
+  writer.write("swivel", m_swivel);
+  writer.write("broken", m_broken);
+  writer.write("random", m_random);
+  writer.write("gravity", m_gravity);
+  // TODO: Properly handle unsigned int
+  writer.write("type", static_cast<int>(m_type));
+  writer.write("type_str", m_type_str);
+  writer.write("limit_dispensed_badguys", m_limit_dispensed_badguys);
+  writer.write("max_concurrent_badguys", m_max_concurrent_badguys);
+  writer.write("current_badguys", m_current_badguys);
+  writer.end_list(Dispenser::get_class());
+}
+
+void
+Dispenser::restore(const ReaderMapping& reader)
+{
+  BadGuy::restore(reader);
+
+  boost::optional<ReaderMapping> subreader(ReaderMapping(reader.get_doc(), reader.get_sexp()));
+
+  if (reader.get(Dispenser::get_class().c_str(), subreader))
+  {
+    subreader->get("cycle", m_cycle);
+
+    boost::optional<ReaderMapping> subreader2(ReaderMapping(reader.get_doc(), reader.get_sexp()));
+    if (subreader->get("badguys", subreader2))
+    {
+      auto it = subreader2->get_iter();
+      while(it.next())
+        m_badguys.push_back(it.as_string_item());
+    }
+
+    int next_badguy;
+    if(subreader->get("next_badguy", next_badguy))
+      m_next_badguy = static_cast<unsigned int>(next_badguy);
+
+    if (subreader->get("dispense_timer", subreader2))
+      m_dispense_timer.restore(*subreader2);
+
+    subreader->get("autotarget", m_autotarget);
+    subreader->get("swivel", m_swivel);
+    subreader->get("broken", m_broken);
+    subreader->get("random", m_random);
+    subreader->get("gravity", m_gravity);
+    int type;
+    if(subreader->get("type", type))
+      m_type = static_cast<DispenserType>(type);
+    subreader->get("type_str", m_type_str);
+    subreader->get("limit_dispensed_badguys", m_limit_dispensed_badguys);
+    subreader->get("max_concurrent_badguys", m_max_concurrent_badguys);
+    subreader->get("current_badguys", m_current_badguys);
+  }
 }
 
 /* EOF */

@@ -18,6 +18,8 @@
 
 #include "sprite/sprite.hpp"
 #include "supertux/tile.hpp"
+#include "util/reader_mapping.hpp"
+#include "util/writer.hpp"
 
 static const float FISH_JUMP_POWER = -600;
 static const float FISH_WAIT_TIME = 1;
@@ -151,6 +153,35 @@ bool
 Fish::is_freezable() const
 {
   return true;
+}
+
+void
+Fish::backup(Writer& writer) const
+{
+  BadGuy::backup(writer);
+
+  writer.start_list(Fish::get_class());
+  writer.write("stop_y", stop_y);
+  writer.start_list("waiting");
+  waiting.backup(writer);
+  writer.end_list("waiting");
+  writer.end_list(Fish::get_class());
+}
+
+void
+Fish::restore(const ReaderMapping& reader)
+{
+  BadGuy::restore(reader);
+
+  boost::optional<ReaderMapping> subreader(ReaderMapping(reader.get_doc(), reader.get_sexp()));
+
+  if (reader.get(Fish::get_class().c_str(), subreader))
+  {
+    subreader->get("stop_y", stop_y);
+    boost::optional<ReaderMapping> subreader2(ReaderMapping(reader.get_doc(), reader.get_sexp()));
+    if (subreader->get("waiting", subreader2))
+      waiting.restore(*subreader2);
+  }
 }
 
 /* EOF */

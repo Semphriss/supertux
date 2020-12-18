@@ -31,6 +31,9 @@ public:
   virtual std::string get_class() const override { return "flyingsnowball"; }
   virtual std::string get_display_name() const override { return _("Flying Snowball"); }
 
+  virtual void backup(Writer& writer) const override;
+  virtual void restore(const ReaderMapping& reader) override;
+
 protected:
   virtual bool collision_squished(GameObject& object) override;
 

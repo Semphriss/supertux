@@ -34,6 +34,9 @@ public:
   virtual std::string get_class() const override { return "stumpy"; }
   virtual std::string get_display_name() const override { return _("Walking Stump"); }
 
+  virtual void backup(Writer& writer) const override;
+  virtual void restore(const ReaderMapping& reader) override;
+
 protected:
   enum MyState {
     STATE_INVINCIBLE, STATE_NORMAL

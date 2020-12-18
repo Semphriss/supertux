@@ -26,6 +26,7 @@
 #include "sprite/sprite_manager.hpp"
 #include "supertux/sector.hpp"
 #include "util/reader_mapping.hpp"
+#include "util/writer.hpp"
 
 GoldBomb::GoldBomb(const ReaderMapping& reader) :
   WalkingBadguy(reader, "images/creatures/gold_bomb/gold_bomb.sprite", "left", "right"),
@@ -262,5 +263,31 @@ void GoldBomb::play_looping_sounds()
     ticking->play();
   }
 }
+
+void
+GoldBomb::backup(Writer& writer) const
+{
+  WalkingBadguy::backup(writer);
+
+  writer.start_list(GoldBomb::get_class());
+  writer.write("state", tstate);
+  writer.end_list(GoldBomb::get_class());
+}
+
+void
+GoldBomb::restore(const ReaderMapping& reader)
+{
+  WalkingBadguy::restore(reader);
+
+  boost::optional<ReaderMapping> subreader(ReaderMapping(reader.get_doc(), reader.get_sexp()));
+
+  if (reader.get(GoldBomb::get_class().c_str(), subreader))
+  {
+    int state;
+    if (subreader->get("state", state))
+      tstate = static_cast<Ticking_State>(state);
+  }
+}
+
 
 /* EOF */

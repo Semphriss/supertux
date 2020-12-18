@@ -34,6 +34,9 @@ public:
   virtual std::string get_class() const override { return "spidermite"; }
   virtual std::string get_display_name() const override { return _("Spider"); }
 
+  virtual void backup(Writer& writer) const override;
+  virtual void restore(const ReaderMapping& reader) override;
+
 protected:
   enum SpiderMiteMode {
     FLY_UP,

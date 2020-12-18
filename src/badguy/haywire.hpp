@@ -42,6 +42,9 @@ public:
   virtual std::string get_class() const override { return "haywire"; }
   virtual std::string get_display_name() const override { return _("Haywire"); }
 
+  virtual void backup(Writer& writer) const override;
+  virtual void restore(const ReaderMapping& reader) override;
+
 protected:
   virtual bool collision_squished(GameObject& object) override;
 

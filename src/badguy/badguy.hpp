@@ -178,6 +178,9 @@ protected:
   /** called when the badguy has been deactivated */
   virtual void deactivate();
 
+  virtual void backup(Writer& writer) const override;
+  virtual void restore(const ReaderMapping& reader) override;
+
   void kill_squished(GameObject& object);
 
   void set_state(State state);
@@ -227,6 +230,18 @@ protected:
 private:
   void try_activate();
 
+  // ==========================================================================
+  //   # REMINDER
+  // --------------------------------------------------------------------------
+  // If you add member variables, don't forget to update backup() and restore()
+  // accordingly! See in src/supertux/game_object.hpp at the documentation of
+  // backup() and restore() for details on which member variables to save.
+  //
+  // Failure to implement backup() and restore() properly will break savestates
+  // and everything that depends on it! (Checkpoints, networking, etc.)
+  //
+  //                                                       ~ Semphris
+  // --------------------------------------------------------------------------
 protected:
   Physic m_physic;
 

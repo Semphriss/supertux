@@ -32,6 +32,9 @@ protected:
   virtual void running(float dt_sec) override; /**< called while the EndSequence is running */
   virtual void stopping() override; /**< called when EndSequence stops */
 
+  virtual void backup(Writer& writer) const override;
+  virtual void restore(const ReaderMapping& reader) override;
+
 private:
   float last_x_pos;
   Timer endsequence_timer;

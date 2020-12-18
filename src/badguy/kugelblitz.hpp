@@ -38,6 +38,9 @@ public:
   virtual std::string get_class() const override { return "kugelblitz"; }
   virtual std::string get_display_name() const override { return _("Kugelblitz"); }
 
+  virtual void backup(Writer& writer) const override;
+  virtual void restore(const ReaderMapping& reader) override;
+
   void explode();
 
 private:

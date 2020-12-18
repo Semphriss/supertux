@@ -25,6 +25,8 @@
 #include "sprite/sprite.hpp"
 #include "sprite/sprite_manager.hpp"
 #include "supertux/sector.hpp"
+#include "util/reader_mapping.hpp"
+#include "util/writer.hpp"
 
 namespace {
 
@@ -209,6 +211,48 @@ bool
 Kugelblitz::is_flammable() const
 {
   return false;
+}
+
+void
+Kugelblitz::backup(Writer& writer) const
+{
+  BadGuy::backup(writer);
+
+  writer.start_list(Kugelblitz::get_class());
+  writer.write("pos_groundhit_x", pos_groundhit.x);
+  writer.write("pos_groundhit_y", pos_groundhit.y);
+  writer.write("groundhit_pos_set", groundhit_pos_set);
+  writer.write("dying", dying);
+  writer.start_list("movement_timer");
+  movement_timer.backup(writer);
+  writer.end_list("movement_timer");
+  writer.start_list("lifetime");
+  lifetime.backup(writer);
+  writer.end_list("lifetime");
+  writer.write("direction", direction);
+  writer.end_list(Kugelblitz::get_class());
+}
+
+void
+Kugelblitz::restore(const ReaderMapping& reader)
+{
+  BadGuy::restore(reader);
+
+  boost::optional<ReaderMapping> subreader(ReaderMapping(reader.get_doc(), reader.get_sexp()));
+
+  if (reader.get(Kugelblitz::get_class().c_str(), subreader))
+  {
+    subreader->get("pos_groundhit_x", pos_groundhit.x);
+    subreader->get("pos_groundhit_y", pos_groundhit.y);
+    subreader->get("groundhit_pos_set", groundhit_pos_set);
+    subreader->get("dying", dying);
+    boost::optional<ReaderMapping> subreader2(ReaderMapping(reader.get_doc(), reader.get_sexp()));
+    if (subreader->get("movement_timer", subreader2))
+      movement_timer.restore(*subreader2);
+    if (subreader->get("lifetime", subreader2))
+      lifetime.restore(*subreader2);
+    subreader->get("direction", direction);
+  }
 }
 
 /* EOF */

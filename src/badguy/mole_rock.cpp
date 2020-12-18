@@ -20,6 +20,8 @@
 
 #include "audio/sound_manager.hpp"
 #include "sprite/sprite.hpp"
+#include "util/reader_mapping.hpp"
+#include "util/writer.hpp"
 
 MoleRock::MoleRock(const ReaderMapping& reader) :
   BadGuy(reader, "images/creatures/mole/mole_rock.sprite", LAYER_TILES - 2),
@@ -104,6 +106,29 @@ bool
 MoleRock::is_flammable() const
 {
   return false;
+}
+
+void
+MoleRock::backup(Writer& writer) const
+{
+  BadGuy::backup(writer);
+
+  writer.start_list(MoleRock::get_class());
+  // TODO: store parent and all
+  writer.end_list(MoleRock::get_class());
+}
+
+void
+MoleRock::restore(const ReaderMapping& reader)
+{
+  BadGuy::restore(reader);
+
+  boost::optional<ReaderMapping> subreader(ReaderMapping(reader.get_doc(), reader.get_sexp()));
+
+  if (reader.get(MoleRock::get_class().c_str(), subreader))
+  {
+    // TODO: restore parent and all
+  }
 }
 
 /* EOF */

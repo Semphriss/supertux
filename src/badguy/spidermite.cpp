@@ -18,6 +18,8 @@
 
 #include "object/player.hpp"
 #include "sprite/sprite.hpp"
+#include "util/reader_mapping.hpp"
+#include "util/writer.hpp"
 
 static const float FLYTIME = 1.2f;
 static const float MOVE_SPEED = -100.0f;
@@ -101,6 +103,37 @@ bool
 SpiderMite::is_freezable() const
 {
   return true;
+}
+
+void
+SpiderMite::backup(Writer& writer) const
+{
+  BadGuy::backup(writer);
+
+  writer.start_list(SpiderMite::get_class());
+  writer.start_list("timer");
+  timer.backup(writer);
+  writer.end_list("timer");
+  writer.write("mode", static_cast<int>(mode));
+  writer.end_list(SpiderMite::get_class());
+}
+
+void
+SpiderMite::restore(const ReaderMapping& reader)
+{
+  BadGuy::restore(reader);
+
+  boost::optional<ReaderMapping> subreader(ReaderMapping(reader.get_doc(), reader.get_sexp()));
+
+  if (reader.get(SpiderMite::get_class().c_str(), subreader))
+  {
+    boost::optional<ReaderMapping> subreader2(ReaderMapping(reader.get_doc(), reader.get_sexp()));
+    if (subreader->get("timer", subreader2))
+      timer.restore(*subreader2);
+    int m;
+    if (subreader->get("mode", m))
+      mode = static_cast<SpiderMiteMode>(m);
+  }
 }
 
 /* EOF */

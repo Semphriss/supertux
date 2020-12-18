@@ -45,6 +45,9 @@ public:
   virtual void ungrab(MovingObject& , Direction dir_) override;
   virtual void grab(MovingObject&, const Vector& pos, Direction dir_) override;
 
+  virtual void backup(Writer& writer) const override;
+  virtual void restore(const ReaderMapping& reader) override;
+
 protected:
   virtual bool collision_squished(GameObject& object) override;
   bool is_in_danger();

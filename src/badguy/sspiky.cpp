@@ -18,6 +18,8 @@
 
 #include "object/player.hpp"
 #include "sprite/sprite.hpp"
+#include "util/reader_mapping.hpp"
+#include "util/writer.hpp"
 
 SSpiky::SSpiky(const ReaderMapping& reader) :
   WalkingBadguy(reader, "images/creatures/spiky/sleepingspiky.sprite", "left", "right"), state(SSPIKY_SLEEPING)
@@ -110,6 +112,31 @@ bool
 SSpiky::is_flammable() const
 {
   return state != SSPIKY_SLEEPING;
+}
+
+void
+SSpiky::backup(Writer& writer) const
+{
+  BadGuy::backup(writer);
+
+  writer.start_list(SSpiky::get_class());
+  writer.write("state", static_cast<int>(state));
+  writer.end_list(SSpiky::get_class());
+}
+
+void
+SSpiky::restore(const ReaderMapping& reader)
+{
+  BadGuy::restore(reader);
+
+  boost::optional<ReaderMapping> subreader(ReaderMapping(reader.get_doc(), reader.get_sexp()));
+
+  if (reader.get(SSpiky::get_class().c_str(), subreader))
+  {
+    int s;
+    if (subreader->get("state", s))
+      state = static_cast<SSpikyState>(s);
+  }
 }
 
 /* EOF */

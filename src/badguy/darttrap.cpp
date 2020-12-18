@@ -24,6 +24,7 @@
 #include "supertux/sector.hpp"
 #include "util/log.hpp"
 #include "util/reader_mapping.hpp"
+#include "util/writer.hpp"
 
 namespace {
 const float MUZZLE_Y = 25; /**< [px] muzzle y-offset from top */
@@ -131,6 +132,46 @@ DartTrap::get_settings()
   result.reorder({"initial-delay", "fire-delay", "ammo", "direction", "x", "y"});
 
   return result;
+}
+
+void
+DartTrap::backup(Writer& writer) const
+{
+  BadGuy::backup(writer);
+
+  writer.start_list(DartTrap::get_class());
+  writer.write("enabled", enabled);
+  writer.write("initial_delay", initial_delay);
+  writer.write("fire_delay", fire_delay);
+  writer.write("ammo", ammo);
+  writer.write("state", static_cast<int>(state));
+  writer.start_list("fire_timer");
+  fire_timer.backup(writer);
+  writer.end_list("fire_timer");
+  writer.end_list(DartTrap::get_class());
+}
+
+void
+DartTrap::restore(const ReaderMapping& reader)
+{
+  BadGuy::restore(reader);
+
+  boost::optional<ReaderMapping> subreader(ReaderMapping(reader.get_doc(), reader.get_sexp()));
+
+  if (reader.get(DartTrap::get_class().c_str(), subreader))
+  {
+    subreader->get("enabled", enabled);
+    subreader->get("initial_delay", initial_delay);
+    subreader->get("fire_delay", fire_delay);
+    subreader->get("ammo", ammo);
+    int s;
+    if(subreader->get("state", s))
+      state = static_cast<State>(s);
+
+    boost::optional<ReaderMapping> subreader2(ReaderMapping(reader.get_doc(), reader.get_sexp()));
+    if (subreader->get("fire_timer", subreader2))
+      fire_timer.restore(*subreader2);
+  }
 }
 
 /* EOF */

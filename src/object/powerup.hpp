@@ -36,6 +36,9 @@ public:
 
   virtual ObjectSettings get_settings() override;
 
+  virtual void backup(Writer& writer) const override;
+  virtual void restore(const ReaderMapping& reader) override;
+
 private:
   /** Initialize power up sprites and other defaults */
   virtual void initialize();

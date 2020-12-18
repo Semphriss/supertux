@@ -35,11 +35,15 @@ public:
   virtual HitResponse collision(GameObject& other, const CollisionHit& hit) override;
   virtual void update(float dt_sec) override;
   virtual void draw(DrawingContext& context) override;
+  virtual std::string get_class() const override { return "block"; }
 
   virtual std::string get_default_sprite_name() const { return m_default_sprite_name; }
 
   virtual ObjectSettings get_settings() override;
   virtual void after_editor_set() override;
+
+  virtual void backup(Writer& writer) const override;
+  virtual void restore(const ReaderMapping& reader) override;
 
 protected:
   virtual void hit(Player& player) = 0;

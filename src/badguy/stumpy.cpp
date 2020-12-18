@@ -25,6 +25,8 @@
 #include "object/sprite_particle.hpp"
 #include "sprite/sprite.hpp"
 #include "supertux/sector.hpp"
+#include "util/reader_mapping.hpp"
+#include "util/writer.hpp"
 
 static const float STUMPY_SPEED = 120;
 static const float INVINCIBLE_TIME = 1;
@@ -169,5 +171,38 @@ Stumpy::is_freezable() const
 {
   return true;
 }
+
+void
+Stumpy::backup(Writer& writer) const
+{
+  WalkingBadguy::backup(writer);
+
+  writer.start_list(Stumpy::get_class());
+  writer.start_list("invincible_timer");
+  invincible_timer.backup(writer);
+  writer.end_list("invincible_timer");
+  writer.write("state", static_cast<int>(mystate));
+  writer.end_list(Stumpy::get_class());
+}
+
+void
+Stumpy::restore(const ReaderMapping& reader)
+{
+  WalkingBadguy::restore(reader);
+
+  boost::optional<ReaderMapping> subreader(ReaderMapping(reader.get_doc(), reader.get_sexp()));
+
+  if (reader.get(Stumpy::get_class().c_str(), subreader))
+  {
+    boost::optional<ReaderMapping> subreader2(ReaderMapping(reader.get_doc(), reader.get_sexp()));
+    if (subreader->get("invincible_timer", subreader2))
+      invincible_timer.restore(*subreader2);
+    int s;
+    if (subreader->get("state", s))
+      mystate = static_cast<MyState>(s);
+    // shake_delta needs not to be saved
+  }
+}
+
 
 /* EOF */

@@ -17,6 +17,7 @@
 #include "badguy/crystallo.hpp"
 
 #include "util/reader_mapping.hpp"
+#include "util/writer.hpp"
 
 Crystallo::Crystallo(const ReaderMapping& reader) :
   WalkingBadguy(reader, "images/creatures/crystallo/crystallo.sprite", "left", "right"),
@@ -70,6 +71,29 @@ bool
 Crystallo::is_flammable() const
 {
   return false;
+}
+
+void
+Crystallo::backup(Writer& writer) const
+{
+  WalkingBadguy::backup(writer);
+
+  writer.start_list(Crystallo::get_class());
+  writer.write("radius", m_radius);
+  writer.end_list(Crystallo::get_class());
+}
+
+void
+Crystallo::restore(const ReaderMapping& reader)
+{
+  WalkingBadguy::restore(reader);
+
+  boost::optional<ReaderMapping> subreader(ReaderMapping(reader.get_doc(), reader.get_sexp()));
+
+  if (reader.get(Crystallo::get_class().c_str(), subreader))
+  {
+    subreader->get("radius", m_radius);
+  }
 }
 
 /* EOF */

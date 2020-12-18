@@ -33,6 +33,9 @@ public:
   virtual bool is_singleton() const override { return true; }
   virtual bool is_saveable() const override { return false; }
 
+  virtual void backup(Writer& writer) const override;
+  virtual void restore(const ReaderMapping& reader) override;
+
   /** @name Scriptable Methods
       @{ */
 

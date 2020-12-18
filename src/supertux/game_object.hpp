@@ -124,18 +124,18 @@ public:
    * 
    * This should only save data that can vary during gameplay. For
    * example, if an object hold a member variable containing its
-   * spawn position, then this variable shouldn't be saved.
-   * A background's images shouldn't be saved either, unless at some
-   * point it becomes possible to change a background's images in some
-   * way, for example through scripting.
+   * spawn position, then this variable shouldn't be saved, as it
+   * doesn't vary. A background's images shouldn't be saved either,
+   * unless at some point in the futureit becomes possible to change
+   * a background's images in some way, for example through scripting.
    * 
    * Yes, this adds a load on code maintenance, unfortunately, as it
    * requires to keep track of which variables become, well, variable
    * during play time.
    */
-  virtual void backup(Writer& writer);
+  virtual void backup(Writer& writer) const;
 
-  /** Restores this object's internal status from a previously */
+  /** Restores this object's internal status from a previously saved state */
   virtual void restore(const ReaderMapping& reader);
 
   /** stops all looping sounds */

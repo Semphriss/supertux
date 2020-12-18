@@ -18,6 +18,8 @@
 
 #include "object/player.hpp"
 #include "sprite/sprite.hpp"
+#include "util/reader_mapping.hpp"
+#include "util/writer.hpp"
 
 static const float CHARGE_SPEED = 240;
 
@@ -177,6 +179,48 @@ bool
 AngryStone::is_flammable() const
 {
   return false;
+}
+
+void
+AngryStone::backup(Writer& writer) const
+{
+  BadGuy::backup(writer);
+
+  writer.start_list(AngryStone::get_class());
+  writer.write("attack_direction_x", attackDirection.x);
+  writer.write("attack_direction_y", attackDirection.y);
+  writer.write("old_wall_direction_x", oldWallDirection.x);
+  writer.write("old_wall_direction_y", oldWallDirection.y);
+  writer.start_list("timer");
+  timer.backup(writer);
+  writer.end_list("timer");
+  writer.write("state", static_cast<int>(state));
+  writer.end_list(AngryStone::get_class());
+}
+
+void
+AngryStone::restore(const ReaderMapping& reader)
+{
+  BadGuy::restore(reader);
+
+  boost::optional<ReaderMapping> subreader(ReaderMapping(reader.get_doc(), reader.get_sexp()));
+
+  if (reader.get(AngryStone::get_class().c_str(), subreader))
+  {
+    subreader->get("sprite_name", m_sprite_name);
+    subreader->get("attack_direction_x", attackDirection.x);
+    subreader->get("attack_direction_y", attackDirection.y);
+    subreader->get("old_wall_direction_x", oldWallDirection.x);
+    subreader->get("old_wall_direction_y", oldWallDirection.y);
+  
+    boost::optional<ReaderMapping> subreader2(ReaderMapping(reader.get_doc(), reader.get_sexp()));
+    if (reader.get("timer", subreader2))
+      timer.restore(*subreader2);
+      
+    int s;
+    if (subreader->get("state", s))
+      state = static_cast<AngryStoneState>(s);
+  }
 }
 
 /* EOF */

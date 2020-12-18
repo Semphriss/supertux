@@ -43,6 +43,9 @@ protected:
   virtual void running(float dt_sec); /**< called while the EndSequence is running */
   virtual void stopping(); /**< called when EndSequence stops */
 
+  virtual void backup(Writer& writer) const override;
+  virtual void restore(const ReaderMapping& reader) override;
+
 protected:
   bool isrunning; /**< true while EndSequence plays */
   bool isdone; /**< true if EndSequence has finished playing */

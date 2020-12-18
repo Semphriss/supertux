@@ -18,6 +18,8 @@
 
 #include "sprite/sprite.hpp"
 #include "sprite/sprite_manager.hpp"
+#include "util/reader_mapping.hpp"
+#include "util/writer.hpp"
 
 static const float SPEED_GROW = 256;
 static const float SPEED_SHRINK = 128;
@@ -89,5 +91,39 @@ Root::draw(DrawingContext& context)
   base_sprite->draw(context.color(), m_start_position, LAYER_TILES+1);
   if ((mystate != STATE_APPEARING) && (mystate != STATE_VANISHING)) BadGuy::draw(context);
 }
+
+void
+Root::backup(Writer& writer) const
+{
+  BadGuy::backup(writer);
+
+  writer.start_list(Root::get_class());
+  writer.write("state", static_cast<int>(mystate));
+  writer.start_list("hatch_timer");
+  hatch_timer.backup(writer);
+  writer.end_list("hatch_timer");
+  writer.write("offset_y", offset_y);
+  writer.end_list(Root::get_class());
+}
+
+void
+Root::restore(const ReaderMapping& reader)
+{
+  BadGuy::restore(reader);
+
+  boost::optional<ReaderMapping> subreader(ReaderMapping(reader.get_doc(), reader.get_sexp()));
+
+  if (reader.get(Root::get_class().c_str(), subreader))
+  {
+    int s;
+    if (subreader->get("state", s))
+      mystate = static_cast<MyState>(s);
+    boost::optional<ReaderMapping> subreader2(ReaderMapping(reader.get_doc(), reader.get_sexp()));
+    if (subreader->get("hatch_timer", subreader2))
+      hatch_timer.restore(*subreader2);
+    subreader->get("offset_y", offset_y);
+  }
+}
+
 
 /* EOF */

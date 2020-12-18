@@ -35,6 +35,9 @@ public:
   virtual std::string get_class() const override { return "sspiky"; }
   virtual std::string get_display_name() const override { return _("Sleeping Spiky"); }
 
+  virtual void backup(Writer& writer) const override;
+  virtual void restore(const ReaderMapping& reader) override;
+
 protected:
   enum SSpikyState {
     SSPIKY_SLEEPING,

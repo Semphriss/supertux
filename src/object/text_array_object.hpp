@@ -53,6 +53,9 @@ public:
     return "images/engine/editor/textarray.png";
   }
 
+  virtual void backup(Writer& writer) const override;
+  virtual void restore(const ReaderMapping& reader) override;
+
   /////////// TextArray api related ///////////
 
   /** Empties the text array. */

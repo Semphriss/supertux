@@ -32,6 +32,9 @@ public:
   virtual std::string get_class() const override { return "plant"; }
   virtual std::string get_display_name() const override { return _("Plant"); }
 
+  virtual void backup(Writer& writer) const override;
+  virtual void restore(const ReaderMapping& reader) override;
+
 protected:
   enum PlantState {
     PLANT_SLEEPING,

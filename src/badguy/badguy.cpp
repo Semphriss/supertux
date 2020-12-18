@@ -925,4 +925,94 @@ BadGuy::add_wind_velocity(const Vector& velocity, const Vector& end_speed)
     m_physic.set_velocity_y(std::max(m_physic.get_velocity_y() + velocity.y, end_speed.y));
 }
 
+void
+BadGuy::backup(Writer& writer) const
+{
+  MovingSprite::backup(writer);
+
+  writer.start_list(BadGuy::get_class());
+  writer.start_list("physic");
+  m_physic.backup(writer);
+  writer.end_list("physic");
+  writer.write("count_me", m_countMe);
+  writer.write("is_initialized", m_is_initialized);
+  writer.write("start_pos_x", m_start_position.x);
+  writer.write("start_pos_y", m_start_position.y);
+  writer.write("dir", static_cast<int>(m_dir));
+  writer.write("m_start_dir", static_cast<int>(m_start_dir));
+  writer.write("frozen", m_frozen);
+  writer.write("ignited", m_ignited);
+  writer.write("in_water", m_in_water);
+  // m_dead_script needs not to be saved
+  writer.write("melting_time", m_melting_time);
+  // m_lightsprite needs not to be saved
+  writer.write("glowing", m_glowing);
+  writer.write("state", static_cast<int>(m_state));
+  writer.write("is_active_flag", m_is_active_flag);
+  writer.start_list("state_timer");
+  m_state_timer.backup(writer);
+  writer.end_list("state_timer");
+  writer.write("on_ground_flag", m_on_ground_flag);
+  writer.write("floor_normal_x", m_floor_normal.x);
+  writer.write("floor_normal_y", m_floor_normal.y);
+  writer.write("colgroup_active", m_colgroup_active);
+  // m_parent_dispenser needs not to be saved
+  writer.end_list(BadGuy::get_class());
+}
+
+void
+BadGuy::restore(const ReaderMapping& reader)
+{
+  MovingSprite::restore(reader);
+
+  boost::optional<ReaderMapping> subreader(ReaderMapping(reader.get_doc(), reader.get_sexp()));
+
+  if (reader.get(BadGuy::get_class().c_str(), subreader))
+  {
+    boost::optional<ReaderMapping> subreader2(ReaderMapping(reader.get_doc(), reader.get_sexp()));
+    if (reader.get("physic", subreader2))
+      m_physic.restore(*subreader2);
+
+    subreader->get("count_me", m_countMe);
+    subreader->get("is_initialized", m_is_initialized);
+    subreader->get("start_pos_x", m_start_position.x);
+    subreader->get("start_pos_y", m_start_position.y);
+
+    int dir;
+    if (subreader->get("dir", dir))
+      m_dir = static_cast<Direction>(dir);
+
+    int start_dir;
+    if (subreader->get("start_dir", start_dir))
+      m_start_dir = static_cast<Direction>(start_dir);
+
+    subreader->get("frozen", m_frozen);
+    subreader->get("ignited", m_ignited);
+    subreader->get("in_water", m_in_water);
+    // m_dead_script needs not to be saved
+    subreader->get("melting_time", m_melting_time);
+    // m_lightsprite needs not to be saved
+    subreader->get("glowing", m_glowing);
+
+    int state;
+    if (subreader->get("state", state))
+      m_state = static_cast<State>(state);
+
+    subreader->get("is_active_flag", m_is_active_flag);
+
+    if (reader.get("state_timer", subreader2))
+      m_state_timer.restore(*subreader2);
+
+    subreader->get("on_ground_flag", m_on_ground_flag);
+    subreader->get("floor_normal_x", m_floor_normal.x);
+    subreader->get("floor_normal_y", m_floor_normal.y);
+
+    int colgroup_active;
+    if (subreader->get("colgroup_active", colgroup_active))
+      m_colgroup_active = static_cast<CollisionGroup>(colgroup_active);
+
+    // m_parent_dispenser needs not to be saved
+  }
+}
+
 /* EOF */

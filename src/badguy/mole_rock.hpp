@@ -41,6 +41,9 @@ public:
   virtual std::string get_class() const override { return "mole_rock"; }
   virtual std::string get_display_name() const override { return _("Mole's rock"); }
 
+  virtual void backup(Writer& writer) const override;
+  virtual void restore(const ReaderMapping& reader) override;
+
 protected:
   const BadGuy* parent; /**< collisions with this BadGuy will be ignored */
   const Vector initial_velocity; /**< velocity at time of creation */

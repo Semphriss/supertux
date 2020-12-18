@@ -18,6 +18,8 @@
 
 #include "object/bullet.hpp"
 #include "supertux/sector.hpp"
+#include "util/reader_mapping.hpp"
+#include "util/writer.hpp"
 
 namespace {
 
@@ -101,6 +103,33 @@ bool
 Igel::is_freezable() const
 {
   return true;
+}
+
+void
+Igel::backup(Writer& writer) const
+{
+  WalkingBadguy::backup(writer);
+
+  writer.start_list(Igel::get_class());
+  writer.start_list("turn_recover_timer");
+  turn_recover_timer.backup(writer);
+  writer.end_list("turn_recover_timer");
+  writer.end_list(Igel::get_class());
+}
+
+void
+Igel::restore(const ReaderMapping& reader)
+{
+  WalkingBadguy::restore(reader);
+
+  boost::optional<ReaderMapping> subreader(ReaderMapping(reader.get_doc(), reader.get_sexp()));
+
+  if (reader.get(Igel::get_class().c_str(), subreader))
+  {
+    boost::optional<ReaderMapping> subreader2(ReaderMapping(reader.get_doc(), reader.get_sexp()));
+    if (subreader->get("turn_recover_timer", subreader2))
+      turn_recover_timer.restore(*subreader2);
+  }
 }
 
 /**bool

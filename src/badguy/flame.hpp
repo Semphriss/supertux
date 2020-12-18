@@ -43,6 +43,9 @@ public:
   virtual void stop_looping_sounds() override;
   virtual void play_looping_sounds() override;
 
+  virtual void backup(Writer& writer) const override;
+  virtual void restore(const ReaderMapping& reader) override;
+
 protected:
   float angle;
   float radius;

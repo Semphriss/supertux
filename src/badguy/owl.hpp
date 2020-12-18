@@ -39,6 +39,9 @@ public:
   virtual std::string get_display_name() const override { return _("Owl"); }
   virtual ObjectSettings get_settings() override;
 
+  virtual void backup(Writer& writer) const override;
+  virtual void restore(const ReaderMapping& reader) override;
+
 protected:
   bool is_above_player() const;
   virtual void active_update (float dt_sec) override;

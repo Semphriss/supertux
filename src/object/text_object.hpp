@@ -39,6 +39,9 @@ public:
   virtual bool is_singleton() const override { return true; }
   virtual bool is_saveable() const override { return false; }
 
+  virtual void backup(Writer& writer) const override;
+  virtual void restore(const ReaderMapping& reader) override;
+
   void set_text(const std::string& text);
   void set_font(const std::string& name);
   void fade_in(float fadetime);

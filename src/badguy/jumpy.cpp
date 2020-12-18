@@ -20,6 +20,8 @@
 
 #include "object/player.hpp"
 #include "sprite/sprite.hpp"
+#include "util/reader_mapping.hpp"
+#include "util/writer.hpp"
 
 static const float JUMPYSPEED=-600;
 static const float JUMPY_MID_TOLERANCE=4;
@@ -114,6 +116,33 @@ bool
 Jumpy::is_flammable() const
 {
   return true;
+}
+
+void
+Jumpy::backup(Writer& writer) const
+{
+  BadGuy::backup(writer);
+
+  writer.start_list(Jumpy::get_class());
+  writer.write("pos_groundhit_x", pos_groundhit.x);
+  writer.write("pos_groundhit_y", pos_groundhit.y);
+  writer.write("groundhit_pos_set", groundhit_pos_set);
+  writer.end_list(Jumpy::get_class());
+}
+
+void
+Jumpy::restore(const ReaderMapping& reader)
+{
+  BadGuy::restore(reader);
+
+  boost::optional<ReaderMapping> subreader(ReaderMapping(reader.get_doc(), reader.get_sexp()));
+
+  if (reader.get(Jumpy::get_class().c_str(), subreader))
+  {
+    subreader->get("pos_groundhit_x", pos_groundhit.x);
+    subreader->get("pos_groundhit_y", pos_groundhit.y);
+    subreader->get("groundhit_pos_set", groundhit_pos_set);
+  }
 }
 
 /* EOF */

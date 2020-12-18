@@ -226,4 +226,40 @@ void Block::after_editor_set()
   m_sprite = SpriteManager::current()->create(m_sprite_name);
 }
 
+void
+Block::backup(Writer& writer) const
+{
+  MovingObject::backup(writer);
+
+  writer.start_list(Block::get_class());
+  writer.write("sprite_name", m_sprite_name);
+  writer.write("default_sprite_name", m_default_sprite_name);
+  writer.write("bouncing", m_bouncing);
+  writer.write("breaking", m_breaking);
+  writer.write("bounce_dir", m_bounce_dir);
+  writer.write("bounce_offset", m_bounce_offset);
+  writer.write("original_y", m_original_y);
+  writer.end_list(Block::get_class());
+}
+
+void
+Block::restore(const ReaderMapping& reader)
+{
+  MovingObject::restore(reader);
+
+  boost::optional<ReaderMapping> subreader(ReaderMapping(reader.get_doc(), reader.get_sexp()));
+
+  if (reader.get(Block::get_class().c_str(), subreader))
+  {
+    subreader->get("sprite_name", m_sprite_name);
+    subreader->get("default_sprite_name", m_default_sprite_name);
+    subreader->get("bouncing", m_bouncing);
+    subreader->get("breaking", m_breaking);
+    subreader->get("bounce_dir", m_bounce_dir);
+    subreader->get("bounce_offset", m_bounce_offset);
+    subreader->get("original_y", m_original_y);
+    m_sprite = SpriteManager::current()->create(m_sprite_name);
+  }
+}
+
 /* EOF */

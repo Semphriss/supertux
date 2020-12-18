@@ -32,6 +32,9 @@ public:
   virtual bool is_freezable() const override { return false; }
   virtual void kill_fall() override { }
 
+  virtual void backup(Writer& writer) const override;
+  virtual void restore(const ReaderMapping& reader) override;
+
 protected:
   enum MyState {
     STATE_APPEARING, STATE_HATCHING, STATE_GROWING, STATE_SHRINKING, STATE_VANISHING
