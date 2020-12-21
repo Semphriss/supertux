@@ -36,6 +36,11 @@ jobs:
       # TODO: add -DGLBINDING_ENABLED=$USE_GLBINDING
       run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DWARNINGS=ON -DWERROR=ON -DBUILD_TESTS=ON -DCMAKE_INSTALL_MESSAGE=NEVER -DCMAKE_INSTALL_PREFIX=/usr -DINSTALL_SUBDIR_BIN=bin -DINSTALL_SUBDIR_SHARE=share/supertux2
 
+    - name: Fix header link problem
+      shell: bash
+      working-directory: : ${runner.workspace}/supertux/build
+      run: sudo ln -s /usr/local/include/freetype2/ /usr/include/freetype
+
     - name: Build
       shell: bash
       working-directory: ${{runner.workspace}}/supertux/build
