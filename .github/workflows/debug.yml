@@ -100,7 +100,7 @@ jobs:
 
     - name: Fix header link problem
       shell: bash
-      run: sudo ls /; sudo ls /usr/; sudo ls /usr/include/; sudo ln -s /usr/include/freetype /usr/local/include/freetype2/
+      run: sudo mkdir -p /usr/include/; sudo ln -s /usr/local/include/freetype2/ /usr/include/freetype
 
     - name: Build
       shell: bash
