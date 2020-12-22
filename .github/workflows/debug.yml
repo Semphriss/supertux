@@ -38,7 +38,7 @@ jobs:
 
     - name: Fix header link problem
       shell: bash
-      working-directory: : ${runner.workspace}/supertux/build
+      working-directory: ${runner.workspace}/supertux/build
       run: sudo ln -s /usr/local/include/freetype2/ /usr/include/freetype
 
     - name: Build
