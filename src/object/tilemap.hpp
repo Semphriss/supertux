@@ -161,9 +161,6 @@ public:
   /** Erases in autotile mode */
   void autotile_erase(const Vector& pos, const Vector& corner_pos);
 
-  /** Returns the Autotileset associated with the given tile */
-  AutotileSet* get_autotileset(uint32_t tile) const;
-
   void set_flip(Flip flip) { m_flip = flip; }
   Flip get_flip() const { return m_flip; }
 

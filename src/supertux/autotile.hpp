@@ -1,5 +1,5 @@
 //  SuperTux
-//  Copyright (C) 2020 A. Semphris <semphris@protonmail.com>
+//  Copyright (C) 2021 A. Semphris <semphris@protonmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -17,133 +17,212 @@
 #ifndef HEADER_SUPERTUX_SUPERTUX_AUTOTILE_HPP
 #define HEADER_SUPERTUX_SUPERTUX_AUTOTILE_HPP
 
-#include <memory>
-#include <stdint.h>
 #include <string>
-#include <algorithm>
+#include <vector>
 
-#include "math/rect.hpp"
-#include "math/rectf.hpp"
-#include "math/size.hpp"
-#include "object/path_object.hpp"
-#include "object/path_walker.hpp"
-#include "squirrel/exposed_object.hpp"
-#include "scripting/tilemap.hpp"
-#include "supertux/game_object.hpp"
-#include "video/color.hpp"
-#include "video/flip.hpp"
-#include "video/drawing_target.hpp"
+class ReaderMapping;
+class TileMap;
+class Writer;
 
-class AutotileMask final
+/**
+ * Class that represents one possible mask for an autotile. A mask is a set of
+ * rules concerning the neighboring tiles of a given tile, which will determine
+ * which autotile is appropriate to use.
+ */
+class AutotileMask
 {
 public:
-  AutotileMask(uint8_t mask, bool center);
+  struct MaskPosition
+  {
+    int x, y;
+    bool solid;
+    std::string set;
+  };
 
-  bool matches(uint8_t mask, bool center) const;
+public:
+  AutotileMask();
 
-  uint8_t get_mask() const;
+  /** Parses a mask from a ReaderMapping object. */
+  static AutotileMask from_reader(ReaderMapping& reader);
 
-private:
-  uint8_t m_mask;
-  bool m_center; // m_center should *always* be the same as the m_solid of the corresponding Autotile
+  /** Saves the mask to the given Writer. */
+  void save(Writer& writer);
 
-private:
-  AutotileMask(const AutotileMask&) = delete;
-  AutotileMask& operator=(const AutotileMask&) = delete;
+  /**
+   * Validates everything in the current mask.
+   * 
+   * @param errors A pointer to a list of strings which will be populated with
+   *               all errors found. If null, errors will be printed with
+   *               log_warning.
+   * @returns Whether or not the collection is clean. False if there are errors.
+   */
+  bool validate(std::vector<std::string>* errors);
+
+  /**
+   * Checks if the given tile corresponds to this mask.
+   * 
+   * @param map The tilemap on which to perform the operation.
+   * @param x The horizontal position of the tile to autotile.
+   * @param y The vertical position of the tile to autotile.
+   * @returns true if this mask matches the given tile, false otherwise.
+   */
+  bool matches(TileMap& map, int x, int y);
+
+public:
+  std::vector<MaskPosition> m_rules;
 };
 
-class Autotile final
+/**
+ * Class that represents a single contextual autotile, a tile in the context
+ * of autotiling.
+ */
+class Autotile
 {
 public:
-  Autotile(uint32_t tile_id,
-    std::vector<std::pair<uint32_t, float>> alt_tiles,
-    std::vector<AutotileMask*> masks,
-    bool solid);
+  Autotile();
 
-  bool matches(uint8_t mask, bool center) const;
+  /** Makes the link between an autotile and a tile in the tileset. */
+  struct AutotileTile
+  {
+    /** The ID of the tile in the tileset. */
+    uint32_t id;
 
-  /** @deprecated Returns the base tile ID. */
-  uint32_t get_tile_id() const;
+    /**
+     * The chances of this tile of occuring. The real chances are this number
+     * divided by the sum of all weights in the autotile.
+     */
+    float weight;
+  };
 
-  /** Picks a tile randomly amongst the possible ones for this autotile. */
-  uint32_t pick_tile(int x, int y) const;
+  /** Parses an autotile from a ReaderMapping object. */
+  static Autotile from_reader(ReaderMapping& reader);
 
-  /** @returns true if the given tile has this tile id */
-  bool is_amongst(uint32_t tile) const;
+  /** Saves the autotile to the given Writer. */
+  void save(Writer& writer);
 
-  /** @returns the first accessible mask for that autotile */
-  uint8_t get_first_mask() const;
+  /**
+   * Validates everything in the current autotile.
+   * 
+   * @param errors A pointer to a list of strings which will be populated with
+   *               all errors found. If null, errors will be printed with
+   *               log_warning.
+   * @returns Whether or not the collection is clean. False if there are errors.
+   */
+  bool validate(std::vector<std::string>* errors);
 
-  /** Returns all possible tiles for this autotile */
-  std::vector<std::pair<uint32_t, float>> get_all_tile_ids() const;
+  /**
+   * Checks if the given tile corresponds to this autotile.
+   * 
+   * @param map The tilemap on which to perform the operation.
+   * @param x The horizontal position of the tile to autotile.
+   * @param y The vertical position of the tile to autotile.
+   * @returns true if this autotile matches the given tile, false otherwise.
+   */
+  bool matches(TileMap& map, int x, int y);
 
-  /** Returns true if the "center" bool of masks are true. All masks of given Autotile must have the same value for their "center" property.*/
-  bool is_solid() const;
-
-private:
-  uint32_t m_tile_id;
-  std::vector<std::pair<uint32_t, float>> m_alt_tiles;
-  std::vector<AutotileMask*> m_masks;
+public:
   bool m_solid;
-
-private:
-  Autotile(const Autotile&) = delete;
-  Autotile& operator=(const Autotile&) = delete;
+  std::vector<AutotileTile> m_tiles;
+  std::vector<AutotileMask> m_masks;
 };
 
-class AutotileSet final
+/**
+ * Class that represents a "substance" from an autotile perspective. Tiles that
+ * commonly autotile with each other are part of the same autotileset.
+ */
+class AutotileSet
 {
 public:
-  // Moved to tile_set.hpp
-  //static AutotileSet* get_tileset_from_tile(uint32_t tile_id);
+  AutotileSet();
+
+  /** Parses an autotileset from a ReaderMapping object. */
+  static AutotileSet from_reader(ReaderMapping& reader);
+
+  /** Saves the autotileset to the given Writer. */
+  void save(Writer& writer);
+
+  /** Returns true if the current Autotileset contains this tile. */
+  bool contains_tile(uint32_t tile);
+
+  /**
+   * Validates everything in the current autotileset.
+   * 
+   * @param errors A pointer to a list of strings which will be populated with
+   *               all errors found. If null, errors will be printed with
+   *               log_warning.
+   * @returns Whether or not the collection is clean. False if there are errors.
+   */
+  bool validate(std::vector<std::string>* errors);
+
+  /**
+   * Sets the correct tile at the given position.
+   * 
+   * @param map The tilemap on which to perform the operation.
+   * @param x The horizontal position of the tile to autotile.
+   * @param y The vertical position of the tile to autotile.
+   */
+  void autotile(TileMap& map, int x, int y);
 
 public:
-  AutotileSet(std::vector<Autotile*> autotiles, uint32_t default_tile, std::string name, bool corner);
-
-  /** Returns the ID of the tile to use, based on the surrounding tiles.
-   *  If the autotileset is corner-based, the top, left, right, bottom and
-   *  center attributes are ignored.
-   */
-  uint32_t get_autotile(uint32_t tile_id,
-    bool top_left, bool top, bool top_right,
-    bool left, bool center, bool right,
-    bool bottom_left, bool bottom, bool bottom_right,
-    int x, int y
-  ) const;
-
-  /** Returns the id of the first block in the autotileset. Used for erronous configs. */
-  uint32_t get_default_tile() const;
-
-  /** true if the given tile is present in the autotileset */
-  bool is_member(uint32_t tile_id) const;
-
-  /** true if is_member() is true AND the "center" bool is true */
-  bool is_solid(uint32_t tile_id) const;
-
-  /** true if this is a corner-based autotileset */
-  bool is_corner() const { return m_corner; }
-  
-  /** Returns the first mask corresponding to the current tile
-   *  (useful for corners-based autotilesets)
-   */
-  uint8_t get_mask_from_tile(uint32_t tile) const;
-
-  // TODO : Validate autotile config files by checking if each mask has
-  //        one and only one corresponding tile.
-  void validate() const;
-
-public:
-  static std::vector<AutotileSet*>* m_autotilesets;
-
-private:
-  std::vector<Autotile*> m_autotiles;
-  uint32_t m_default;
   std::string m_name;
-  bool m_corner;
+  uint32_t m_default_tile;
+  std::vector<Autotile> m_autotiles;
+};
 
-private:
-  AutotileSet(const AutotileSet&) = delete;
-  AutotileSet& operator=(const AutotileSet&) = delete;
+/**
+ * Class that contains a full autotile configuration file. There is one
+ * autotileset collection per tileset.
+ */
+class AutotileSetCollection
+{
+public:
+  /**
+   * Struct that represents groups of autotilesets. Only used internally, to make
+   * the job easier for autotile masks.
+   */
+  struct AutotileSetGroup
+  {
+    std::string name;
+    std::vector<std::string> set_names;
+  };
+
+public:
+  AutotileSetCollection();
+
+  /** Parses a full autotileset collection from a file. */
+  static AutotileSetCollection from_file(std::string file);
+
+  /** Parses a full autotileset collection from a ReaderMapping object. */
+  static AutotileSetCollection from_reader(ReaderMapping& reader);
+
+  /** Saves the full autotileset collection to the given Writer. */
+  void save(Writer& writer);
+
+  /** Returns all autotilesets which contain the given tile. */
+  std::vector<AutotileSet> get_sets_from_tile(uint32_t tile);
+
+  /**
+   * Sets the correct tile at the given position.
+   * 
+   * @param map The tilemap on which to perform the operation.
+   * @param x The horizontal position of the tile to autotile.
+   * @param y The vertical position of the tile to autotile.
+   */
+  void autotile(TileMap& map, int x, int y);
+
+  /**
+   * Validates everything in the current collection.
+   * 
+   * @param errors A pointer to a list of strings which will be populated with
+   *               all errors found. If null, errors will be printed with
+   *               log_warning.
+   * @returns Whether or not the collection is clean. False if there are errors.
+   */
+  bool validate(std::vector<std::string>* errors);
+
+public:
+  std::vector<AutotileSet> m_autotilesets;
+  std::vector<AutotileSetGroup> m_groups;
 };
 
 #endif

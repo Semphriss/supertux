@@ -21,7 +21,6 @@
 #include <sexp/value.hpp>
 #include <sexp/io.hpp>
 
-#include "supertux/autotile_parser.hpp"
 #include "supertux/gameconfig.hpp"
 #include "supertux/globals.hpp"
 #include "supertux/tile_set.hpp"
@@ -82,9 +81,7 @@ TileSetParser::parse()
       }
       else
       {
-        AutotileParser* parser = new AutotileParser(m_tileset.m_autotilesets,
-            FileSystem::normalize(m_tiles_path + autotile_filename));
-        parser->parse();
+        m_tileset.m_autotiles = AutotileSetCollection::from_file(FileSystem::normalize(m_tiles_path + autotile_filename));
       }
     }
     else
