@@ -6,11 +6,25 @@ on:
       - master
     tags:
       - '*'
-  pull_request: {}
+  # https://docs.github.com/en/free-pro-team@latest/actions/reference/events-that-trigger-workflows#pull_request_target
+  pull_request_target: {}
 # TODO the glbinding build
 jobs:
+  # *Very* hacky way to check in the first line (and only the first) contains "ci skip"
+  check-ci-skip:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check CI skip option
+        env:
+          PUSH_MESSAGE: ${{ github.event.head_commit.message }}
+          PR_MESSAGE: ${{ github.event.pull_request.title }}
+        run: |
+          echo $COMMIT_MESSAGE | head -n 1 - | grep -El "(ci skip|skip ci)" | sed 's/(standard input)/true/g' | sed 's/^$/false/g' | sed 's/\(.*\)/\:\:set\-output name\=push\:&/g'
+          echo $PR_MESSAGE | head -n 1 - | grep -El "(ci skip|skip ci)" | sed 's/(standard input)/true/g' | sed 's/^$/false/g' | sed 's/\(.*\)/\:\:set\-output name\=pr\:&/g'
+
   build-supertux:
-    if: "!contains(github.event.head_commit.message, 'ci skip') && !contains(github.event.head_commit.message, 'skip ci')"
+    needs: check-ci-skip
+    if: ${{ !contains(fromJson(needs.check-ci-skip.outputs.push), 'standart_input') && !contains(fromJson(needs.check-ci-skip.outputs.pr), 'standart_input') }}
 
     strategy:
       fail-fast: false
