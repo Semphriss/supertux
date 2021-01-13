@@ -16,13 +16,15 @@ jobs:
     steps:
       - name: Check CI skip option
         env:
-          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+          PUSH_MESSAGE: ${{ github.event.head_commit.message }}
+          PR_MESSAGE: ${{ github.event.pull_request.title }}
         run: |
-          echo $COMMIT_MESSAGE | head -n 1 - | grep -El "(ci skip|skip ci)" | sed 's/(standard input)/true/g' | sed 's/^$/false/g' | sed 's/\(.*\)/\:\:set\-output name\=skip\:&/g'
+          echo $COMMIT_MESSAGE | head -n 1 - | grep -El "(ci skip|skip ci)" | sed 's/(standard input)/true/g' | sed 's/^$/false/g' | sed 's/\(.*\)/\:\:set\-output name\=push\:&/g'
+          echo $PR_MESSAGE | head -n 1 - | grep -El "(ci skip|skip ci)" | sed 's/(standard input)/true/g' | sed 's/^$/false/g' | sed 's/\(.*\)/\:\:set\-output name\=pr\:&/g'
 
   build-supertux:
     needs: check-ci-skip
-    if: ${{ !contains(fromJson(needs.check-ci-skip.outputs.ci_skip), 'standart_input') }}
+    if: ${{ !contains(fromJson(needs.check-ci-skip.outputs.push), 'standart_input') && !contains(fromJson(needs.check-ci-skip.outputs.pr), 'standart_input') }}
 
     strategy:
       fail-fast: false
