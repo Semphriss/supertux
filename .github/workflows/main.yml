@@ -21,7 +21,7 @@ jobs:
 
   build-supertux:
     needs: check-ci-skip
-    if: ${{ !contains(fromJson(needs.check-ci-skip.outputs.ci_skip), 'standart_input') }}
+    if: ${{ !contains(fromJson(needs.job1.outputs.ci_skip), "standart_input") }}
 
     strategy:
       fail-fast: false
