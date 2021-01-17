@@ -43,6 +43,18 @@ class TileMap final :
   public PathObject
 {
 public:
+  enum class AutotileCornerOperation {
+    ADD_TOP_LEFT,
+    ADD_TOP_RIGHT,
+    ADD_BOTTOM_LEFT,
+    ADD_BOTTOM_RIGHT,
+    REMOVE_TOP_LEFT,
+    REMOVE_TOP_RIGHT,
+    REMOVE_BOTTOM_LEFT,
+    REMOVE_BOTTOM_RIGHT,
+  };
+
+public:
   TileMap(const TileSet *tileset);
   TileMap(const TileSet *tileset, const ReaderMapping& reader);
   virtual ~TileMap();
@@ -141,25 +153,12 @@ public:
   /** changes all tiles with the given ID */
   void change_all(uint32_t oldtile, uint32_t newtile);
 
-  /** Puts the correct autotile block at the given position */
-  void autotile(int x, int y, uint32_t tile);
-  
-  enum class AutotileCornerOperation {
-    ADD_TOP_LEFT,
-    ADD_TOP_RIGHT,
-    ADD_BOTTOM_LEFT,
-    ADD_BOTTOM_RIGHT,
-    REMOVE_TOP_LEFT,
-    REMOVE_TOP_RIGHT,
-    REMOVE_BOTTOM_LEFT,
-    REMOVE_BOTTOM_RIGHT,
-  };
-  
-  /** Puts the correct autotile blocks at the tiles around the given corner */
-  void autotile_corner(int x, int y, uint32_t tile, AutotileCornerOperation op);
-  
-  /** Erases in autotile mode */
-  void autotile_erase(const Vector& pos, const Vector& corner_pos);
+  /**
+   * Puts the correct autotile block at the given position. No distinction
+   * is made between normal and corner autotilesets, so arguments for both
+   * are required.
+   */
+  void put_autotile(int x, int y, int corner_x, int corner_y, uint32_t tile);
 
   void set_flip(Flip flip) { m_flip = flip; }
   Flip get_flip() const { return m_flip; }

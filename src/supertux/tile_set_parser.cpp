@@ -81,7 +81,7 @@ TileSetParser::parse()
       }
       else
       {
-        m_tileset.m_autotiles = AutotileSetCollection::from_file(FileSystem::normalize(m_tiles_path + autotile_filename));
+        m_tileset.m_autotiles = std::move(AutotileSetCollection::from_file(FileSystem::normalize(m_tiles_path + autotile_filename)));
       }
     }
     else

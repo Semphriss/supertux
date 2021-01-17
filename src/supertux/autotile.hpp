@@ -211,6 +211,16 @@ public:
   void autotile(TileMap& map, int x, int y);
 
   /**
+   * Sets the correct tile at the given position.
+   * 
+   * @param map The tilemap on which to perform the operation.
+   * @param x The horizontal position of the corner to autotile. (0, 0 is top-left)
+   * @param y The vertical position of the corner to autotile.
+   * @param tile The tile that's being placed. Autotileset will be deduced automatically.
+   */
+  void autotile_corner(TileMap& map, int x, int y, uint32_t tile);
+
+  /**
    * Validates everything in the current collection.
    * 
    * @param errors A pointer to a list of strings which will be populated with
