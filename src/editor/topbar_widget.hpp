@@ -1,5 +1,5 @@
 //  SuperTux
-//  Copyright (C) 2020 A. Semphris <semphris@protonmail.com>
+//  Copyright (C) 2021 A. Semphris <semphris@protonmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -17,28 +17,32 @@
 #ifndef HEADER_SUPERTUX_EDITOR_TOPBAR_WIDGET_HPP
 #define HEADER_SUPERTUX_EDITOR_TOPBAR_WIDGET_HPP
 
-#include "editor/widget.hpp"
+#include "interface/container.hpp"
 
 /** The toolbox is on the right side of the screen and allows
     selection of the current tool and contains the object or tile
     palette */
-class EditorTopbarWidget final : public Widget
+class EditorTopbarWidget final : public InterfaceContainer
 {
 public:
+  struct MenuSection
+  {
+    std::string name;
+    std::vector<std::pair<std::string, std::function<void()>>> options;
+  };
+
+public:
   EditorTopbarWidget();
+  virtual ~EditorTopbarWidget() {}
 
   virtual void draw(DrawingContext& context) override;
-  virtual void update(float dt_sec) override;
-
   virtual bool on_mouse_button_up(const SDL_MouseButtonEvent& button) override;
-  virtual bool on_mouse_button_down(const SDL_MouseButtonEvent& button) override;
-  virtual bool on_mouse_motion(const SDL_MouseMotionEvent& motion) override;
-  virtual bool on_mouse_wheel(const SDL_MouseWheelEvent& wheel) override;
-  virtual bool on_key_up(const SDL_KeyboardEvent& key) override;
-  virtual bool on_key_down(const SDL_KeyboardEvent& key) override;
 
-  virtual void setup() override;
-  virtual void resize() override;
+private:
+  void reset_components();
+
+private:
+  std::vector<MenuSection> m_menu;
 
 private:
   EditorTopbarWidget(const EditorTopbarWidget&) = delete;

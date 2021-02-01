@@ -22,39 +22,69 @@
 #include "control/input_manager.hpp"
 #include "editor/widget.hpp"
 #include "interface/label.hpp"
+#include "interface/theme.hpp"
 #include "video/drawing_context.hpp"
+
+class InterfaceContainer;
 
 class InterfaceControl : public Widget
 {
 public:
   InterfaceControl();
+  InterfaceControl(InterfaceThemeSet theme);
   virtual ~InterfaceControl() {}
 
+  virtual bool event(const SDL_Event& ev) override { if (!m_enabled) return false; return Widget::event(ev); }
   virtual void draw(DrawingContext& context) override { if (m_label) m_label->draw(context); }
-  virtual bool on_mouse_motion(const SDL_MouseMotionEvent& motion) override { if (m_label) m_label->on_mouse_motion(motion); return false; }
+  virtual bool on_mouse_button_up(const SDL_MouseButtonEvent& button) override { m_mouse_down = false; return false; }
+  virtual bool on_mouse_button_down(const SDL_MouseButtonEvent& button) override { m_mouse_down = true; return false; }
+  virtual bool on_mouse_motion(const SDL_MouseMotionEvent& motion) override;
 
-  void set_focus(bool focus) { m_has_focus = focus; }
-  bool has_focus() const { return m_has_focus; }
+  /** Sets this control's focus status. @returns whether it is a change. */
+  virtual std::vector<std::function<void()>> set_focus(bool focus, std::vector<std::function<void()>> callbacks = {});
+  virtual bool has_focus() const { return m_has_focus; }
 
   void set_rect(const Rectf& rect) { m_rect = rect; }
   Rectf get_rect() const { return m_rect; }
 
+  const InterfaceTheme& get_current_theme() const;
+
 public:
-  /** Optional; a function that will be called each time the bound value
-   *  is modified.
+  /**
+   * Optional; a function that will be called each time the bound value
+   * is modified.
    */
   std::function<void()> m_on_change;
+
+  /**
+   * Optional; a function that will be called when the control gains or loses
+   * user focus. Argument is true when the control has gained the focus.
+   */
+  std::function<void()> m_on_focus;
 
   /** Optional; the label associated with the control */
   std::unique_ptr<InterfaceLabel> m_label;
 
-protected:
-  /** Whether or not the user has this InterfaceControl as focused */
-  bool m_has_focus;
-  /** The rectangle where the InterfaceControl should be rendered */
-  Rectf m_rect;
   /** A pointer to the parent container, or null if not in any container. */
-  InterfaceControl* m_parent;
+  InterfaceContainer* m_parent;
+
+  /** Whether this control is interactible. */
+  bool m_enabled;
+
+  /** Whether this control is visible on the screen. */
+  bool m_visible;
+
+  InterfaceThemeSet m_theme;
+
+protected:
+  /** Whether or not the user has this InterfaceControl as focused. */
+  bool m_has_focus;
+  /** Whether or not the mouse hovers this component. */
+  bool m_mouse_hover;
+  /** Whether or not the mouse is left-clicking. */
+  bool m_mouse_down;
+  /** The rectangle where the InterfaceControl should be rendered. */
+  Rectf m_rect;
 
 private:
   InterfaceControl(const InterfaceControl&) = delete;

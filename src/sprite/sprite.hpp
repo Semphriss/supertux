@@ -17,6 +17,7 @@
 #ifndef HEADER_SUPERTUX_SPRITE_SPRITE_HPP
 #define HEADER_SUPERTUX_SPRITE_SPRITE_HPP
 
+#include "math/rectf.hpp"
 #include "sprite/sprite_data.hpp"
 #include "sprite/sprite_ptr.hpp"
 #include "video/canvas.hpp"
@@ -32,6 +33,10 @@ public:
 
   /** Draw sprite, automatically calculates next frame */
   void draw(Canvas& canvas, const Vector& pos, int layer,
+            Flip flip = NO_FLIP);
+
+  /** Same as the other draw() funciton, but scales the sprite in the rect */
+  void draw(Canvas& canvas, const Rectf& rect, int layer,
             Flip flip = NO_FLIP);
 
   /** Set action (or state) */
@@ -54,6 +59,9 @@ public:
 
   /** Get currently drawn frame */
   int get_current_frame() const { return m_frameidx; }
+
+  /** Gets the SurfacePtr for the current frame */
+  SurfacePtr get_current_surface();
 
   /** Get sprite's name */
   const std::string& get_name() const { return m_data.name; }

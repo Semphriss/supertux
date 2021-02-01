@@ -26,6 +26,7 @@ const Color Color::CYAN(0.0, 1.0, 1.0);
 const Color Color::MAGENTA(1.0, 0.0, 1.0);
 const Color Color::YELLOW(1.0, 1.0, 0.0);
 const Color Color::WHITE(1.0, 1.0, 1.0);
+const Color Color::INVISIBLE(0.0, 0.0, 0.0, 0.0);
 
 Color::Color() :
   red(0),

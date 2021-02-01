@@ -140,17 +140,13 @@ void
 Sprite::draw(Canvas& canvas, const Vector& pos, int layer,
              Flip flip)
 {
-  assert(m_action != nullptr);
-  update();
-
-
   DrawingContext& context = canvas.get_context();
   context.push_transform();
 
   context.set_flip(context.get_flip() ^ flip);
   context.set_alpha(context.get_alpha() * m_alpha);
 
-  canvas.draw_surface(m_action->surfaces[m_frameidx],
+  canvas.draw_surface(get_current_surface(),
                       pos - Vector(m_action->x_offset, m_action->y_offset),
                       m_angle,
                       m_color,
@@ -158,6 +154,32 @@ Sprite::draw(Canvas& canvas, const Vector& pos, int layer,
                       layer);
 
   context.pop_transform();
+}
+
+void
+Sprite::draw(Canvas& canvas, const Rectf& rect, int layer,
+             Flip flip)
+{
+  DrawingContext& context = canvas.get_context();
+  context.push_transform();
+
+  context.set_flip(context.get_flip() ^ flip);
+  context.set_alpha(context.get_alpha() * m_alpha);
+
+  canvas.draw_surface_scaled(get_current_surface(),
+                      rect,
+                      layer);
+
+  context.pop_transform();
+}
+
+SurfacePtr
+Sprite::get_current_surface()
+{
+  assert(m_action != nullptr);
+  update();
+
+  return m_action->surfaces[m_frameidx];
 }
 
 int

@@ -24,128 +24,111 @@
 #include "video/video_system.hpp"
 #include "video/viewport.hpp"
 
+static const float SCROLLBAR_MARGIN = 2.f;
+
 ControlScrollbar::ControlScrollbar() :
-  m_scrolling(),
-  m_hovering(),
   m_total_region(),
   m_covered_region(),
   m_progress(),
-  m_rect(),
-  m_scaled_rect(),
-  //is_horizontal(),
-  last_mouse_pos()
-  //zoom_factor()
+  m_horizontal(),
+  last_mouse_pos(),
+  m_mouse_dragging()
 {
-  m_covered_region = VideoSystem::current()->get_viewport().get_rect().get_height();
-  m_total_region = 2000;
 }
 
 void
 ControlScrollbar::draw(DrawingContext& context)
 {
-  m_rect = Rect(0, 0, 10, context.get_height());
+  m_mouse_hover = m_mouse_hover || m_mouse_dragging;
 
-  context.color().draw_filled_rect(m_rect, Color(0.5f, 0.5f, 0.5f, 1.f), 8, LAYER_GUI);
-  context.color().draw_filled_rect(get_bar_rect(),
-                                   Color(1.f, 1.f, 1.f, (m_hovering || m_scrolling) ? 1.f : 0.5f),
-                                   8,
-                                   LAYER_GUI);
-/*
-  context.color().draw_filled_rect(Rectf(Vector(0, 0), Vector(SIZE, SIZE)),
-                                     Color(0.9f, 0.9f, 1.0f, 0.6f),
-                                     MIDDLE, LAYER_GUI-10);
-  context.color().draw_filled_rect(Rectf(Vector(40, 40), Vector(56, 56)),
-                                     Color(0.9f, 0.9f, 1.0f, 0.6f),
-                                     8, LAYER_GUI-20);
-  if (can_scroll()) {
-    draw_arrow(context, m_mouse_pos);
-  }
+  auto theme = get_current_theme();
 
-  draw_arrow(context, Vector(TOPLEFT, MIDDLE));
-  draw_arrow(context, Vector(BOTTOMRIGHT, MIDDLE));
-  draw_arrow(context, Vector(MIDDLE, TOPLEFT));
-  draw_arrow(context, Vector(MIDDLE, BOTTOMRIGHT));
-*/
+  context.color().draw_filled_rect(m_rect, theme.bkg_color, theme.round_corner, LAYER_GUI + 5);
+  context.color().draw_filled_rect(get_bar_rect(), theme.txt_color, theme.round_corner, LAYER_GUI + 5);
 }
 
-void
-ControlScrollbar::update(float dt_sec)
+bool
+ControlScrollbar::on_mouse_motion(const SDL_MouseMotionEvent& motion)
 {
-  
+  InterfaceControl::on_mouse_motion(motion);
+
+  if (!m_mouse_dragging)
+    return false;
+
+  Vector mouse_pos = VideoSystem::current()->get_viewport().to_logical(motion.x, motion.y);
+  float delta = m_horizontal ?
+        ((mouse_pos - last_mouse_pos).x / m_rect.get_width() * m_total_region) :
+        ((mouse_pos - last_mouse_pos).y / m_rect.get_height() * m_total_region);
+  m_progress = math::clamp(m_progress + delta, 0.f, m_total_region - m_covered_region);
+  last_mouse_pos = mouse_pos;
+
+  if (m_on_change)
+    m_on_change();
+
+  return false;
 }
 
 bool
 ControlScrollbar::on_mouse_button_up(const SDL_MouseButtonEvent& button)
 {
-  m_scrolling = false;
+  InterfaceControl::on_mouse_button_up(button);
+
+  m_mouse_dragging = false;
+
   return false;
 }
 
 bool
 ControlScrollbar::on_mouse_button_down(const SDL_MouseButtonEvent& button)
 {
-  if (button.button == SDL_BUTTON_LEFT) {
-    Vector mouse_pos = VideoSystem::current()->get_viewport().to_logical(button.x, button.y);
-    if (get_bar_rect().contains(int(mouse_pos.x), int(mouse_pos.y))) {
-      m_scrolling = true;
-      return true;
-    } else {
-      return false;
-    }
-  } else {
-    return false;
-  }
+  InterfaceControl::on_mouse_button_down(button);
+
+  last_mouse_pos = VideoSystem::current()->get_viewport().to_logical(button.x, button.y);
+  m_mouse_dragging = get_bar_rect().contains(last_mouse_pos);
+
+  return m_mouse_dragging;
 }
 
-bool
-ControlScrollbar::on_mouse_motion(const SDL_MouseMotionEvent& motion)
-{
-  //InterfaceControl::on_mouse_motion(motion);
-
-  Vector mouse_pos = VideoSystem::current()->get_viewport().to_logical(motion.x, motion.y);
-
-  /*if (mouse_pos.x < SIZE && m_mouse_pos.y < SIZE) {
-    m_scrolling_vec = m_mouse_pos - Vector(MIDDLE, MIDDLE);
-    if (m_scrolling_vec.x != 0 || m_scrolling_vec.y != 0) {
-      float norm = m_scrolling_vec.norm();
-      m_scrolling_vec *= powf(static_cast<float>(M_E), norm / 16.0f - 1.0f);
-    }
-  }*/
-
-  m_hovering = get_bar_rect().contains(int(mouse_pos.x), int(mouse_pos.y));
-
-  int new_progress = m_progress + int((mouse_pos.y - last_mouse_pos) * VideoSystem::current()->get_viewport().get_scale().y * float(m_total_region) / float(m_covered_region));
-  last_mouse_pos = mouse_pos.y;
-
-  if (m_scrolling) {
-
-    m_progress = std::min(m_total_region - m_covered_region, std::max(0, new_progress));
-
-    printf("%d to %d of %d\n", m_progress, m_progress + m_covered_region, m_total_region);
-
-    return true;
-  } else {
-    return false;
-  }
-}
-
-Rect
+Rectf
 ControlScrollbar::get_bar_rect()
 {
-  return Rect(m_rect.left,
-              m_rect.top + int(float(m_progress)
-                             * float(m_covered_region)
-                             / float(m_total_region)
-                           ),
-              m_rect.right,
-              m_rect.top + int(float(m_progress)
-                             * float(m_covered_region)
-                             / float(m_total_region))
-                         + int(float(m_rect.get_height())
-                             * float(m_covered_region)
-                             / float(m_total_region)
-                           )
-             );
+  float scale = (m_horizontal ? m_rect.get_width() : m_rect.get_height()) / m_total_region;
+
+  if (m_horizontal)
+  {
+    Rectf bar(m_rect.get_left() + m_progress * scale,
+              m_rect.get_top(),
+              m_rect.get_left() + (m_progress + m_covered_region) * scale,
+              m_rect.get_bottom());
+
+    if (bar.get_width() < 2.f * SCROLLBAR_MARGIN + 1.f)
+      bar.set_right(bar.get_left() + 2.f * SCROLLBAR_MARGIN + 1.f);
+
+    if (bar.get_height() < 2.f * SCROLLBAR_MARGIN + 1.f)
+      bar.set_bottom(bar.get_top() + 2.f * SCROLLBAR_MARGIN + 1.f);
+
+    bar = std::move(bar.grown(-SCROLLBAR_MARGIN));
+
+    return bar;
+  }
+  else
+  {
+    Rectf bar(m_rect.get_left(),
+              m_rect.get_top() + m_progress * scale,
+              m_rect.get_right(),
+              m_rect.get_top() + (m_progress + m_covered_region) * scale);
+
+    if (bar.get_width() < 2.f * SCROLLBAR_MARGIN + 1.f)
+      bar.set_right(bar.get_left() + 2.f * SCROLLBAR_MARGIN + 1.f);
+
+    if (bar.get_height() < 2.f * SCROLLBAR_MARGIN + 1.f)
+      bar.set_bottom(bar.get_top() + 2.f * SCROLLBAR_MARGIN + 1.f);
+
+    bar = std::move(bar.grown(-SCROLLBAR_MARGIN));
+
+    return bar;
+  }
+  
 }
 
 /* EOF */

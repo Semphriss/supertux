@@ -31,6 +31,13 @@
 static const float CONTROL_CURSOR_TIMER = 0.5f;
 
 ControlTextbox::ControlTextbox() :
+  InterfaceControl(InterfaceThemeSet(
+    InterfaceTheme(Resources::control_font, Color::BLACK, Color(.5f, .5f, .5f), 0.f), // base
+    InterfaceTheme(Resources::control_font, Color::BLACK, Color(.6f, .6f, .6f), 0.f), // hover
+    InterfaceTheme(Resources::control_font, Color::BLACK, Color(.75f, .75f, .75f), 0.f), // active
+    InterfaceTheme(Resources::control_font, Color::BLACK, Color(.75f, .75f, .75f), 0.f), // focused
+    InterfaceTheme(Resources::control_font, Color(.2f, .2f, .2f), Color(.6f, .6f, .6f), 0.f) // disabled
+  )),
   m_validate_string(),
   m_charlist(),
   m_string(nullptr),
@@ -76,22 +83,25 @@ ControlTextbox::delete_char_before_caret()
 void
 ControlTextbox::draw(DrawingContext& context)
 {
+  if (!m_visible)
+    return;
+
   InterfaceControl::draw(context);
 
+  const InterfaceTheme& theme = get_current_theme();
+
   context.color().draw_filled_rect(m_rect,
-                                   m_has_focus ? Color(0.75f, 0.75f, 0.7f, 1.f)
-                                               : Color(0.5f, 0.5f, 0.5f, 1.f),
+                                   theme.bkg_color,
+                                   theme.round_corner,
                                    LAYER_GUI);
 
   if (m_caret_pos != m_secondary_caret_pos) {
-    float lgt1 = Resources::control_font
-                 ->get_text_width(get_first_chars_visible(std::max(
+    float lgt1 = theme.font->get_text_width(get_first_chars_visible(std::max(
                                 std::min(m_caret_pos, m_secondary_caret_pos) - m_current_offset,
                                 0
                                 )));
 
-    float lgt2 = Resources::control_font
-                 ->get_text_width(get_first_chars_visible(std::min(
+    float lgt2 = theme.font->get_text_width(get_first_chars_visible(std::min(
                                  std::max(m_caret_pos, m_secondary_caret_pos) - m_current_offset,
                                  int(get_contents_visible().size())
                                  )));
@@ -104,22 +114,21 @@ ControlTextbox::draw(DrawingContext& context)
                                      LAYER_GUI);
   }
 
-  context.color().draw_text(Resources::control_font,
+  context.color().draw_text(theme.font,
                             get_contents_visible(),
                             Vector(m_rect.get_left() + 5.f,
                                    (m_rect.get_top() + m_rect.get_bottom()) / 2 -
-                                    Resources::control_font->get_height() / 2),
+                                    theme.font->get_height() / 2),
                             FontAlignment::ALIGN_LEFT,
                             LAYER_GUI + 1,
-                            Color::BLACK);
+                            theme.txt_color);
   if (m_cursor_timer > 0 && m_has_focus) {
-    float lgt = Resources::control_font
-                                ->get_text_width(get_first_chars_visible(m_caret_pos - m_current_offset));
+    float lgt = theme.font->get_text_width(get_first_chars_visible(m_caret_pos - m_current_offset));
 
     context.color().draw_line(m_rect.p1() + Vector(lgt + 5.f, 2.f),
                               m_rect.p1() + Vector(lgt + 5.f,
-                                  Resources::control_font->get_height() + 4.f),
-                              Color::BLACK,
+                                  theme.font->get_height() + 4.f),
+                              theme.txt_color,
                               LAYER_GUI + 1);
   }
 }
@@ -127,9 +136,11 @@ ControlTextbox::draw(DrawingContext& context)
 bool
 ControlTextbox::on_mouse_button_down(const SDL_MouseButtonEvent& button)
 {
+  InterfaceControl::on_mouse_button_down(button);
+
   Vector mouse_pos = VideoSystem::current()->get_viewport().to_logical(button.x, button.y);
   if (m_rect.contains(mouse_pos)) {
-    m_has_focus = true;
+    set_focus(true);
     m_cursor_timer = CONTROL_CURSOR_TIMER;
     m_caret_pos = get_text_position(mouse_pos);
     m_secondary_caret_pos = m_caret_pos;
@@ -139,7 +150,7 @@ ControlTextbox::on_mouse_button_down(const SDL_MouseButtonEvent& button)
     if (m_has_focus) {
       parse_value();
     }
-    m_has_focus = false;
+    set_focus(false);
   }
   return false;
 }
@@ -147,6 +158,8 @@ ControlTextbox::on_mouse_button_down(const SDL_MouseButtonEvent& button)
 bool
 ControlTextbox::on_mouse_button_up(const SDL_MouseButtonEvent& button)
 {
+  InterfaceControl::on_mouse_button_up(button);
+
   if (m_mouse_pressed) {
     m_mouse_pressed = false;
     return true;
@@ -304,6 +317,9 @@ ControlTextbox::on_key_down(const SDL_KeyboardEvent& key)
 
 bool
 ControlTextbox::event(const SDL_Event& ev) {
+  if (!m_enabled)
+    return false;
+
   Widget::event(ev);
 
   if (ev.type == SDL_TEXTINPUT && m_has_focus)

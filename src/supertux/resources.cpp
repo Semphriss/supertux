@@ -74,7 +74,7 @@ Resources::load()
       normal_font = fixed_font;
       small_font.reset(new TTFFont(font, 10, 1.25f, 2, 1));
       big_font.reset(new TTFFont(font, 22, 1.25f, 2, 1));
-      control_font.reset(new TTFFont("fonts/Roboto-Regular.ttf", 15, 1.25f, 0, 0));
+      control_font.reset(new TTFFont("fonts/Roboto-Regular.ttf", 15, 1.25f));
     }
   }
 

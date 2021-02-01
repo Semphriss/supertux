@@ -24,7 +24,7 @@
 #include "video/drawing_context.hpp"
 
 /** Class that's designed to contain other controls */
-class InterfaceContainer final : public InterfaceControl
+class InterfaceContainer : public InterfaceControl
 {
 public:
   InterfaceContainer();
@@ -34,8 +34,17 @@ public:
   virtual void update(float dt_sec) override;
   virtual void draw(DrawingContext& context) override;
 
+  virtual std::vector<std::function<void()>> set_focus(bool focus, std::vector<std::function<void()>> callbacks = {}) override;
+  virtual bool has_focus() const override;
+
+  /** Used by children controls to tell this container that they grabbed focus. */
+  void notify_focus(InterfaceControl* source_child, std::vector<std::function<void()>> callbacks);
+
+  /** @returns the control currently focused in this container, or nullptr if no control is focused. */
+  InterfaceControl* get_focused_child();
+
 public:
-  std::vector<InterfaceControl> m_children;
+  std::vector<std::unique_ptr<InterfaceControl>> m_children;
 
 private:
   InterfaceContainer(const InterfaceContainer&) = delete;

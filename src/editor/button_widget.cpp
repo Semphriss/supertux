@@ -19,11 +19,10 @@
 #include "video/viewport.hpp"
 #include "video/video_system.hpp"
 
-ButtonWidget::ButtonWidget(SpritePtr sprite, const Vector& pos,
+ButtonWidget::ButtonWidget(SpritePtr sprite, const Rectf& rect,
                            std::function<void()> sig_click) :
   m_sprite(std::move(sprite)),
-  m_rect(pos, Sizef(static_cast<float>(m_sprite->get_width()),
-                    static_cast<float>(m_sprite->get_width()))),
+  m_rect(rect),
   m_grab(false),
   m_hover(false),
   m_sig_click(std::move(sig_click))
@@ -33,18 +32,18 @@ ButtonWidget::ButtonWidget(SpritePtr sprite, const Vector& pos,
 void
 ButtonWidget::draw(DrawingContext& context)
 {
-  context.color().draw_filled_rect(m_rect, Color(0.0f, 0.0f, 0.0f, 0.6f), 4.0f,
+  context.color().draw_filled_rect(m_rect, Color(0.0f, 0.0f, 0.0f, 0.6f),
                                    LAYER_GUI-5);
 
   if (m_sprite) {
-    m_sprite->draw(context.color(), m_rect.p1(), LAYER_GUI-5);
+    m_sprite->draw(context.color(), m_rect, LAYER_GUI-5);
   }
 
   if (m_grab) {
-    context.color().draw_filled_rect(m_rect, Color(0.9f, 0.9f, 1.0f, 0.9f), 4.0f,
+    context.color().draw_filled_rect(m_rect, Color(0.9f, 0.9f, 1.0f, 0.9f),
                                      LAYER_GUI-5);
   } else if (m_hover) {
-    context.color().draw_filled_rect(m_rect, Color(0.9f, 0.9f, 1.0f, 0.6f), 4.0f,
+    context.color().draw_filled_rect(m_rect, Color(0.9f, 0.9f, 1.0f, 0.6f),
                                      LAYER_GUI-5);
   }
 }

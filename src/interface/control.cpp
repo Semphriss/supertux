@@ -16,12 +16,90 @@
 
 #include "interface/control.hpp"
 
+#include "interface/container.hpp"
+#include "video/video_system.hpp"
+#include "video/viewport.hpp"
+
 InterfaceControl::InterfaceControl() :
   m_on_change(),
+  m_on_focus(),
   m_label(),
+  m_parent(nullptr),
+  m_enabled(true),
+  m_visible(true),
+  m_theme(),
   m_has_focus(),
-  m_rect(),
-  m_parent(nullptr)
+  m_mouse_hover(false),
+  m_mouse_down(false),
+  m_rect()
 {
 }
 
+InterfaceControl::InterfaceControl(InterfaceThemeSet theme) :
+  m_on_change(),
+  m_on_focus(),
+  m_label(),
+  m_parent(nullptr),
+  m_enabled(true),
+  m_visible(true),
+  m_theme(theme),
+  m_has_focus(),
+  m_mouse_hover(false),
+  m_mouse_down(false),
+  m_rect()
+{
+}
+
+std::vector<std::function<void()>>
+InterfaceControl::set_focus(bool focus, std::vector<std::function<void()>> callbacks)
+{
+  bool changed = m_has_focus != focus;
+
+  m_has_focus = focus;
+
+  if (m_on_focus && changed)
+    callbacks.push_back(m_on_focus);
+
+  if (focus && m_parent)
+    m_parent->notify_focus(this, callbacks);
+
+  if (!m_parent)
+  {
+    for (auto& func : callbacks)
+      func();
+
+    return {};
+  }
+
+  return callbacks;
+}
+
+const InterfaceTheme&
+InterfaceControl::get_current_theme() const
+{
+  if (!m_enabled)
+    return m_theme.disabled;
+
+  if (m_mouse_down && m_mouse_hover)
+    return m_theme.active;
+
+  if (m_has_focus)
+    return m_theme.focused;
+
+  if (m_mouse_hover)
+    return m_theme.hover;
+
+  return m_theme.base;
+}
+
+bool
+InterfaceControl::on_mouse_motion(const SDL_MouseMotionEvent& motion)
+{
+  if (m_label)
+    m_label->on_mouse_motion(motion);
+
+  Vector mouse_pos = VideoSystem::current()->get_viewport().to_logical(motion.x, motion.y);
+  m_mouse_hover = m_rect.contains(mouse_pos);
+
+  return false;
+}

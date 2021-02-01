@@ -17,7 +17,7 @@
 #ifndef HEADER_SUPERTUX_INTERFACE_CONTROL_SCROLLBAR_HPP
 #define HEADER_SUPERTUX_INTERFACE_CONTROL_SCROLLBAR_HPP
 
-#include "editor/widget.hpp"
+#include "interface/control.hpp"
 #include "math/rect.hpp"
 #include "math/vector.hpp"
 
@@ -25,48 +25,45 @@ class DrawingContext;
 union SDL_Event;
 
 /** A generic template for a scrollbar */
-class ControlScrollbar final : public Widget
+class ControlScrollbar final : public InterfaceControl
 {
 public:
   ControlScrollbar();
 
   virtual void draw(DrawingContext& context) override;
-  virtual void update(float dt_sec) override;
 
+  virtual bool on_mouse_motion(const SDL_MouseMotionEvent& motion) override;
   virtual bool on_mouse_button_up(const SDL_MouseButtonEvent& button) override;
   virtual bool on_mouse_button_down(const SDL_MouseButtonEvent& button) override;
-  virtual bool on_mouse_motion(const SDL_MouseMotionEvent& motion) override;
 
-private:
-  /** Whether or not the mouse is clicking on the bar */
-  bool m_scrolling;
-
-  /** Whether or not the mouse hovers above the bar */
-  bool m_hovering;
+public:
+  // -------------------------------------------------------------------------
+  // Scroll bar:           |     ==========                     |
+  // -------------------------------------------------------------------------
+  //
+  //  m_total_region:      \____________________________________/
+  //  m_covered_region:          \________/
+  //  m_progress:          \____/
 
   /** The length (height) of the region to scroll */
-  int m_total_region;
+  float m_total_region;
 
   /** The length (height) of the viewport for the region */
-  int m_covered_region;
+  float m_covered_region;
 
   /** The length (height) between the beginning of the viewport and the beginning of the region */
-  int m_progress;
-  
-  /** The logical position and size of the widget */
-  Rect m_rect;
-  
-  /** The position and size of the widget, to scale */
-  Rect m_scaled_rect;
+  float m_progress;
   
   /** `true` of the scroller is horizontal; `false` if it is vertical */
-  //bool is_horizontal;
+  bool m_horizontal;
 
 private:
-  Rect get_bar_rect();
+  Rectf get_bar_rect();
 
-  float last_mouse_pos;
-  //float zoom_factor;
+  Vector last_mouse_pos;
+
+  /** Can't use a m_mouse_clicking, so use this to override */
+  bool m_mouse_dragging;
 
 private:
   ControlScrollbar(const ControlScrollbar&) = delete;

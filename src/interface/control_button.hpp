@@ -30,9 +30,8 @@ public:
   virtual bool on_key_up(const SDL_KeyboardEvent& key) override;
   virtual bool on_key_down(const SDL_KeyboardEvent& key) override;
 
-private:
+public:
   std::string m_btn_label;
-  bool m_mouse_down;
 
 private:
   ControlButton(const ControlButton&) = delete;

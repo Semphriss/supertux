@@ -22,48 +22,54 @@
 #include "video/viewport.hpp"
 
 ControlButton::ControlButton(std::string label) :
-  m_btn_label(std::move(label)),
-  m_mouse_down(false)
+  InterfaceControl(InterfaceThemeSet(
+    InterfaceTheme(Resources::control_font, Color::BLACK, Color(.5f, .5f, .5f), 0.f), // base
+    InterfaceTheme(Resources::control_font, Color::BLACK, Color(.6f, .6f, .6f), 0.f), // hover
+    InterfaceTheme(Resources::control_font, Color::BLACK, Color(.3f, .3f, .3f), 0.f), // active
+    InterfaceTheme(Resources::control_font, Color::BLACK, Color(.75f, .75f, .75f), 0.f), // focused
+    InterfaceTheme(Resources::control_font, Color(.2f, .2f, .2f), Color(.6f, .6f, .6f), 0.f) // disabled
+  )),
+  m_btn_label(std::move(label))
 {
 }
 
 void
 ControlButton::draw(DrawingContext& context)
 {
+  if (!m_visible)
+    return;
+
   InterfaceControl::draw(context);
 
+  const InterfaceTheme& theme = get_current_theme();
+
   context.color().draw_filled_rect(m_rect,
-                                   m_mouse_down ? Color(0.3f, 0.3f, 0.3f, 1.f) :
-                                       (m_has_focus ? Color(0.75f, 0.75f, 0.7f, 1.f) : Color(0.5f, 0.5f, 0.5f, 1.f)),
+                                   theme.bkg_color,
+                                   theme.round_corner,
                                    LAYER_GUI);
 
-  context.color().draw_text(Resources::control_font,
+  context.color().draw_text(theme.font,
                             m_btn_label,
                             Vector((m_rect.get_left() + m_rect.get_right()) / 2,
-                                   (m_rect.get_top() + m_rect.get_bottom()) / 2 - Resources::control_font->get_height() / 2),
+                                   (m_rect.get_top() + m_rect.get_bottom()) / 2 - theme.font->get_height() / 2),
                             FontAlignment::ALIGN_CENTER,
                             LAYER_GUI,
-                            Color::BLACK);
+                            theme.txt_color);
 }
 
 bool
 ControlButton::on_mouse_button_up(const SDL_MouseButtonEvent& button)
 {
+  InterfaceControl::on_mouse_button_up(button);
+
   if (button.button != SDL_BUTTON_LEFT)
     return false;
 
-  Vector mouse_pos = VideoSystem::current()->get_viewport().to_logical(button.x, button.y);
-  if (!m_rect.contains(mouse_pos) || !m_mouse_down) {
-    m_mouse_down = false;
+  if (!m_mouse_hover)
     return false;
-  }
-
-  m_mouse_down = false;
 
   if (m_on_change)
     m_on_change();
-
-  m_has_focus = true;
 
   return true;
 }
@@ -71,12 +77,14 @@ ControlButton::on_mouse_button_up(const SDL_MouseButtonEvent& button)
 bool
 ControlButton::on_mouse_button_down(const SDL_MouseButtonEvent& button)
 {
+  InterfaceControl::on_mouse_button_down(button);
+
   if (button.button == SDL_BUTTON_LEFT) {
     Vector mouse_pos = VideoSystem::current()->get_viewport().to_logical(button.x, button.y);
     if (!m_rect.contains(mouse_pos)) {
-      m_has_focus = false;
+      set_focus(false);
     } else {
-      m_has_focus = true;
+      set_focus(true);
       m_mouse_down = true;
     }
   }

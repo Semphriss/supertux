@@ -29,9 +29,9 @@ class ButtonWidget : public Widget
 {
 private:
 public:
-  ButtonWidget(SpritePtr sprite, const Vector& pos, std::function<void()> m_sig_click = {});
-  ButtonWidget(const std::string& path, const Vector& pos, std::function<void()> callback = {}) :
-    ButtonWidget(SpriteManager::current()->create(path), pos, std::move(callback))
+  ButtonWidget(SpritePtr sprite, const Rectf& rect, std::function<void()> m_sig_click = {});
+  ButtonWidget(const std::string& path, const Rectf& rect, std::function<void()> callback = {}) :
+    ButtonWidget(SpriteManager::current()->create(path), rect, std::move(callback))
   {
   }
 
