@@ -24,7 +24,7 @@
 #include "video/video_system.hpp"
 #include "video/viewport.hpp"
 
-static const float SCROLLBAR_MARGIN = 2.f;
+static const float SCROLLBAR_MARGIN = 0.f;
 
 ControlScrollbar::ControlScrollbar() :
   m_total_region(),
@@ -39,6 +39,9 @@ ControlScrollbar::ControlScrollbar() :
 void
 ControlScrollbar::draw(DrawingContext& context)
 {
+  if (!is_valid())
+    return;
+
   m_mouse_hover = m_mouse_hover || m_mouse_dragging;
 
   auto theme = get_current_theme();
@@ -50,6 +53,9 @@ ControlScrollbar::draw(DrawingContext& context)
 bool
 ControlScrollbar::on_mouse_motion(const SDL_MouseMotionEvent& motion)
 {
+  if (!is_valid())
+    return false;
+
   InterfaceControl::on_mouse_motion(motion);
 
   if (!m_mouse_dragging)
@@ -71,7 +77,13 @@ ControlScrollbar::on_mouse_motion(const SDL_MouseMotionEvent& motion)
 bool
 ControlScrollbar::on_mouse_button_up(const SDL_MouseButtonEvent& button)
 {
+  if (!is_valid())
+    return false;
+
   InterfaceControl::on_mouse_button_up(button);
+
+  if (m_mouse_dragging)
+    SDL_CaptureMouse(SDL_FALSE);
 
   m_mouse_dragging = false;
 
@@ -81,10 +93,17 @@ ControlScrollbar::on_mouse_button_up(const SDL_MouseButtonEvent& button)
 bool
 ControlScrollbar::on_mouse_button_down(const SDL_MouseButtonEvent& button)
 {
+  if (!is_valid())
+    return false;
+
   InterfaceControl::on_mouse_button_down(button);
 
   last_mouse_pos = VideoSystem::current()->get_viewport().to_logical(button.x, button.y);
-  m_mouse_dragging = get_bar_rect().contains(last_mouse_pos);
+  m_mouse_dragging = m_rect.contains(last_mouse_pos);
+
+  if (m_mouse_dragging)
+    if (SDL_CaptureMouse(SDL_TRUE) != 0)
+      log_warning << "Cannot track mouse outside of main window" << std::endl;
 
   return m_mouse_dragging;
 }
@@ -129,6 +148,12 @@ ControlScrollbar::get_bar_rect()
     return bar;
   }
   
+}
+
+bool
+ControlScrollbar::is_valid()
+{
+  return m_covered_region < m_total_region;
 }
 
 /* EOF */

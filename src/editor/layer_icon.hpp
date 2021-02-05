@@ -29,7 +29,6 @@ public:
   virtual ~LayerIcon() {}
 
   virtual void draw(DrawingContext& context, const Vector& pos) override;
-  virtual void draw(DrawingContext& context, const Vector& pos, int pixels_shown) override;
 
   int get_zpos() const;
   bool is_valid() const;

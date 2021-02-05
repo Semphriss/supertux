@@ -41,15 +41,23 @@ EditorLayersWidget::EditorLayersWidget(Editor& editor) :
   m_selected_tilemap(),
   m_Ypos(448),
   m_Width(512),
-  m_scroll(0),
-  m_scroll_speed(0),
-  m_sector_text(),
-  m_sector_text_width(0),
   m_hovered_item(HoveredItem::NONE),
   m_hovered_layer(-1),
   m_object_tip(),
-  m_has_mouse_focus(false)
+  m_has_mouse_focus(false),
+  m_scrollbar()
 {
+  m_scrollbar.set_rect(Rect(0, SCREEN_HEIGHT - 6,
+                            SCREEN_WIDTH, SCREEN_HEIGHT));
+  m_scrollbar.m_horizontal = true;
+  m_scrollbar.m_theme = InterfaceThemeSet(
+    InterfaceTheme(Resources::control_font, Color(.7f, .7f, .7f, 1.f), Color::BLACK, 0.f), // base
+    InterfaceTheme(Resources::control_font, Color(.8f, .8f, .8f, 1.f), Color::BLACK, 0.f), // hover
+    InterfaceTheme(Resources::control_font, Color(1.f, 1.f, 1.f, 1.f), Color::BLACK, 0.f), // active
+    InterfaceTheme(Resources::control_font, Color(.9f, .9f, .9f, 1.f), Color::BLACK, 0.f), // focused
+    InterfaceTheme(Resources::control_font, Color(.3f, .3f, .3f, 1.f), Color::BLACK, 0.f) // disabled
+  );
+  update_scrollbar();
 }
 
 void
@@ -63,25 +71,27 @@ EditorLayersWidget::draw(DrawingContext& context)
 
   context.color().draw_filled_rect(Rectf(Vector(0, static_cast<float>(m_Ypos)),
                                          Vector(static_cast<float>(m_Width), static_cast<float>(SCREEN_HEIGHT))),
-                                     Color(0.9f, 0.9f, 1.0f, 0.6f),
-                                     0.0f,
-                                     LAYER_GUI-10);
+                                   Color::BLACK,
+                                   0.0f,
+                                   LAYER_GUI - 10);
 
   Rectf target_rect = Rectf(0, 0, 0, 0);
   bool draw_rect = true;
 
   switch (m_hovered_item)
   {
+/*
     case HoveredItem::SPAWNPOINTS:
       target_rect = Rectf(Vector(0, static_cast<float>(m_Ypos)),
                           Vector(static_cast<float>(m_Xpos), static_cast<float>(SCREEN_HEIGHT)));
       break;
-
+*/
+/*
     case HoveredItem::SECTOR:
       target_rect = Rectf(Vector(static_cast<float>(m_Xpos), static_cast<float>(m_Ypos)),
                           Vector(static_cast<float>(m_sector_text_width + m_Xpos), static_cast<float>(SCREEN_HEIGHT)));
       break;
-
+*/
     case HoveredItem::LAYERS:
       {
         Vector coords = get_layer_coords(m_hovered_layer);
@@ -103,22 +113,20 @@ EditorLayersWidget::draw(DrawingContext& context)
   if (!m_editor.is_level_loaded()) {
     return;
   }
-
+/*
   context.color().draw_text(Resources::normal_font, m_sector_text,
-                            Vector(35.0f, static_cast<float>(m_Ypos) + 5.0f),
+                            Vector(32.0f, static_cast<float>(m_Ypos) + 5.0f),
                             ALIGN_LEFT, LAYER_GUI, ColorScheme::Menu::default_color);
-
+*/
   int pos = 0;
   for (const auto& layer_icon : m_layer_icons) {
     if (layer_icon->is_valid()) {
-      if (pos * 35 >= m_scroll) {
-        layer_icon->draw(context, get_layer_coords(pos));
-      } else if ((pos + 1) * 35 >= m_scroll) {
-        layer_icon->draw(context, get_layer_coords(pos), 35 - (m_scroll - pos * 35));
-      }
+      layer_icon->draw(context, get_layer_coords(pos));
     }
     pos++;
   }
+
+  m_scrollbar.draw(context);
 }
 
 void
@@ -133,14 +141,20 @@ EditorLayersWidget::update(float dt_sec)
     else
       ++it;
   }
-  
-  if(m_scroll_speed < 0 && m_scroll > 0)
+
+  update_scrollbar();
+}
+
+bool
+EditorLayersWidget::event(const SDL_Event& event)
+{
+  if (!m_scrollbar.event(event))
   {
-    m_scroll -= 5;
+    return Widget::event(event);
   }
-  else if (m_scroll_speed > 0 && m_scroll < (static_cast<int>(m_layer_icons.size()) - 1) * 35)
+  else
   {
-    m_scroll += 5;
+    return true;
   }
 }
 
@@ -156,11 +170,11 @@ EditorLayersWidget::on_mouse_button_down(const SDL_MouseButtonEvent& button)
   if (button.button == SDL_BUTTON_LEFT)
   {
     switch (m_hovered_item)
-    {
+    {/*
       case HoveredItem::SECTOR:
         m_editor.disable_keyboard();
         MenuManager::instance().set_menu(MenuStorage::EDITOR_SECTORS_MENU);
-        return true;
+        return true;*/
 
       case HoveredItem::LAYERS:
         if (m_hovered_layer >= m_layer_icons.size())
@@ -210,13 +224,12 @@ bool
 EditorLayersWidget::on_mouse_motion(const SDL_MouseMotionEvent& motion)
 {
   Vector mouse_pos = VideoSystem::current()->get_viewport().to_logical(motion.x, motion.y);
-  float x = mouse_pos.x - static_cast<float>(m_Xpos);
+  float x = mouse_pos.x;
   float y = mouse_pos.y - static_cast<float>(m_Ypos);
   if (y < 0 || x > static_cast<float>(m_Width)) {
     m_hovered_item = HoveredItem::NONE;
     m_object_tip = nullptr;
     m_has_mouse_focus = false;
-    m_scroll_speed = 0;
     return false;
   }
 
@@ -227,25 +240,12 @@ EditorLayersWidget::on_mouse_motion(const SDL_MouseMotionEvent& motion)
     m_object_tip = nullptr;
     return true;
   } else {
-    if (x <= static_cast<float>(m_sector_text_width)) {
-      m_hovered_item = HoveredItem::SECTOR;
-      m_object_tip = nullptr;
-    } else {
-      // Scrolling
-      if (x < static_cast<float>(m_sector_text_width + 32)) {
-        m_scroll_speed = -1;
-      } else if (x > static_cast<float>(SCREEN_WIDTH - 160)) { // 160 = 128 + 32
-        m_scroll_speed = 1;
-      } else {
-        m_scroll_speed = 0;
-      }
-      unsigned int new_hovered_layer = get_layer_pos(mouse_pos);
-      if (m_hovered_layer != new_hovered_layer || m_hovered_item != HoveredItem::LAYERS) {
-        m_hovered_layer = new_hovered_layer;
-        update_tip();
-      }
-      m_hovered_item = HoveredItem::LAYERS;
+    unsigned int new_hovered_layer = get_layer_pos(mouse_pos);
+    if (m_hovered_layer != new_hovered_layer || m_hovered_item != HoveredItem::LAYERS) {
+      m_hovered_layer = new_hovered_layer;
+      update_tip();
     }
+    m_hovered_item = HoveredItem::LAYERS;
   }
 
   return true;
@@ -255,32 +255,6 @@ EditorLayersWidget::on_mouse_motion(const SDL_MouseMotionEvent& motion)
 bool
 EditorLayersWidget::on_mouse_wheel(const SDL_MouseWheelEvent& wheel)
 {
-  if (m_has_mouse_focus)
-  {
-    if((wheel.x < 0 || wheel.y < 0) && !(wheel.x > 0 || wheel.y > 0))
-    {
-      if (m_scroll >= 16)
-      {
-        m_scroll -= 16;
-      }
-      else
-      {
-        m_scroll = 0;
-      }
-    }
-    else if ((wheel.x > 0 || wheel.y > 0) && !(wheel.x < 0 || wheel.y < 0))
-    {
-      if (m_scroll < (static_cast<int>(m_layer_icons.size()) - 1) * 35)
-      {
-        m_scroll += 16;
-      }
-      else
-      {
-        m_scroll = (static_cast<int>(m_layer_icons.size()) - 1) * 35;
-      }
-      
-    }
-  }
   return false;
 }
 
@@ -295,6 +269,11 @@ EditorLayersWidget::resize()
 {
   m_Ypos = SCREEN_HEIGHT - 32;
   m_Width = SCREEN_WIDTH - 128;
+
+  m_scrollbar.set_rect(Rect(0, SCREEN_HEIGHT - 6,
+                            SCREEN_WIDTH - 128, SCREEN_HEIGHT));
+
+  update_scrollbar();
 }
 
 void
@@ -333,14 +312,6 @@ EditorLayersWidget::refresh()
   }
 
   sort_layers();
-  refresh_sector_text();
-}
-
-void
-EditorLayersWidget::refresh_sector_text()
-{
-  m_sector_text = _("Sector") + ": " + m_editor.get_sector()->get_name();
-  m_sector_text_width  = int(Resources::normal_font->get_text_width(m_sector_text)) + 6;
 }
 
 void
@@ -350,6 +321,8 @@ EditorLayersWidget::sort_layers()
             [](const std::unique_ptr<LayerIcon>& lhs, const std::unique_ptr<LayerIcon>& rhs) {
               return lhs->get_zpos() < rhs->get_zpos();
             });
+
+  update_scrollbar();
 }
 
 void
@@ -368,6 +341,8 @@ EditorLayersWidget::add_layer(GameObject* layer)
   }
 
   m_layer_icons.push_back(move(icon));
+
+  update_scrollbar();
 }
 
 void
@@ -383,14 +358,24 @@ EditorLayersWidget::update_tip()
 Vector
 EditorLayersWidget::get_layer_coords(const int pos) const
 {
-  return Vector(static_cast<float>(pos * 35 + m_Xpos + m_sector_text_width - m_scroll),
+  return Vector(static_cast<float>(pos * 32) - m_scrollbar.m_progress,
                 static_cast<float>(m_Ypos));
 }
 
 int
 EditorLayersWidget::get_layer_pos(const Vector& coords) const
 {
-  return static_cast<int>((coords.x - static_cast<float>(m_Xpos - m_scroll) - static_cast<float>(m_sector_text_width)) / 35.0f);
+  return static_cast<int>((coords.x + m_scrollbar.m_progress) / 32.0f);
 }
 
+void
+EditorLayersWidget::update_scrollbar()
+{
+  m_scrollbar.m_total_region = static_cast<float>(m_layer_icons.size()) * 32.f;
+  m_scrollbar.m_covered_region = static_cast<float>(SCREEN_WIDTH) - 128.f;
+  m_scrollbar.m_progress = math::clamp(m_scrollbar.m_progress, 0.f, m_scrollbar.m_total_region - m_scrollbar.m_covered_region);
+
+  if (!m_scrollbar.is_valid())
+    m_scrollbar.m_progress = 0.f;
+}
 /* EOF */

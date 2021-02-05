@@ -22,7 +22,7 @@
 class ControlButton : public InterfaceControl
 {
 public:
-  ControlButton(std::string label);
+  ControlButton(std::string label = "");
 
   virtual void draw(DrawingContext& context) override;
   virtual bool on_mouse_button_up(const SDL_MouseButtonEvent& button) override;
@@ -32,6 +32,7 @@ public:
 
 public:
   std::string m_btn_label;
+  bool m_action_on_mousedown;
 
 private:
   ControlButton(const ControlButton&) = delete;

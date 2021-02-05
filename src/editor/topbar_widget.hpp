@@ -19,20 +19,30 @@
 
 #include "interface/container.hpp"
 
+class Editor;
+
 /** The toolbox is on the right side of the screen and allows
     selection of the current tool and contains the object or tile
     palette */
 class EditorTopbarWidget final : public InterfaceContainer
 {
 public:
+  struct MenuEntry
+  {
+    std::string name;
+    std::string icon;
+    bool new_category;
+    std::function<void()> callback;
+  };
+
   struct MenuSection
   {
     std::string name;
-    std::vector<std::pair<std::string, std::function<void()>>> options;
+    std::vector<MenuEntry> options;
   };
 
 public:
-  EditorTopbarWidget();
+  EditorTopbarWidget(Editor& editor);
   virtual ~EditorTopbarWidget() {}
 
   virtual void draw(DrawingContext& context) override;
@@ -42,6 +52,7 @@ private:
   void reset_components();
 
 private:
+  Editor& m_editor;
   std::vector<MenuSection> m_menu;
 
 private:

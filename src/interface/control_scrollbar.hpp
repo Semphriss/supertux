@@ -36,6 +36,9 @@ public:
   virtual bool on_mouse_button_up(const SDL_MouseButtonEvent& button) override;
   virtual bool on_mouse_button_down(const SDL_MouseButtonEvent& button) override;
 
+  /** @returns true if the current bar is valid and will show and interact */
+  bool is_valid();
+
 public:
   // -------------------------------------------------------------------------
   // Scroll bar:           |     ==========                     |

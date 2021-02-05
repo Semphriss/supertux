@@ -29,7 +29,10 @@
 #include "editor/tile_selection.hpp"
 #include "editor/tip.hpp"
 #include "editor/tool_icon.hpp"
+#include "editor/topbar_widget.hpp"
 #include "editor/undo_manager.hpp"
+#include "interface/control_button_image.hpp"
+#include "interface/control_scrollbar.hpp"
 #include "gui/dialog.hpp"
 #include "gui/menu_manager.hpp"
 #include "gui/mousecursor.hpp"
@@ -110,16 +113,18 @@ Editor::Editor() :
   auto toolbox_widget = std::make_unique<EditorToolboxWidget>(*this);
   auto layers_widget = std::make_unique<EditorLayersWidget>(*this);
   auto overlay_widget = std::make_unique<EditorOverlayWidget>(*this);
+  auto topbar_widget = std::make_unique<EditorTopbarWidget>(*this);
 
   m_toolbox_widget = toolbox_widget.get();
   m_layers_widget = layers_widget.get();
   m_overlay_widget = overlay_widget.get();
 
   auto undo_button_widget = std::make_unique<ButtonWidget>("images/engine/editor/undo.png",
-    Vector(10, 10), [this]{ undo(); });
+    Rectf(0.f, 0.f, 24.f, 24.f), [this]{ undo(); });
   auto redo_button_widget = std::make_unique<ButtonWidget>("images/engine/editor/redo.png",
-    Vector(60, 10), [this]{ redo(); });
+    Rectf(24.f, 0.f, 48.f, 24.f), [this]{ redo(); });
 
+  m_widgets.push_back(std::move(topbar_widget));
   m_widgets.push_back(std::move(undo_button_widget));
   m_widgets.push_back(std::move(redo_button_widget));
   m_widgets.push_back(std::move(toolbox_widget));
@@ -137,9 +142,9 @@ Editor::draw(Compositor& compositor)
   auto& context = compositor.make_context();
 
   if (m_levelloaded) {
-  for(const auto& widget : m_widgets) {
-    widget->draw(context);
-  }
+
+    for(const auto& widget : m_widgets)
+      widget->draw(context);
 
     m_sector->draw(context);
     context.color().draw_filled_rect(context.get_rect(),
@@ -353,8 +358,8 @@ Editor::scroll(const Vector& velocity)
 {
   if (!m_levelloaded) return;
 
-  Rectf bounds(0.0f,
-               0.0f,
+  Rectf bounds(0.f,
+               -24.f,
                std::max(0.0f, m_sector->get_width() - static_cast<float>(SCREEN_WIDTH - 128)),
                std::max(0.0f, m_sector->get_height() - static_cast<float>(SCREEN_HEIGHT - 32)));
   Camera& camera = m_sector->get_camera();
@@ -489,7 +494,6 @@ Editor::set_level(std::unique_ptr<Level> level, bool reset)
     }
   }
 
-  m_layers_widget->refresh_sector_text();
   m_toolbox_widget->update_mouse_icon();
   m_overlay_widget->on_level_change();
   

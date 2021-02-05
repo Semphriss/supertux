@@ -29,7 +29,8 @@ ControlButton::ControlButton(std::string label) :
     InterfaceTheme(Resources::control_font, Color::BLACK, Color(.75f, .75f, .75f), 0.f), // focused
     InterfaceTheme(Resources::control_font, Color(.2f, .2f, .2f), Color(.6f, .6f, .6f), 0.f) // disabled
   )),
-  m_btn_label(std::move(label))
+  m_btn_label(std::move(label)),
+  m_action_on_mousedown()
 {
 }
 
@@ -68,7 +69,7 @@ ControlButton::on_mouse_button_up(const SDL_MouseButtonEvent& button)
   if (!m_mouse_hover)
     return false;
 
-  if (m_on_change)
+  if (m_on_change && !m_action_on_mousedown)
     m_on_change();
 
   return true;
@@ -86,6 +87,8 @@ ControlButton::on_mouse_button_down(const SDL_MouseButtonEvent& button)
     } else {
       set_focus(true);
       m_mouse_down = true;
+      if (m_on_change && m_action_on_mousedown)
+        m_on_change();
     }
   }
   return false;
@@ -121,3 +124,4 @@ ControlButton::on_key_down(const SDL_KeyboardEvent& key)
   return false;
 }
 
+/* EOF */

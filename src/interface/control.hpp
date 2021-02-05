@@ -40,9 +40,11 @@ public:
   virtual bool on_mouse_button_down(const SDL_MouseButtonEvent& button) override { m_mouse_down = true; return false; }
   virtual bool on_mouse_motion(const SDL_MouseMotionEvent& motion) override;
 
-  /** Sets this control's focus status. @returns whether it is a change. */
+  /** Sets this control's focus status. */
   virtual std::vector<std::function<void()>> set_focus(bool focus, std::vector<std::function<void()>> callbacks = {});
   virtual bool has_focus() const { return m_has_focus; }
+
+  virtual void draw_tooltip(DrawingContext& context, const std::string& text) const;
 
   void set_rect(const Rectf& rect) { m_rect = rect; }
   Rectf get_rect() const { return m_rect; }
@@ -59,6 +61,10 @@ public:
   /**
    * Optional; a function that will be called when the control gains or loses
    * user focus. Argument is true when the control has gained the focus.
+   * 
+   * FIXME: AVOID USING - There is no guarantee as to when exactly the function
+   *        will be called. Some controls might have had their focus updated and
+   *        some others might have not. Do not read/write focus from this.
    */
   std::function<void()> m_on_focus;
 
@@ -83,6 +89,8 @@ protected:
   bool m_mouse_hover;
   /** Whether or not the mouse is left-clicking. */
   bool m_mouse_down;
+  /** The position of the mouse in the window */
+  Vector m_mouse_pos;
   /** The rectangle where the InterfaceControl should be rendered. */
   Rectf m_rect;
 

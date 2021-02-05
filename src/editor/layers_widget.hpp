@@ -21,6 +21,7 @@
 
 #include "control/input_manager.hpp"
 #include "editor/widget.hpp"
+#include "interface/control_scrollbar.hpp"
 #include "object/tilemap.hpp"
 #include "supertux/screen.hpp"
 
@@ -46,6 +47,7 @@ public:
   virtual void draw(DrawingContext& context) override;
   virtual void update(float dt_sec) override;
 
+  virtual bool event(const SDL_Event& event) override;
   virtual bool on_mouse_button_up(const SDL_MouseButtonEvent& button) override;
   virtual bool on_mouse_button_down(const SDL_MouseButtonEvent& button) override;
   virtual bool on_mouse_motion(const SDL_MouseMotionEvent& motion) override;
@@ -56,7 +58,6 @@ public:
 
   void refresh();
 
-  void refresh_sector_text();
   void sort_layers();
   void add_layer(GameObject* layer);
 
@@ -68,6 +69,7 @@ private:
   Vector get_layer_coords(const int pos) const;
   int get_layer_pos(const Vector& coords) const;
   void update_tip();
+  void update_scrollbar();
 
 private:
   Editor& m_editor;
@@ -75,13 +77,7 @@ private:
   TileMap* m_selected_tilemap;
 
   int m_Ypos;
-  const int m_Xpos = 32;
   int m_Width;
-  int m_scroll;
-  int m_scroll_speed;
-
-  std::string m_sector_text;
-  int m_sector_text_width;
 
   HoveredItem m_hovered_item;
   unsigned int m_hovered_layer;
@@ -89,6 +85,8 @@ private:
   std::unique_ptr<Tip> m_object_tip;
 
   bool m_has_mouse_focus;
+
+  ControlScrollbar m_scrollbar;
 
 private:
   EditorLayersWidget(const EditorLayersWidget&) = delete;

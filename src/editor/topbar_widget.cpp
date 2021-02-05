@@ -16,20 +16,30 @@
 
 #include "editor/topbar_widget.hpp"
 
+#include "editor/editor.hpp"
+#include "gui/menu_manager.hpp"
 #include "interface/control_button.hpp"
+#include "sprite/sprite_manager.hpp"
+#include "supertux/menu/editor_sectors_menu.hpp"
+#include "supertux/menu/menu_storage.hpp"
 #include "util/gettext.hpp"
 
 #include <iostream>
 
-EditorTopbarWidget::EditorTopbarWidget() :
+EditorTopbarWidget::EditorTopbarWidget(Editor& editor) :
   InterfaceContainer(),
+  m_editor(editor),
   m_menu({
-    {_("Test"), {
-      {_("Test"), []{
-        SDL_ShowSimpleMessageBox(0, "Title here", "Test 1", NULL);
+    {_("Sector"), {
+      {_("Manage sectors..."), "", false, [this]{
+        m_editor.disable_keyboard();
+        MenuManager::instance().set_menu(MenuStorage::EDITOR_SECTORS_MENU);
       }},
-      {_("Test 2"), []{
-        SDL_ShowSimpleMessageBox(0, "Title here", "Test 2", NULL);
+      {_("Create sector"), "", false, []{
+        EditorSectorsMenu::create_sector();
+      }},
+      {_("Delete sector"), "", false, []{
+        EditorSectorsMenu::delete_sector();
       }}
     }},
   })
@@ -67,7 +77,7 @@ EditorTopbarWidget::reset_components()
 
     float submenu_width = btn_width;
     for (const auto& option : category.options)
-      submenu_width = std::max(submenu_width, submenu_theme.base.font->get_text_width(option.first) + 2.f * submenu_margin);
+      submenu_width = std::max(submenu_width, submenu_theme.base.font->get_text_width(option.name) + 2.f * submenu_margin);
 
     float y = 24.f;
 
@@ -75,13 +85,13 @@ EditorTopbarWidget::reset_components()
     auto submenu_ptr = submenu_container.get();
     for (const auto& option : category.options)
     {
-      auto entry = std::make_unique<ControlButton>(option.first);
+      auto entry = std::make_unique<ControlButton>(option.name);
       entry->set_rect(Rectf(x, y, x + submenu_width, y + 24.f));
       entry->m_theme = submenu_theme;
       entry->m_on_change = [submenu_ptr, option] {
         submenu_ptr->m_enabled = false;
         submenu_ptr->m_visible = false;
-        option.second();
+        option.callback();
       };
 
       entry->m_parent = submenu_ptr;
@@ -100,6 +110,7 @@ EditorTopbarWidget::reset_components()
     auto title = std::make_unique<ControlButton>(category.name);
     title->set_rect(Rectf(x, 0.f, x + btn_width, 24.f));
     title->m_theme = button_theme;
+    title->m_action_on_mousedown = true;
     auto title_ptr = title.get();
     title->m_on_change = std::function<void()>([this, submenu_ptr, title_ptr](){
       for (auto& c : m_children)

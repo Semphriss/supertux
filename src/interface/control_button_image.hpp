@@ -1,5 +1,5 @@
 //  SuperTux
-//  Copyright (C) 2015 Hume2 <teratux.mail@gmail.com>
+//  Copyright (C) 2021 A. Semphris <semphris@protonmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -14,35 +14,26 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef HEADER_SUPERTUX_EDITOR_OBJECT_ICON_HPP
-#define HEADER_SUPERTUX_EDITOR_OBJECT_ICON_HPP
+#ifndef HEADER_SUPERTUX_INTERFACE_CONTROL_BUTTON_IMAGE_HPP
+#define HEADER_SUPERTUX_INTERFACE_CONTROL_BUTTON_IMAGE_HPP
 
-#include <string>
+#include "interface/control_button.hpp"
+#include "sprite/sprite_ptr.hpp"
 
-#include "math/vector.hpp"
-#include "video/surface_ptr.hpp"
-
-class DrawingContext;
-class ReaderMapping;
-
-class ObjectIcon
+class ControlButtonImage : public ControlButton
 {
 public:
-  ObjectIcon(const std::string& name, const std::string& icon);
-  ObjectIcon(const ReaderMapping& reader);
-  virtual ~ObjectIcon();
+  ControlButtonImage(std::string filename, std::string label = "");
+  ControlButtonImage(SpritePtr sprite, std::string label = "");
 
-  virtual void draw(DrawingContext& context, const Vector& pos);
+  virtual void draw(DrawingContext& context) override;
 
-  std::string get_object_class() const { return m_object_class; }
-
-private:
-  void calculate_offset();
+public:
+  SpritePtr m_sprite;
 
 private:
-  std::string m_object_class;
-  SurfacePtr m_surface;
-  Vector m_offset;
+  ControlButtonImage(const ControlButtonImage&) = delete;
+  ControlButtonImage& operator=(const ControlButtonImage&) = delete;
 };
 
 #endif

@@ -27,9 +27,9 @@ public:
 
   void menu_action(MenuItem& item) override;
 
-private:
-  void create_sector();
-  void delete_sector();
+public:
+  static void create_sector();
+  static void delete_sector();
 
 private:
   EditorSectorsMenu(const EditorSectorsMenu&) = delete;
