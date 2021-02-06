@@ -80,18 +80,6 @@ EditorLayersWidget::draw(DrawingContext& context)
 
   switch (m_hovered_item)
   {
-/*
-    case HoveredItem::SPAWNPOINTS:
-      target_rect = Rectf(Vector(0, static_cast<float>(m_Ypos)),
-                          Vector(static_cast<float>(m_Xpos), static_cast<float>(SCREEN_HEIGHT)));
-      break;
-*/
-/*
-    case HoveredItem::SECTOR:
-      target_rect = Rectf(Vector(static_cast<float>(m_Xpos), static_cast<float>(m_Ypos)),
-                          Vector(static_cast<float>(m_sector_text_width + m_Xpos), static_cast<float>(SCREEN_HEIGHT)));
-      break;
-*/
     case HoveredItem::LAYERS:
       {
         Vector coords = get_layer_coords(m_hovered_layer);
@@ -113,11 +101,7 @@ EditorLayersWidget::draw(DrawingContext& context)
   if (!m_editor.is_level_loaded()) {
     return;
   }
-/*
-  context.color().draw_text(Resources::normal_font, m_sector_text,
-                            Vector(32.0f, static_cast<float>(m_Ypos) + 5.0f),
-                            ALIGN_LEFT, LAYER_GUI, ColorScheme::Menu::default_color);
-*/
+
   int pos = 0;
   for (const auto& layer_icon : m_layer_icons) {
     if (layer_icon->is_valid()) {
@@ -170,34 +154,33 @@ EditorLayersWidget::on_mouse_button_down(const SDL_MouseButtonEvent& button)
   if (button.button == SDL_BUTTON_LEFT)
   {
     switch (m_hovered_item)
-    {/*
-      case HoveredItem::SECTOR:
-        m_editor.disable_keyboard();
-        MenuManager::instance().set_menu(MenuStorage::EDITOR_SECTORS_MENU);
-        return true;*/
-
+    {
       case HoveredItem::LAYERS:
         if (m_hovered_layer >= m_layer_icons.size())
-        {
           return false;
-        }
-        else
-        {
-          if (m_layer_icons[m_hovered_layer]->is_tilemap()) {
-            if (m_selected_tilemap) {
-              m_selected_tilemap->m_editor_active = false;
-            }
-            m_selected_tilemap = static_cast<TileMap*>(m_layer_icons[m_hovered_layer]->get_layer());
-            m_selected_tilemap->m_editor_active = true;
-            m_editor.edit_path(m_selected_tilemap->get_path(), m_selected_tilemap);
-          } else {
-            auto cam = dynamic_cast<Camera*>(m_layer_icons[m_hovered_layer]->get_layer());
-            if (cam) {
-              m_editor.edit_path(cam->get_path(), cam);
-            }
+        
+        if (m_layer_icons[m_hovered_layer]->is_tilemap()) {
+          if (m_selected_tilemap) {
+            m_selected_tilemap->m_editor_active = false;
           }
-          return true;
+          m_selected_tilemap = static_cast<TileMap*>(m_layer_icons[m_hovered_layer]->get_layer());
+          m_selected_tilemap->m_editor_active = true;
+          m_editor.edit_path(m_selected_tilemap->get_path(), m_selected_tilemap);
+        } else {
+          auto cam = dynamic_cast<Camera*>(m_layer_icons[m_hovered_layer]->get_layer());
+          if (cam) {
+            m_editor.edit_path(cam->get_path(), cam);
+          }
         }
+
+        {
+          // TODO: Replace this with the toolbox's object settings panel when it will be done
+          auto om = std::make_unique<ObjectMenu>(m_editor, m_layer_icons[m_hovered_layer]->get_layer());
+          m_editor.m_deactivate_request = true;
+          MenuManager::instance().push_menu(std::move(om));
+        }
+
+        return true;
 
       default:
         return false;
@@ -205,13 +188,22 @@ EditorLayersWidget::on_mouse_button_down(const SDL_MouseButtonEvent& button)
   }
   else if (button.button == SDL_BUTTON_RIGHT)
   {
-    if (m_hovered_item == HoveredItem::LAYERS && m_hovered_layer < m_layer_icons.size()) {
-      auto om = std::make_unique<ObjectMenu>(m_editor, m_layer_icons[m_hovered_layer]->get_layer());
-      m_editor.m_deactivate_request = true;
-      MenuManager::instance().push_menu(std::move(om));
-      return true;
-    } else {
-      return false;
+    switch (m_hovered_item)
+    {
+      case HoveredItem::LAYERS:
+
+        if (m_hovered_layer >= m_layer_icons.size())
+          return false;
+
+        {
+          auto h = &(m_layer_icons[m_hovered_layer]->get_layer()->m_editor_hidden);
+          *h = !*h;
+        }
+
+        return true;
+
+      default:
+        return false;
     }
   }
   else
@@ -235,18 +227,13 @@ EditorLayersWidget::on_mouse_motion(const SDL_MouseMotionEvent& motion)
 
   m_has_mouse_focus = true;
 
-  if (x < 0) {
-    m_hovered_item = HoveredItem::SPAWNPOINTS;
-    m_object_tip = nullptr;
-    return true;
-  } else {
-    unsigned int new_hovered_layer = get_layer_pos(mouse_pos);
-    if (m_hovered_layer != new_hovered_layer || m_hovered_item != HoveredItem::LAYERS) {
-      m_hovered_layer = new_hovered_layer;
-      update_tip();
-    }
-    m_hovered_item = HoveredItem::LAYERS;
+  unsigned int new_hovered_layer = get_layer_pos(mouse_pos);
+  if (m_hovered_layer != new_hovered_layer || m_hovered_item != HoveredItem::LAYERS) {
+    m_hovered_layer = new_hovered_layer;
+    update_tip();
   }
+
+  m_hovered_item = HoveredItem::LAYERS;
 
   return true;
 }

@@ -31,7 +31,8 @@
 LayerIcon::LayerIcon(GameObject* layer) :
   ObjectIcon("", layer->get_icon_path()),
   m_layer(layer),
-  m_selection()
+  m_selection(),
+  m_hidden(Surface::from_file("images/engine/editor/hidden.png"))
 {
   if (dynamic_cast<TileMap*>(layer)) {
     m_selection = Surface::from_file("images/engine/editor/selection.png");
@@ -55,6 +56,10 @@ LayerIcon::draw(DrawingContext& context, const Vector& pos)
       }
     }
   }
+  if (m_layer->m_editor_hidden)
+    context.color().draw_surface_scaled(m_hidden,
+                                        Rectf(pos, pos + Vector(32, 32)),
+                                        LAYER_GUI);
 }
 
 int

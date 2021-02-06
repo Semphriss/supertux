@@ -160,7 +160,8 @@ GameObjectManager::draw(DrawingContext& context)
         continue;
     }
 
-    object->draw(context);
+    if (!object->m_editor_hidden)
+      object->draw(context);
   }
 }
 

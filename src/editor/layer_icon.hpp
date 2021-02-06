@@ -39,6 +39,7 @@ public:
 private:
   GameObject* m_layer;
   SurfacePtr m_selection;
+  SurfacePtr m_hidden;
 
 private:
   LayerIcon(const LayerIcon&) = delete;

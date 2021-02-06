@@ -162,6 +162,10 @@ public:
 private:
   void set_uid(const UID& uid) { m_uid = uid; }
 
+public:
+  /** If true, this GameObject shouldn't be drawn in the editor. */
+  bool m_editor_hidden;
+
 protected:
   /** a name for the gameobject, this is mostly a hint for scripts and
       for debugging, don't rely on names being set or being unique */

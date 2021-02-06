@@ -24,6 +24,7 @@
 #include "video/color.hpp"
 
 GameObject::GameObject() :
+  m_editor_hidden(false),
   m_name(),
   m_uid(),
   m_scheduled_for_removal(false),
@@ -33,6 +34,7 @@ GameObject::GameObject() :
 }
 
 GameObject::GameObject(const std::string& name) :
+  m_editor_hidden(false),
   m_name(name),
   m_uid(),
   m_scheduled_for_removal(false),
