@@ -123,8 +123,10 @@ Editor::Editor() :
     Rectf(0.f, 0.f, 24.f, 24.f), [this]{ undo(); });
   auto redo_button_widget = std::make_unique<ButtonWidget>("images/engine/editor/redo.png",
     Rectf(24.f, 0.f, 48.f, 24.f), [this]{ redo(); });
+  auto scroller_widget = std::make_unique<EditorScrollerWidget>(*this);
 
   m_widgets.push_back(std::move(topbar_widget));
+  m_widgets.push_back(std::move(scroller_widget));
   m_widgets.push_back(std::move(undo_button_widget));
   m_widgets.push_back(std::move(redo_button_widget));
   m_widgets.push_back(std::move(toolbox_widget));

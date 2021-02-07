@@ -18,6 +18,7 @@
 #define HEADER_SUPERTUX_EDITOR_SCROLLER_WIDGET_HPP
 
 #include "editor/widget.hpp"
+#include "math/rectf.hpp"
 #include "math/vector.hpp"
 
 class Editor;
@@ -44,13 +45,14 @@ public:
 
 public:
   void draw_arrow(DrawingContext&, const Vector& pos);
-  bool can_scroll() const;
+  bool is_scrolling() const;
 
 private:
   Editor& m_editor;
   bool m_scrolling;
   Vector m_scrolling_vec;
   Vector m_mouse_pos;
+  Rectf m_rect;
 
 private:
   EditorScrollerWidget(const EditorScrollerWidget&) = delete;
