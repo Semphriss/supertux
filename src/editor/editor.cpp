@@ -158,16 +158,17 @@ Editor::draw(Compositor& compositor)
     context.color().draw_filled_rect(context.get_rect(),
                                      Color(0.0f, 0.0f, 0.0f),
                                      0.0f, std::numeric_limits<int>::min());
-  } else {
-    context.color().draw_surface_scaled(m_bgr_surface,
-                                        context.get_rect(),
-                                        -100);
-  }
 
   context.color().draw_filled_rect(panel_grab_h(), Color(1.f, 1.f, 1.f, .5f),
                                    6.f, LAYER_GUI + 3);
   context.color().draw_filled_rect(panel_grab_v(), Color(1.f, 1.f, 1.f, .5f),
                                    6.f, LAYER_GUI + 3);
+
+  } else {
+    context.color().draw_surface_scaled(m_bgr_surface,
+                                        context.get_rect(),
+                                        -100);
+  }
 
   MouseCursor::current()->draw(context);
 }
@@ -747,33 +748,36 @@ Editor::event(const SDL_Event& ev)
       }
     }
 
-    if (ev.type == SDL_MOUSEBUTTONDOWN && panel_grab_h().grown(2.f).contains(
-        VideoSystem::current()->get_viewport().to_logical(ev.button.x, ev.button.y)))
-      m_grabbing_h = true;
-
-    if (ev.type == SDL_MOUSEBUTTONDOWN && panel_grab_v().grown(2.f).contains(
-        VideoSystem::current()->get_viewport().to_logical(ev.button.x, ev.button.y)))
-      m_grabbing_v = true;
-
-    if (ev.type == SDL_MOUSEBUTTONUP)
-      m_grabbing_v = m_grabbing_h = false;
-
-    if (ev.type == SDL_MOUSEMOTION && m_grabbing_h)
+    if (m_levelloaded)
     {
-      m_panel_grab_h -= static_cast<float>(ev.motion.xrel);
-      m_panel_grab_h = math::clamp(m_panel_grab_h,
-                                   128.f,
-                                   static_cast<float>(SCREEN_WIDTH) - 64.f);
-      update_grabbers();
-    }
+      if (ev.type == SDL_MOUSEBUTTONDOWN && panel_grab_h().grown(2.f).contains(
+          VideoSystem::current()->get_viewport().to_logical(ev.button.x, ev.button.y)))
+        m_grabbing_h = true;
 
-    if (ev.type == SDL_MOUSEMOTION && m_grabbing_v)
-    {
-      m_panel_grab_v += static_cast<float>(ev.motion.yrel);
-      m_panel_grab_v = math::clamp(m_panel_grab_v,
-                                   96.f,
-                                   static_cast<float>(SCREEN_HEIGHT) - 96.f);
-      update_grabbers();
+      if (ev.type == SDL_MOUSEBUTTONDOWN && panel_grab_v().grown(2.f).contains(
+          VideoSystem::current()->get_viewport().to_logical(ev.button.x, ev.button.y)))
+        m_grabbing_v = true;
+
+      if (ev.type == SDL_MOUSEBUTTONUP)
+        m_grabbing_v = m_grabbing_h = false;
+
+      if (ev.type == SDL_MOUSEMOTION && m_grabbing_h)
+      {
+        m_panel_grab_h -= static_cast<float>(ev.motion.xrel);
+        m_panel_grab_h = math::clamp(m_panel_grab_h,
+                                    128.f,
+                                    static_cast<float>(SCREEN_WIDTH) - 64.f);
+        update_grabbers();
+      }
+
+      if (ev.type == SDL_MOUSEMOTION && m_grabbing_v)
+      {
+        m_panel_grab_v += static_cast<float>(ev.motion.yrel);
+        m_panel_grab_v = math::clamp(m_panel_grab_v,
+                                    96.f,
+                                    static_cast<float>(SCREEN_HEIGHT) - 96.f);
+        update_grabbers();
+      }
     }
 
     for(const auto& widget : m_widgets)

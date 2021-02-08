@@ -109,7 +109,7 @@ EditorSettingsWidget::on_mouse_wheel(const SDL_MouseWheelEvent& wheel)
   if (!m_rect.contains(m_mouse_pos))
     return false;
 
-  m_scrollbar.m_progress = math::clamp(m_scrollbar.m_progress - static_cast<float>(wheel.y * 10),
+  m_scrollbar.m_progress = math::clamp(m_scrollbar.m_progress - static_cast<float>(wheel.y * 30),
                                        0.f,
                                        m_scrollbar.m_total_region - m_scrollbar.m_covered_region);
   reset_components();
