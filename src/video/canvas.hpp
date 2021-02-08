@@ -92,6 +92,7 @@ public:
 
 private:
   Vector apply_translate(const Vector& pos) const;
+  Rectf clip_src(const Rectf& src, const Rectf& dest) const;
   float scale() const;
 
 private:

@@ -81,4 +81,33 @@ TEST(RectfTest, set_p2)
   ASSERT_EQ(Rectf(Vector(16.0f, 16.0f), Vector(48.0f, 100.0f)), rect);
 }
 
+TEST(RectfTest, clip_line)
+{
+  Rectf rect(Vector(-8, 4), Vector(16, 11));
+  auto line1 = rect.clip_line(Vector(333,1), Vector(334,2));
+  ASSERT_EQ(std::get<0>(line1), Vector(0, 0));
+  ASSERT_EQ(std::get<1>(line1), Vector(0, 0));
+  auto line2 = rect.clip_line(Vector(0,0), Vector(999,0));
+  ASSERT_EQ(std::get<0>(line2), Vector(0, 0));
+  ASSERT_EQ(std::get<1>(line2), Vector(0, 0));
+  auto line3 = rect.clip_line(Vector(-10,0), Vector(-10,999));
+  ASSERT_EQ(std::get<0>(line3), Vector(0, 0));
+  ASSERT_EQ(std::get<1>(line3), Vector(0, 0));
+  auto line4 = rect.clip_line(Vector(0,0), Vector(0,999));
+  ASSERT_EQ(std::get<0>(line4), Vector(0, 4));
+  ASSERT_EQ(std::get<1>(line4), Vector(0, 11));
+  auto line5 = rect.clip_line(Vector(-10,5), Vector(10,5));
+  ASSERT_EQ(std::get<0>(line5), Vector(-8, 5));
+  ASSERT_EQ(std::get<1>(line5), Vector(10, 5));
+  auto line6 = rect.clip_line(Vector(-3,1), Vector(6,10));
+  ASSERT_EQ(std::get<0>(line6), Vector(0, 4));
+  ASSERT_EQ(std::get<1>(line6), Vector(6, 10));
+  auto line7 = rect.clip_line(Vector(11,2), Vector(6,12));
+  ASSERT_EQ(std::get<0>(line7), Vector(10, 4));
+  ASSERT_EQ(std::get<1>(line7), Vector(6.5f, 11));
+  auto line8 = rect.clip_line(Vector(18,9), Vector(12,12));
+  ASSERT_EQ(std::get<0>(line8), Vector(16, 10));
+  ASSERT_EQ(std::get<1>(line8), Vector(14, 11));
+}
+
 /* EOF */

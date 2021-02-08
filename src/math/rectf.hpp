@@ -105,6 +105,18 @@ public:
   void move(const Vector& v) { m_p1 += v; }
   Rectf moved(const Vector& v) const { return Rectf(m_p1 + v, m_size); }
 
+  Rectf intersect(Rectf other) const
+  {
+    if (std::max(p1().x, other.p1().x) >= std::min(p2().x, other.p2().x)
+     || std::max(p1().y, other.p1().y) >= std::min(p2().y, other.p2().y))
+      return Rectf();
+
+    return Rectf(std::max(p1().x, other.p1().x),
+                 std::max(p1().y, other.p1().y),
+                 std::min(p2().x, other.p2().x),
+                 std::min(p2().y, other.p2().y));
+  }
+
   bool contains(const Vector& v) const {
     return v.x >= m_p1.x && v.y >= m_p1.y && v.x < get_right() && v.y < get_bottom();
   }
@@ -155,6 +167,8 @@ public:
     m_size = Sizef(p.x - m_p1.x,
                    p.y - m_p1.y);
   }
+
+  std::tuple<Vector, Vector> clip_line(const Vector& p1, const Vector& p2);
 
 private:
   /// upper left edge

@@ -33,7 +33,7 @@ public:
   virtual bool on_mouse_motion(const SDL_MouseMotionEvent& motion) override;
 
   void set_rect(const Rectf& rect) { m_rect = rect; }
-  Rectf get_rect() const { return m_rect; }
+  Rectf& get_rect() { return m_rect; }
 
   void set_label(const std::string& label) { m_label = label; }
   std::string get_label() const { return m_label; }

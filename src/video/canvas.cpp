@@ -1,5 +1,6 @@
 //  SuperTux
 //  Copyright (C) 2016 Ingo Ruhnke <grumbel@gmail.com>
+//                2021 A. Semphris <semphris@protonmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -126,10 +127,17 @@ Canvas::draw_surface(const SurfacePtr& surface,
   request->alpha = m_context.transform().alpha;
   request->blend = blend;
 
-  request->srcrects.emplace_back(Rectf(surface->get_region()));
-  request->dstrects.emplace_back(Rectf(apply_translate(position) * scale(),
-                                 Sizef(static_cast<float>(surface->get_width()) * scale(),
-                                       static_cast<float>(surface->get_height()) * scale())));
+  Rectf srcrect(surface->get_region());
+  Rectf dstrect(apply_translate(position) * scale(),
+                Sizef(static_cast<float>(surface->get_width()) * scale(),
+                      static_cast<float>(surface->get_height()) * scale()));
+  srcrect = clip_src(srcrect, dstrect);
+
+  if (srcrect.get_width() <= 0 || srcrect.get_height() <= 0)
+    return;
+
+  request->srcrects.emplace_back(srcrect);
+  request->dstrects.emplace_back(dstrect.intersect(m_context.transform().clip));
   request->angles.emplace_back(angle);
   request->texture = surface->get_texture().get();
   request->displacement_texture = surface->get_displacement_texture().get();
@@ -166,8 +174,11 @@ Canvas::draw_surface_part(const SurfacePtr& surface, const Rectf& srcrect, const
   request->alpha = m_context.transform().alpha * style.get_alpha();
   request->blend = style.get_blend();
 
-  request->srcrects.emplace_back(srcrect);
-  request->dstrects.emplace_back(apply_translate(dstrect.p1())*scale(), dstrect.get_size()*scale());
+  Rectf dst = Rectf(apply_translate(dstrect.p1())*scale(),
+                    dstrect.get_size()*scale());
+  Rectf src = clip_src(srcrect, dst);
+  request->srcrects.emplace_back(src);
+  request->dstrects.emplace_back(dst.intersect(m_context.transform().clip));
   request->angles.emplace_back(0.0f);
   request->texture = surface->get_texture().get();
   request->displacement_texture = surface->get_displacement_texture().get();
@@ -209,14 +220,18 @@ Canvas::draw_surface_batch(const SurfacePtr& surface,
   request->alpha = m_context.transform().alpha;
   request->color = color;
 
+  for (auto src = srcrects.begin(), dst = dstrects.begin();
+      src != srcrects.end() && dst != dstrects.end();
+      src++, dst++)
+  {
+    *dst = Rectf(apply_translate(dst->p1())*scale(), dst->get_size()*scale());
+    *src = clip_src(*src, *dst);
+    *dst = (*dst).intersect(m_context.transform().clip);
+  }
+
   request->srcrects = std::move(srcrects);
   request->dstrects = std::move(dstrects);
   request->angles = std::move(angles);
-
-  for (auto& dstrect : request->dstrects)
-  {
-    dstrect = Rectf(apply_translate(dstrect.p1())*scale(), dstrect.get_size()*scale());
-  }
 
   request->texture = surface->get_texture().get();
   request->displacement_texture = surface->get_displacement_texture().get();
@@ -257,7 +272,8 @@ Canvas::draw_gradient(const Color& top, const Color& bottom, int layer,
   request->bottom = bottom;
   request->direction = direction;
   request->region = Rectf(apply_translate(region.p1())*scale(),
-                          apply_translate(region.p2())*scale());
+                          apply_translate(region.p2())*scale()
+                         ).intersect(m_context.transform().clip);
 
   m_requests.push_back(request);
 }
@@ -281,7 +297,8 @@ Canvas::draw_filled_rect(const Rectf& rect, const Color& color, float radius, in
   request->alpha = m_context.transform().alpha;
 
   request->rect = Rectf(apply_translate(rect.p1())*scale(),
-                        rect.get_size()*scale());
+                        rect.get_size()*scale()
+                       ).intersect(m_context.transform().clip);
   request->color = color;
   request->color.alpha = color.alpha * m_context.transform().alpha;
   request->radius = radius;
@@ -297,6 +314,7 @@ Canvas::draw_inverse_ellipse(const Vector& pos, const Vector& size, const Color&
   request->type   = INVERSEELLIPSE;
   request->layer  = layer;
 
+  // TODO: Find a way to clip that
   request->flip = m_context.transform().flip;
   request->alpha = m_context.transform().alpha;
 
@@ -319,10 +337,12 @@ Canvas::draw_line(const Vector& pos1, const Vector& pos2, const Color& color, in
   request->flip = m_context.transform().flip;
   request->alpha = m_context.transform().alpha;
 
-  request->pos          = apply_translate(pos1)*scale();
+  auto line = Rectf(m_context.transform().clip).clip_line(apply_translate(pos1)*scale(),
+                                                          apply_translate(pos2)*scale());
+  request->pos          = std::get<0>(line);
   request->color        = color;
   request->color.alpha  = color.alpha * m_context.transform().alpha;
-  request->dest_pos     = apply_translate(pos2)*scale();
+  request->dest_pos     = std::get<1>(line);
 
   m_requests.push_back(request);
 }
@@ -338,6 +358,7 @@ Canvas::draw_triangle(const Vector& pos1, const Vector& pos2, const Vector& pos3
   request->flip = m_context.transform().flip;
   request->alpha = m_context.transform().alpha;
 
+  // TODO: Find a way to clip that
   request->pos1 = apply_translate(pos1)*scale();
   request->pos2 = apply_translate(pos2)*scale();
   request->pos3 = apply_translate(pos3)*scale();
@@ -379,6 +400,12 @@ Canvas::apply_translate(const Vector& pos) const
   Vector translation = m_context.transform().translation;
   return (pos - translation) + Vector(static_cast<float>(m_context.get_viewport().left),
                                       static_cast<float>(m_context.get_viewport().top));
+}
+
+Rectf
+Canvas::clip_src(const Rectf& src, const Rectf& dest) const
+{
+  return src.intersect(m_context.transform().clip.moved(-dest.p1().x, -dest.p1().y));
 }
 
 float

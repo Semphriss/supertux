@@ -40,6 +40,12 @@ template <class T> int sgn(T val) {
     return (T(0) < val) - (val < T(0));
 }
 
+template<class T>
+bool is_in_range(const T& val, const T& min, const T& max)
+{
+  return val >= min && val <= max;
+}
+
 constexpr float TAU = 6.28318530717958647693f;
 constexpr float PI = 3.14159265358979323846f;
 constexpr float PI_2 = 1.57079632679489661923f;

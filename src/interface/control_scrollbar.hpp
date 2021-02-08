@@ -22,7 +22,6 @@
 #include "math/vector.hpp"
 
 class DrawingContext;
-union SDL_Event;
 
 /** A generic template for a scrollbar */
 class ControlScrollbar final : public InterfaceControl
@@ -38,6 +37,9 @@ public:
 
   /** @returns true if the current bar is valid and will show and interact */
   bool is_valid();
+
+  float get_value() { return m_progress + m_offset; }
+  void bind_value(float* value) { m_value = value; }
 
 public:
   // -------------------------------------------------------------------------
@@ -56,7 +58,10 @@ public:
 
   /** The length (height) between the beginning of the viewport and the beginning of the region */
   float m_progress;
-  
+
+  /** Offset which will be added to m_progress to determine the value */
+  float m_offset;
+
   /** `true` of the scroller is horizontal; `false` if it is vertical */
   bool m_horizontal;
 
@@ -67,6 +72,9 @@ private:
 
   /** Can't use a m_mouse_clicking, so use this to override */
   bool m_mouse_dragging;
+
+  /** The value of the progress bar. Differs from m_progress by the fact that it considers the offset. */
+  float* m_value;
 
 private:
   ControlScrollbar(const ControlScrollbar&) = delete;

@@ -31,8 +31,6 @@
 #include "editor/tool_icon.hpp"
 #include "editor/topbar_widget.hpp"
 #include "editor/undo_manager.hpp"
-#include "interface/control_button_image.hpp"
-#include "interface/control_scrollbar.hpp"
 #include "gui/dialog.hpp"
 #include "gui/menu_manager.hpp"
 #include "gui/mousecursor.hpp"
@@ -94,6 +92,7 @@ Editor::Editor() :
   m_test_pos(),
   m_savegame(),
   m_particle_editor_filename(),
+  m_settings_widget(),
   m_sector(),
   m_levelloaded(false),
   m_leveltested(false),
@@ -108,16 +107,22 @@ Editor::Editor() :
   m_ignore_sector_change(false),
   m_level_first_loaded(false),
   m_time_since_last_save(0.f),
-  m_scroll_speed(32.0f)
+  m_scroll_speed(32.0f),
+  m_panel_grab_h(192.f),
+  m_panel_grab_v(static_cast<float>(SCREEN_HEIGHT / 2)),
+  m_grabbing_h(false),
+  m_grabbing_v(false)
 {
   auto toolbox_widget = std::make_unique<EditorToolboxWidget>(*this);
   auto layers_widget = std::make_unique<EditorLayersWidget>(*this);
   auto overlay_widget = std::make_unique<EditorOverlayWidget>(*this);
   auto topbar_widget = std::make_unique<EditorTopbarWidget>(*this);
+  auto settings_widget = std::make_unique<EditorSettingsWidget>(*this);
 
   m_toolbox_widget = toolbox_widget.get();
   m_layers_widget = layers_widget.get();
   m_overlay_widget = overlay_widget.get();
+  m_settings_widget = settings_widget.get();
 
   auto undo_button_widget = std::make_unique<ButtonWidget>("images/engine/editor/undo.png",
     Rectf(0.f, 0.f, 24.f, 24.f), [this]{ undo(); });
@@ -131,6 +136,7 @@ Editor::Editor() :
   m_widgets.push_back(std::move(redo_button_widget));
   m_widgets.push_back(std::move(toolbox_widget));
   m_widgets.push_back(std::move(layers_widget));
+  m_widgets.push_back(std::move(settings_widget));
   m_widgets.push_back(std::move(overlay_widget));
 }
 
@@ -157,6 +163,11 @@ Editor::draw(Compositor& compositor)
                                         context.get_rect(),
                                         -100);
   }
+
+  context.color().draw_filled_rect(panel_grab_h(), Color(1.f, 1.f, 1.f, .5f),
+                                   6.f, LAYER_GUI + 3);
+  context.color().draw_filled_rect(panel_grab_v(), Color(1.f, 1.f, 1.f, .5f),
+                                   6.f, LAYER_GUI + 3);
 
   MouseCursor::current()->draw(context);
 }
@@ -408,6 +419,24 @@ Editor::update_keyboard(const Controller& controller)
   if (controller.hold(Control::DOWN)) {
     scroll({ 0.0f, m_scroll_speed });
   }
+}
+
+Rectf
+Editor::panel_grab_h() const
+{
+  return Rectf(static_cast<float>(SCREEN_WIDTH) - m_panel_grab_h + 2.f,
+               static_cast<float>(SCREEN_HEIGHT) / 2.f - 24.f,
+               static_cast<float>(SCREEN_WIDTH) - m_panel_grab_h + 6.f,
+               static_cast<float>(SCREEN_HEIGHT) / 2.f + 24.f);
+}
+
+Rectf
+Editor::panel_grab_v() const
+{
+  return Rectf(static_cast<float>(SCREEN_WIDTH) - m_panel_grab_h / 2.f - 24.f,
+               m_panel_grab_v - 3.f,
+               static_cast<float>(SCREEN_WIDTH) - m_panel_grab_h / 2.f + 24.f,
+               m_panel_grab_v + 3.f);
 }
 
 void
@@ -703,11 +732,6 @@ Editor::event(const SDL_Event& ev)
 
     BIND_SECTOR(*m_sector);
 
-    for(const auto& widget : m_widgets) {
-      if (widget->event(ev))
-        break;
-    }
-
     // unreliable heuristic to snapshot the current state for future undo
     if (((ev.type == SDL_KEYUP && ev.key.repeat == 0 &&
          ev.key.keysym.sym != SDLK_LSHIFT &&
@@ -723,6 +747,46 @@ Editor::event(const SDL_Event& ev)
       }
     }
 
+    if (ev.type == SDL_MOUSEBUTTONDOWN && panel_grab_h().grown(2.f).contains(
+        VideoSystem::current()->get_viewport().to_logical(ev.button.x, ev.button.y)))
+      m_grabbing_h = true;
+
+    if (ev.type == SDL_MOUSEBUTTONDOWN && panel_grab_v().grown(2.f).contains(
+        VideoSystem::current()->get_viewport().to_logical(ev.button.x, ev.button.y)))
+      m_grabbing_v = true;
+
+    if (ev.type == SDL_MOUSEBUTTONUP)
+      m_grabbing_v = m_grabbing_h = false;
+
+    if (ev.type == SDL_MOUSEMOTION && m_grabbing_h)
+    {
+      m_panel_grab_h -= static_cast<float>(ev.motion.xrel);
+      m_panel_grab_h = math::clamp(m_panel_grab_h,
+                                   128.f,
+                                   static_cast<float>(SCREEN_WIDTH) - 64.f);
+      update_grabbers();
+    }
+
+    if (ev.type == SDL_MOUSEMOTION && m_grabbing_v)
+    {
+      m_panel_grab_v += static_cast<float>(ev.motion.yrel);
+      m_panel_grab_v = math::clamp(m_panel_grab_v,
+                                   96.f,
+                                   static_cast<float>(SCREEN_HEIGHT) - 96.f);
+      update_grabbers();
+    }
+
+    for(const auto& widget : m_widgets)
+    {
+      if (widget->event(ev))
+      {
+        // TODO: Better code quality. This is meant to skip only the scrolling
+        // below, but it's done in a rather dirty way (skips any potential
+        // cleaning acter the scrolling or the try/catch)
+        return;
+      }
+    }
+
     // Scroll with mouse wheel, if the mouse is not over the toolbox.
     // The toolbox does scrolling independently from the main area.
     if (ev.type == SDL_MOUSEWHEEL && !m_toolbox_widget->has_mouse_focus() && !m_layers_widget->has_mouse_focus()) {
@@ -735,6 +799,16 @@ Editor::event(const SDL_Event& ev)
   {
     log_warning << "error while processing Editor::event(): " << err.what() << std::endl;
   }
+}
+
+void
+Editor::update_grabbers()
+{
+  m_settings_widget->set_left(m_panel_grab_h);
+  m_settings_widget->set_top(m_panel_grab_v);
+  m_settings_widget->resize();
+  m_layers_widget->set_right_margin(static_cast<int>(m_panel_grab_h));
+  m_layers_widget->resize();
 }
 
 void

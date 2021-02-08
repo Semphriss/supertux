@@ -47,7 +47,7 @@ public:
   virtual void draw_tooltip(DrawingContext& context, const std::string& text) const;
 
   void set_rect(const Rectf& rect) { m_rect = rect; }
-  Rectf get_rect() const { return m_rect; }
+  Rectf& get_rect() { return m_rect; }
 
   const InterfaceTheme& get_current_theme() const;
 

@@ -27,12 +27,14 @@ public:
   Flip flip;
   float alpha;
   float scale;
+  Rect clip;
 
   DrawingTransform() :
     translation(),
     flip(NO_FLIP),
     alpha(1.0f),
-    scale(1.0f)
+    scale(1.0f),
+    clip(0, 0, std::numeric_limits<int>::max(), std::numeric_limits<int>::max())
   {}
 };
 

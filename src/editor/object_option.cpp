@@ -22,9 +22,23 @@
 #include <vector>
 #include <sstream>
 
+#include "editor/editor.hpp"
 #include "editor/object_menu.hpp"
 #include "gui/menu.hpp"
+#include "gui/menu_badguy_select.hpp"
+#include "gui/menu_filesystem.hpp"
+#include "gui/menu_manager.hpp"
+#include "interface/container.hpp"
+#include "interface/control_button.hpp"
+#include "interface/control_checkbox.hpp"
+#include "interface/control_enum.hpp"
+#include "interface/control_textbox.hpp"
+#include "interface/control_textbox_float.hpp"
+#include "interface/control_textbox_int.hpp"
+#include "interface/label.hpp"
 #include "object/tilemap.hpp"
+#include "supertux/game_object.hpp"
+#include "supertux/sector.hpp"
 #include "util/gettext.hpp"
 #include "util/writer.hpp"
 #include "video/color.hpp"
@@ -65,6 +79,19 @@ void
 BoolObjectOption::add_to_menu(Menu& menu) const
 {
   menu.add_toggle(-1, get_text(), m_pointer);
+}
+
+std::unique_ptr<InterfaceControl>
+BoolObjectOption::add_to_settings(float width, Editor& editor, GameObject* go) const
+{
+  auto control = std::make_unique<ControlCheckbox>();
+  control->set_rect(Rectf(width * 3.f / 4.f - 10.f, 0.f, width * 3.f / 4.f + 10.f, 20.f));
+  control->bind_value(m_pointer);
+  control->m_label = std::make_unique<InterfaceLabel>();
+  control->m_label->set_rect(Rectf(10.f, 0.f, width / 2.f - 5.f, 20.f));
+  control->m_label->set_label(get_text());
+
+  return control;
 }
 
 void
@@ -118,6 +145,19 @@ IntObjectOption::add_to_menu(Menu& menu) const
   menu.add_intfield(get_text(), m_pointer);
 }
 
+std::unique_ptr<InterfaceControl>
+IntObjectOption::add_to_settings(float width, Editor& editor, GameObject* go) const
+{
+  auto control = std::make_unique<ControlTextboxInt>();
+  control->set_rect(Rectf(width / 2.f + 5.f, 0.f, width - 10.f, 20.f));
+  control->bind_value(m_pointer);
+  control->m_label = std::make_unique<InterfaceLabel>();
+  control->m_label->set_rect(Rectf(10.f, 0.f, width / 2.f - 5.f, 20.f));
+  control->m_label->set_label(get_text());
+
+  return control;
+}
+
 RectfObjectOption::RectfObjectOption(const std::string& text, Rectf* pointer, const std::string& key,
                                      unsigned int flags) :
   ObjectOption(text, key, flags),
@@ -149,6 +189,29 @@ RectfObjectOption::add_to_menu(Menu& menu) const
 {
   menu.add_floatfield(_("Width"), const_cast<float*>(&m_width));
   menu.add_floatfield(_("Height"), const_cast<float*>(&m_height));
+}
+
+std::unique_ptr<InterfaceControl>
+RectfObjectOption::add_to_settings(float width, Editor& editor, GameObject* go) const
+{
+  auto container = std::make_unique<InterfaceContainer>();
+  container->set_rect(Rectf(10.f, 0.f, width - 10.f, 20.f));
+
+  auto control_w = std::make_unique<ControlTextboxFloat>();
+  control_w->set_rect(Rectf(width / 2.f + 5.f, 0.f, width * 3.f / 4.f - 5.f, 20.f));
+  control_w->bind_value(const_cast<float*>(&m_width));
+
+  auto control_h = std::make_unique<ControlTextboxFloat>();
+  control_h->set_rect(Rectf(width * 3.f / 4.f + 5.f, 0.f, width - 10.f, 20.f));
+  control_h->bind_value(const_cast<float*>(&m_height));
+
+  container->m_label = std::make_unique<InterfaceLabel>();
+  container->m_label->set_rect(Rectf(10.f, 0.f, width / 2.f - 5.f, 20.f));
+  container->m_label->set_label(_("Width") + " / " + _("Height"));
+  container->m_children.push_back(std::move(control_w));
+  container->m_children.push_back(std::move(control_h));
+
+  return container;
 }
 
 FloatObjectOption::FloatObjectOption(const std::string& text, float* pointer, const std::string& key,
@@ -184,6 +247,19 @@ FloatObjectOption::add_to_menu(Menu& menu) const
   menu.add_floatfield(get_text(), m_pointer);
 }
 
+std::unique_ptr<InterfaceControl>
+FloatObjectOption::add_to_settings(float width, Editor& editor, GameObject* go) const
+{
+  auto control = std::make_unique<ControlTextboxFloat>();
+  control->set_rect(Rectf(width / 2.f + 5.f, 0.f, width - 10.f, 20.f));
+  control->bind_value(m_pointer);
+  control->m_label = std::make_unique<InterfaceLabel>();
+  control->m_label->set_rect(Rectf(10.f, 0.f, width / 2.f - 5.f, 20.f));
+  control->m_label->set_label(get_text());
+
+  return control;
+}
+
 StringObjectOption::StringObjectOption(const std::string& text, std::string* pointer, const std::string& key,
                                        boost::optional<std::string> default_value,
                                        unsigned int flags) :
@@ -215,6 +291,19 @@ void
 StringObjectOption::add_to_menu(Menu& menu) const
 {
   menu.add_textfield(get_text(), m_pointer);
+}
+
+std::unique_ptr<InterfaceControl>
+StringObjectOption::add_to_settings(float width, Editor& editor, GameObject* go) const
+{
+  auto control = std::make_unique<ControlTextbox>();
+  control->set_rect(Rectf(width / 2.f + 5.f, 0.f, width - 10.f, 20.f));
+  control->bind_string(&(*m_pointer));
+  control->m_label = std::make_unique<InterfaceLabel>();
+  control->m_label->set_rect(Rectf(10.f, 0.f, width / 2.f - 5.f, 20.f));
+  control->m_label->set_label(get_text());
+
+  return control;
 }
 
 StringSelectObjectOption::StringSelectObjectOption(const std::string& text, int* pointer,
@@ -259,6 +348,25 @@ StringSelectObjectOption::add_to_menu(Menu& menu) const
     selected_id = 0; // Set the option to zero when not selectable
   }
   menu.add_string_select(-1, get_text(), m_pointer, m_select);
+}
+
+std::unique_ptr<InterfaceControl>
+StringSelectObjectOption::add_to_settings(float width, Editor& editor, GameObject* go) const
+{
+  auto control = std::make_unique<ControlEnum<int>>();
+  control->set_rect(Rectf(width / 2.f + 5.f, 0.f, width - 10.f, 20.f));
+
+  int i = 0;
+  for (const auto& label : m_select)
+    control->add_option(i++, label);
+
+  control->bind_value(m_pointer);
+
+  control->m_label = std::make_unique<InterfaceLabel>();
+  control->m_label->set_rect(Rectf(10.f, 0.f, width / 2.f - 5.f, 20.f));
+  control->m_label->set_label(get_text());
+
+  return control;
 }
 
 EnumObjectOption::EnumObjectOption(const std::string& text, int* pointer,
@@ -307,6 +415,25 @@ EnumObjectOption::add_to_menu(Menu& menu) const
   menu.add_string_select(-1, get_text(), m_pointer, m_labels);
 }
 
+std::unique_ptr<InterfaceControl>
+EnumObjectOption::add_to_settings(float width, Editor& editor, GameObject* go) const
+{
+  auto control = std::make_unique<ControlEnum<int>>();
+  control->set_rect(Rectf(width / 2.f + 5.f, 0.f, width - 10.f, 20.f));
+
+  int i = 0;
+  for (const auto& label : m_labels)
+    control->add_option(i++, label);
+
+  control->bind_value(m_pointer);
+
+  control->m_label = std::make_unique<InterfaceLabel>();
+  control->m_label->set_rect(Rectf(10.f, 0.f, width / 2.f - 5.f, 20.f));
+  control->m_label->set_label(get_text());
+
+  return control;
+}
+
 
 ScriptObjectOption::ScriptObjectOption(const std::string& text, std::string* pointer, const std::string& key,
                                        unsigned int flags) :
@@ -340,6 +467,19 @@ void
 ScriptObjectOption::add_to_menu(Menu& menu) const
 {
   menu.add_script(get_text(), m_pointer);
+}
+
+std::unique_ptr<InterfaceControl>
+ScriptObjectOption::add_to_settings(float width, Editor& editor, GameObject* go) const
+{
+  auto control = std::make_unique<ControlTextbox>();
+  control->set_rect(Rectf(width / 2.f + 5.f, 0.f, width - 10.f, 20.f));
+  control->bind_string(m_pointer);
+  control->m_label = std::make_unique<InterfaceLabel>();
+  control->m_label->set_rect(Rectf(10.f, 0.f, width / 2.f - 5.f, 20.f));
+  control->m_label->set_label(get_text());
+
+  return control;
 }
 
 FileObjectOption::FileObjectOption(const std::string& text, std::string* pointer,
@@ -384,6 +524,25 @@ FileObjectOption::add_to_menu(Menu& menu) const
   menu.add_file(get_text(), m_pointer, m_filter, m_basedir);
 }
 
+std::unique_ptr<InterfaceControl>
+FileObjectOption::add_to_settings(float width, Editor& editor, GameObject* go) const
+{
+  auto control = std::make_unique<ControlButton>();
+  control->set_rect(Rectf(10.f, 0.f, width - 10.f, 20.f));
+  control->m_btn_label = get_text();
+
+  // Make member variables into standalone variables so that the lambda can
+  // outlive the FileObjectOption
+  auto pointer = m_pointer;
+  auto filter = m_filter;
+  auto basedir = m_basedir;
+  control->m_on_change = [pointer, filter, basedir] {
+    MenuManager::instance().push_menu(std::make_unique<FileSystemMenu>(pointer, filter, basedir));
+  };
+
+  return control;
+}
+
 ColorObjectOption::ColorObjectOption(const std::string& text, Color* pointer, const std::string& key,
                                      boost::optional<Color> default_value, bool use_alpha,
                                      unsigned int flags) :
@@ -422,6 +581,35 @@ ColorObjectOption::add_to_menu(Menu& menu) const
   menu.add_color(get_text(), m_pointer);
 }
 
+std::unique_ptr<InterfaceControl>
+ColorObjectOption::add_to_settings(float width, Editor& editor, GameObject* go) const
+{
+  auto container = std::make_unique<InterfaceContainer>();
+  container->set_rect(Rectf(10.f, 0.f, width - 10.f, 44.f));
+
+  auto control_r = std::make_unique<ControlTextboxFloat>();
+  control_r->set_rect(Rectf(width / 2.f + 5.f, 0.f, width * 3.f / 4.f - 5.f, 20.f));
+  control_r->bind_value(const_cast<float*>(&(m_pointer->red)));
+
+  auto control_g = std::make_unique<ControlTextboxFloat>();
+  control_g->set_rect(Rectf(width * 3.f / 4.f + 5.f, 0.f, width - 10.f, 20.f));
+  control_g->bind_value(const_cast<float*>(&(m_pointer->green)));
+
+  auto control_b = std::make_unique<ControlTextboxFloat>();
+  control_b->set_rect(Rectf(width / 2.f + 5.f, 24.f, width * 3.f / 4.f - 5.f, 44.f));
+  control_b->bind_value(const_cast<float*>(&(m_pointer->blue)));
+
+  auto control_a = std::make_unique<ControlTextboxFloat>();
+  control_a->set_rect(Rectf(width * 3.f / 4.f + 5.f, 24.f, width - 10.f, 44.f));
+  control_a->bind_value(const_cast<float*>(&(m_pointer->alpha)));
+
+  container->m_label = std::make_unique<InterfaceLabel>();
+  container->m_label->set_rect(Rectf(10.f, 0.f, width / 2.f - 5.f, 20.f));
+  container->m_label->set_label(get_text());
+
+  return container;
+}
+
 BadGuySelectObjectOption::BadGuySelectObjectOption(const std::string& text, std::vector<std::string>* pointer, const std::string& key,
                                                    unsigned int flags) :
   ObjectOption(text, key, flags),
@@ -447,6 +635,23 @@ void
 BadGuySelectObjectOption::add_to_menu(Menu& menu) const
 {
   menu.add_badguy_select(get_text(), m_pointer);
+}
+
+std::unique_ptr<InterfaceControl>
+BadGuySelectObjectOption::add_to_settings(float width, Editor& editor, GameObject* go) const
+{
+  auto control = std::make_unique<ControlButton>();
+  control->set_rect(Rectf(10.f, 0.f, width - 10.f, 20.f));
+  control->m_btn_label = get_text();
+
+  // Make member variables into standalone variables so that the lambda can
+  // outlive the FileObjectOption
+  auto pointer = m_pointer;
+  control->m_on_change = [pointer] {
+    MenuManager::instance().push_menu(std::make_unique<BadguySelectMenu>(pointer));
+  };
+
+  return control;
 }
 
 TilesObjectOption::TilesObjectOption(const std::string& text, TileMap* tilemap, const std::string& key,
@@ -475,6 +680,12 @@ TilesObjectOption::add_to_menu(Menu& menu) const
 {
 }
 
+std::unique_ptr<InterfaceControl>
+TilesObjectOption::add_to_settings(float width, Editor& editor, GameObject* go) const
+{
+  return {};
+}
+
 PathObjectOption::PathObjectOption(const std::string& text, Path* path, const std::string& key,
                                    unsigned int flags) :
   ObjectOption(text, key, flags),
@@ -497,6 +708,12 @@ PathObjectOption::to_string() const
 void
 PathObjectOption::add_to_menu(Menu& menu) const
 {
+}
+
+std::unique_ptr<InterfaceControl>
+PathObjectOption::add_to_settings(float width, Editor& editor, GameObject* go) const
+{
+  return {};
 }
 
 PathRefObjectOption::PathRefObjectOption(const std::string& text, const std::string& path_ref, const std::string& key,
@@ -525,6 +742,12 @@ PathRefObjectOption::add_to_menu(Menu& menu) const
 {
 }
 
+std::unique_ptr<InterfaceControl>
+PathRefObjectOption::add_to_settings(float width, Editor& editor, GameObject* go) const
+{
+  return {};
+}
+
 SExpObjectOption::SExpObjectOption(const std::string& text, const std::string& key, sexp::Value& value,
                                    unsigned int flags) :
   ObjectOption(text, key, flags),
@@ -551,6 +774,12 @@ SExpObjectOption::add_to_menu(Menu& menu) const
 {
 }
 
+std::unique_ptr<InterfaceControl>
+SExpObjectOption::add_to_settings(float width, Editor& editor, GameObject* go) const
+{
+  return {};
+}
+
 RemoveObjectOption::RemoveObjectOption() :
   ObjectOption(_("Remove"), "", 0)
 {
@@ -566,6 +795,25 @@ void
 RemoveObjectOption::add_to_menu(Menu& menu) const
 {
   menu.add_entry(ObjectMenu::MNID_REMOVE, get_text());
+}
+
+std::unique_ptr<InterfaceControl>
+RemoveObjectOption::add_to_settings(float width, Editor& editor, GameObject* go) const
+{
+  auto control = std::make_unique<ControlButton>();
+  control->set_rect(Rectf(10.f, 0.f, width - 10.f, 20.f));
+  control->m_btn_label = get_text();
+
+  // Make member variables into standalone variables so that the lambda can
+  // outlive the FileObjectOption
+  control->m_on_change = [&editor, go] {
+    editor.delete_markers();
+    editor.m_reactivate_request = true;
+    go->remove_me();
+    editor.m_settings_widget->set_object(nullptr);
+  };
+
+  return control;
 }
 
 TestFromHereOption::TestFromHereOption() :
@@ -585,6 +833,25 @@ TestFromHereOption::add_to_menu(Menu& menu) const
   menu.add_entry(ObjectMenu::MNID_TEST_FROM_HERE, get_text());
 }
 
+std::unique_ptr<InterfaceControl>
+TestFromHereOption::add_to_settings(float width, Editor& editor, GameObject* go) const
+{
+  auto control = std::make_unique<ControlButton>();
+  control->set_rect(Rectf(10.f, 0.f, width - 10.f, 20.f));
+  control->m_btn_label = get_text();
+
+  // Make member variables into standalone variables so that the lambda can
+  // outlive the FileObjectOption
+  control->m_on_change = [&editor, go] {
+    const MovingObject *here = dynamic_cast<const MovingObject *>(go);
+    editor.m_test_pos = std::make_pair(editor.get_sector()->get_name(),
+                                        here->get_pos());
+    editor.m_test_request = true;
+  };
+
+  return control;
+}
+
 ParticleEditorOption::ParticleEditorOption() :
   ObjectOption(_("Open Particle Editor"), "", 0)
 {
@@ -600,6 +867,22 @@ void
 ParticleEditorOption::add_to_menu(Menu& menu) const
 {
   menu.add_entry(ObjectMenu::MNID_OPEN_PARTICLE_EDITOR, get_text());
+}
+
+std::unique_ptr<InterfaceControl>
+ParticleEditorOption::add_to_settings(float width, Editor& editor, GameObject* go) const
+{
+  auto control = std::make_unique<ControlButton>();
+  control->set_rect(Rectf(10.f, 0.f, width - 10.f, 20.f));
+  control->m_btn_label = get_text();
+
+  // Make member variables into standalone variables so that the lambda can
+  // outlive the FileObjectOption
+  control->m_on_change = [&editor] {
+    editor.m_particle_editor_request = true;
+  };
+
+  return control;
 }
 
 ButtonOption::ButtonOption(const std::string& text, std::function<void()> callback) :
@@ -618,6 +901,17 @@ void
 ButtonOption::add_to_menu(Menu& menu) const
 {
   menu.add_entry(get_text(), m_callback);
+}
+
+std::unique_ptr<InterfaceControl>
+ButtonOption::add_to_settings(float width, Editor& editor, GameObject* go) const
+{
+  auto control = std::make_unique<ControlButton>();
+  control->set_rect(Rectf(10.f, 0.f, width - 10.f, 20.f));
+  control->m_btn_label = get_text();
+  control->m_on_change = m_callback;
+
+  return control;
 }
 
 /* EOF */

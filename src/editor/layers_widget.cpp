@@ -45,7 +45,8 @@ EditorLayersWidget::EditorLayersWidget(Editor& editor) :
   m_hovered_layer(-1),
   m_object_tip(),
   m_has_mouse_focus(false),
-  m_scrollbar()
+  m_scrollbar(),
+  m_right_margin(192)
 {
   m_scrollbar.set_rect(Rect(0, SCREEN_HEIGHT - 6,
                             SCREEN_WIDTH, SCREEN_HEIGHT));
@@ -63,6 +64,8 @@ EditorLayersWidget::EditorLayersWidget(Editor& editor) :
 void
 EditorLayersWidget::draw(DrawingContext& context)
 {
+  context.push_transform();
+  context.transform().clip = Rect(0, m_Ypos, SCREEN_WIDTH - m_right_margin, SCREEN_HEIGHT);
 
   if (m_object_tip) {
     auto position = get_layer_coords(m_hovered_layer);
@@ -111,6 +114,8 @@ EditorLayersWidget::draw(DrawingContext& context)
   }
 
   m_scrollbar.draw(context);
+
+  context.pop_transform();
 }
 
 void
@@ -173,12 +178,7 @@ EditorLayersWidget::on_mouse_button_down(const SDL_MouseButtonEvent& button)
           }
         }
 
-        {
-          // TODO: Replace this with the toolbox's object settings panel when it will be done
-          auto om = std::make_unique<ObjectMenu>(m_editor, m_layer_icons[m_hovered_layer]->get_layer());
-          m_editor.m_deactivate_request = true;
-          MenuManager::instance().push_menu(std::move(om));
-        }
+        m_editor.m_settings_widget->set_object(m_layer_icons[m_hovered_layer]->get_layer());
 
         return true;
 
@@ -255,10 +255,10 @@ void
 EditorLayersWidget::resize()
 {
   m_Ypos = SCREEN_HEIGHT - 32;
-  m_Width = SCREEN_WIDTH - 128;
+  m_Width = SCREEN_WIDTH - m_right_margin;
 
   m_scrollbar.set_rect(Rect(0, SCREEN_HEIGHT - 6,
-                            SCREEN_WIDTH - 128, SCREEN_HEIGHT));
+                            SCREEN_WIDTH - m_right_margin, SCREEN_HEIGHT));
 
   update_scrollbar();
 }
@@ -359,7 +359,7 @@ void
 EditorLayersWidget::update_scrollbar()
 {
   m_scrollbar.m_total_region = static_cast<float>(m_layer_icons.size()) * 32.f;
-  m_scrollbar.m_covered_region = static_cast<float>(SCREEN_WIDTH) - 128.f;
+  m_scrollbar.m_covered_region = static_cast<float>(SCREEN_WIDTH - m_right_margin);
   m_scrollbar.m_progress = math::clamp(m_scrollbar.m_progress, 0.f, m_scrollbar.m_total_region - m_scrollbar.m_covered_region);
 
   if (!m_scrollbar.is_valid())

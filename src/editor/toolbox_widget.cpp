@@ -387,7 +387,7 @@ EditorToolboxWidget::on_mouse_motion(const SDL_MouseMotionEvent& motion)
   float x = mouse_pos.x - static_cast<float>(m_Xpos);
   float y = mouse_pos.y - static_cast<float>(m_Ypos);
 
-  if (x < 0) {
+  if (x < 0 || static_cast<int>(y) >= SCREEN_HEIGHT / 2 - m_Ypos) {
     m_hovered_item = HoveredItem::NONE;
     m_tile_scrolling = TileScrolling::NONE;
     m_has_mouse_focus = false;
@@ -408,7 +408,7 @@ EditorToolboxWidget::on_mouse_motion(const SDL_MouseMotionEvent& motion)
     }
     m_tile_scrolling = TileScrolling::NONE;
     return false;
-  } else {
+  } else if (static_cast<int>(y) < SCREEN_HEIGHT / 2 - m_Ypos) {
     m_hovered_item = HoveredItem::TILE;
     m_hovered_tile = get_tile_pos(mouse_pos);
     if (m_dragging && m_input_type == InputType::TILE) {

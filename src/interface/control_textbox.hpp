@@ -22,7 +22,6 @@
 #include "control/input_manager.hpp"
 #include "interface/control.hpp"
 
-
 class ControlTextbox : public InterfaceControl
 {
 public:
@@ -39,7 +38,7 @@ public:
   virtual void update(float dt_sec) override;
 
   /** Binds a string to the textbox */
-  void bind_string(std::string* value) { m_string = value; }
+  void bind_string(std::string* value) { m_string = value; if (value) m_internal_string_backup = *value; revert_value(); }
 
   /** Returns the full string held in m_charlist */
   std::string get_string() const;

@@ -65,6 +65,8 @@ public:
 
   TileMap* get_selected_tilemap() const { return m_selected_tilemap; }
 
+  void set_right_margin(int m) { m_right_margin = m; }
+
 private:
   Vector get_layer_coords(const int pos) const;
   int get_layer_pos(const Vector& coords) const;
@@ -87,6 +89,8 @@ private:
   bool m_has_mouse_focus;
 
   ControlScrollbar m_scrollbar;
+
+  int m_right_margin;
 
 private:
   EditorLayersWidget(const EditorLayersWidget&) = delete;

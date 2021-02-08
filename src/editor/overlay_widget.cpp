@@ -740,10 +740,15 @@ EditorOverlayWidget::process_left_click()
       if (!m_editor.get_tileselect_object().empty()) {
         if (!m_dragged_object) {
           put_object();
+          grab_object();
         }
       } else {
         rubber_object();
       }
+
+      if (m_hovered_object && m_hovered_object->is_valid() && m_hovered_object->has_settings())
+        m_editor.m_settings_widget->set_object(m_hovered_object);
+
       break;
 
     default:
@@ -770,7 +775,8 @@ EditorOverlayWidget::process_right_click()
             m_hovered_object->is_valid() &&
             m_hovered_object->has_settings())
         {
-          show_object_menu(*m_hovered_object);
+          //show_object_menu(*m_hovered_object);
+          m_editor.m_settings_widget->set_object(m_hovered_object);
         }
       }
       break;

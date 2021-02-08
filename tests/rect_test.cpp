@@ -77,4 +77,11 @@ TEST(RectTest, SDL)
   ASSERT_EQ(Rect(SDL_Rect{50, 50, 50, 50}), Rect(50, 50, 100, 100));
 }
 
+TEST(RectTest, intersect)
+{
+  ASSERT_EQ(Rect(4, 6, 15, 12).intersect(Rect(2, 3, 7, 8)), Rect(4, 6, 7, 8));
+  ASSERT_EQ(Rect(2, 3, 7, 8).intersect(Rect(4, 6, 15, 12)), Rect(4, 6, 7, 8));
+  ASSERT_EQ(Rect(4, 6, 6, 12).intersect(Rect(7, 1, 11, 18)), Rect());
+}
+
 /* EOF */

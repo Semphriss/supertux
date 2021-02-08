@@ -57,7 +57,8 @@ DrawingContext::get_cliprect() const
   return Rectf(get_translation().x,
                get_translation().y,
                get_translation().x + static_cast<float>(m_viewport.get_width()) / transform().scale,
-               get_translation().y + static_cast<float>(m_viewport.get_height()) / transform().scale);
+               get_translation().y + static_cast<float>(m_viewport.get_height()) / transform().scale)
+         .intersect(transform().clip);
 }
 
 void

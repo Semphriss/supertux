@@ -340,7 +340,7 @@ ControlTextbox::parse_value(bool call_on_change /* = true  (see header)*/)
     }
   }
 
-  std::string new_str = get_string();
+  std::string new_str = get_contents();
   if (m_internal_string_backup != new_str) {
     m_internal_string_backup = new_str;
 

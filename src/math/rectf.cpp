@@ -1,5 +1,6 @@
 //  SuperTux
 //  Copyright (C) 2016 Ingo Ruhnke <grumbel@gmail.com>
+//                2021 A. Semphris <semphris@protonmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -37,4 +38,75 @@ std::ostream& operator<<(std::ostream& out, const Rectf& rect)
   return out;
 }
 
+std::tuple<Vector, Vector>
+Rectf::clip_line(const Vector& p1, const Vector& p2)
+{
+  if (contains(p1) && contains(p2))
+    return {p1, p2};
+  
+  if (p1.x == p2.x)
+  {
+    if (!math::is_in_range(p1.x, get_left(), get_right()))
+      return {Vector(), Vector()};
+
+    return {
+      Vector(p1.x, math::clamp(p1.y, get_top(), get_bottom())),
+      Vector(p2.x, math::clamp(p2.y, get_top(), get_bottom()))
+    };
+  }
+  else if (p1.y == p2.y)
+  {
+    if (!math::is_in_range(p1.y, get_top(), get_bottom()))
+      return {Vector(), Vector()};
+
+    return {
+      Vector(math::clamp(p1.x, get_left(), get_right()), p1.y),
+      Vector(math::clamp(p2.x, get_left(), get_right()), p2.y)
+    };
+  }
+  else
+  {
+    float a = (p2.y - p1.y) / (p2.x - p1.x);
+    float b = p1.y - a * p1.x;
+
+    Vector r1 = p1, r2 = p2;
+    if (math::is_in_range(a * get_left() + b, get_top(), get_bottom()))
+    {
+      if (p1.x < get_left() && p2.x > get_left())
+        r1 = Vector(get_left(), a * get_left() + b);
+      if (p2.x < get_left() && p1.x > get_left())
+        r2 = Vector(get_left(), a * get_left() + b);
+    }
+
+    if (math::is_in_range(a * get_right() + b, get_top(), get_bottom()))
+    {
+      if (p1.x < get_right() && p2.x > get_right())
+        r2 = Vector(get_right(), a * get_right() + b);
+      if (p2.x < get_right() && p1.x > get_right())
+        r1 = Vector(get_right(), a * get_right() + b);
+    }
+
+    if (math::is_in_range((get_top() - b) / a, get_left(), get_right()))
+    {
+      if (p1.y < get_top() && p2.y > get_top())
+        r1 = Vector((get_top() - b) / a, get_top());
+      if (p2.y < get_top() && p1.y > get_top())
+        r2 = Vector((get_top() - b) / a, get_top());
+    }
+
+    if (math::is_in_range((get_bottom() - b) / a, get_left(), get_right()))
+    {
+      if (p1.y < get_bottom() && p2.y > get_bottom())
+        r2 = Vector((get_bottom() - b) / a, get_bottom());
+      if (p2.y < get_bottom() && p1.y > get_bottom())
+        r1 = Vector((get_bottom() - b) / a, get_bottom());
+    }
+
+    if (r1 == p1 && r2 == p2)
+      return {Vector(), Vector()};
+    
+    return {r1, r2};
+  }
+  
+}
 /* EOF */

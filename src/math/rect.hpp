@@ -138,6 +138,19 @@ public:
                 bottom + border);
   }
 
+  Rect intersect(Rect other) const
+  {
+    Rect r(std::max(left, other.left),
+           std::max(top, other.top),
+           std::min(right, other.right),
+           std::min(bottom, other.bottom));
+
+    if (!r.valid())
+      return Rect();
+
+    return r;
+  }
+
   SDL_Rect to_sdl() const
   {
     return {left, top, get_width(), get_height()};

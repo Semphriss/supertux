@@ -39,6 +39,9 @@ namespace sexp {
 class Value;
 } // namespace sexp
 class Color;
+class Editor;
+class GameObject;
+class InterfaceControl;
 class Menu;
 class Path;
 class Rectf;
@@ -54,6 +57,7 @@ public:
   virtual void save(Writer& write) const = 0;
   virtual std::string to_string() const = 0;
   virtual void add_to_menu(Menu& menu) const = 0;
+  virtual std::unique_ptr<InterfaceControl> add_to_settings(float width, Editor& editor, GameObject* go) const = 0;
 
   const std::string& get_key() const { return m_key; }
   const std::string& get_text() const { return m_text; }
@@ -79,6 +83,7 @@ public:
   virtual void save(Writer& write) const override;
   virtual std::string to_string() const override;
   virtual void add_to_menu(Menu& menu) const override;
+  virtual std::unique_ptr<InterfaceControl> add_to_settings(float width, Editor& editor, GameObject* go) const override;
 
 private:
   bool* const m_pointer;
@@ -99,6 +104,7 @@ public:
   virtual void save(Writer& write) const override;
   virtual std::string to_string() const override;
   virtual void add_to_menu(Menu& menu) const override;
+  virtual std::unique_ptr<InterfaceControl> add_to_settings(float width, Editor& editor, GameObject* go) const override;
 
 private:
   int* const m_pointer;
@@ -118,6 +124,7 @@ public:
   virtual void save(Writer& write) const override;
   virtual std::string to_string() const override;
   virtual void add_to_menu(Menu& menu) const override;
+  virtual std::unique_ptr<InterfaceControl> add_to_settings(float width, Editor& editor, GameObject* go) const override;
 
 private:
   Rectf* const m_pointer;
@@ -139,6 +146,7 @@ public:
   virtual void save(Writer& write) const override;
   virtual std::string to_string() const override;
   virtual void add_to_menu(Menu& menu) const override;
+  virtual std::unique_ptr<InterfaceControl> add_to_settings(float width, Editor& editor, GameObject* go) const override;
 
 private:
   float* const m_pointer;
@@ -159,6 +167,7 @@ public:
   virtual void save(Writer& write) const override;
   virtual std::string to_string() const override;
   virtual void add_to_menu(Menu& menu) const override;
+  virtual std::unique_ptr<InterfaceControl> add_to_settings(float width, Editor& editor, GameObject* go) const override;
 
 private:
   std::string* const m_pointer;
@@ -179,6 +188,7 @@ public:
   virtual void save(Writer& write) const override;
   virtual std::string to_string() const override;
   virtual void add_to_menu(Menu& menu) const override;
+  virtual std::unique_ptr<InterfaceControl> add_to_settings(float width, Editor& editor, GameObject* go) const override;
 
 private:
   int* const m_pointer;
@@ -202,6 +212,7 @@ public:
   virtual void save(Writer& write) const override;
   virtual std::string to_string() const override;
   virtual void add_to_menu(Menu& menu) const override;
+  virtual std::unique_ptr<InterfaceControl> add_to_settings(float width, Editor& editor, GameObject* go) const override;
 
 private:
   int* const m_pointer;
@@ -223,6 +234,7 @@ public:
   virtual void save(Writer& write) const override;
   virtual std::string to_string() const override;
   virtual void add_to_menu(Menu& menu) const override;
+  virtual std::unique_ptr<InterfaceControl> add_to_settings(float width, Editor& editor, GameObject* go) const override;
 
 private:
   std::string* const m_pointer;
@@ -245,6 +257,7 @@ public:
   virtual void save(Writer& write) const override;
   virtual std::string to_string() const override;
   virtual void add_to_menu(Menu& menu) const override;
+  virtual std::unique_ptr<InterfaceControl> add_to_settings(float width, Editor& editor, GameObject* go) const override;
 
 private:
   std::string* const m_pointer;
@@ -267,6 +280,7 @@ public:
   virtual void save(Writer& write) const override;
   virtual std::string to_string() const override;
   virtual void add_to_menu(Menu& menu) const override;
+  virtual std::unique_ptr<InterfaceControl> add_to_settings(float width, Editor& editor, GameObject* go) const override;
 
 private:
   Color* const m_pointer;
@@ -287,6 +301,7 @@ public:
   virtual void save(Writer& write) const override;
   virtual std::string to_string() const override;
   virtual void add_to_menu(Menu& menu) const override;
+  virtual std::unique_ptr<InterfaceControl> add_to_settings(float width, Editor& editor, GameObject* go) const override;
 
 private:
   std::vector<std::string>* const m_pointer;
@@ -305,6 +320,7 @@ public:
   virtual void save(Writer& write) const override;
   virtual std::string to_string() const override;
   virtual void add_to_menu(Menu& menu) const override;
+  virtual std::unique_ptr<InterfaceControl> add_to_settings(float width, Editor& editor, GameObject* go) const override;
 
 private:
   TileMap* m_tilemap;
@@ -323,6 +339,7 @@ public:
   virtual void save(Writer& write) const override;
   virtual std::string to_string() const override;
   virtual void add_to_menu(Menu& menu) const override;
+  virtual std::unique_ptr<InterfaceControl> add_to_settings(float width, Editor& editor, GameObject* go) const override;
 
 private:
   Path* m_path;
@@ -341,6 +358,7 @@ public:
   virtual void save(Writer& write) const override;
   virtual std::string to_string() const override;
   virtual void add_to_menu(Menu& menu) const override;
+  virtual std::unique_ptr<InterfaceControl> add_to_settings(float width, Editor& editor, GameObject* go) const override;
 
 private:
   std::string m_path_ref;
@@ -358,6 +376,7 @@ public:
   virtual void save(Writer& write) const override;
   virtual std::string to_string() const override;
   virtual void add_to_menu(Menu& menu) const override;
+  virtual std::unique_ptr<InterfaceControl> add_to_settings(float width, Editor& editor, GameObject* go) const override;
 
 private:
   sexp::Value m_sx;
@@ -375,6 +394,7 @@ public:
   virtual void save(Writer& write) const override {}
   virtual std::string to_string() const override;
   virtual void add_to_menu(Menu& menu) const override;
+  virtual std::unique_ptr<InterfaceControl> add_to_settings(float width, Editor& editor, GameObject* go) const override;
 
 private:
   RemoveObjectOption(const RemoveObjectOption&) = delete;
@@ -389,6 +409,7 @@ public:
   virtual void save(Writer& write) const override {}
   virtual std::string to_string() const override;
   virtual void add_to_menu(Menu& menu) const override;
+  virtual std::unique_ptr<InterfaceControl> add_to_settings(float width, Editor& editor, GameObject* go) const override;
 
 private:
   TestFromHereOption(const TestFromHereOption&) = delete;
@@ -403,6 +424,7 @@ public:
   virtual void save(Writer& write) const override {}
   virtual std::string to_string() const override;
   virtual void add_to_menu(Menu& menu) const override;
+  virtual std::unique_ptr<InterfaceControl> add_to_settings(float width, Editor& editor, GameObject* go) const override;
 
 private:
   ParticleEditorOption(const ParticleEditorOption&) = delete;
@@ -417,6 +439,7 @@ public:
   virtual void save(Writer& write) const override {}
   virtual std::string to_string() const override;
   virtual void add_to_menu(Menu& menu) const override;
+  virtual std::unique_ptr<InterfaceControl> add_to_settings(float width, Editor& editor, GameObject* go) const override;
 
 private:
   std::function<void()> m_callback;

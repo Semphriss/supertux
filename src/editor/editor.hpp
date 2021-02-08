@@ -25,6 +25,7 @@
 #include "editor/toolbox_widget.hpp"
 #include "editor/layers_widget.hpp"
 #include "editor/scroller_widget.hpp"
+#include "editor/settings_widget.hpp"
 #include "supertux/screen.hpp"
 #include "supertux/world.hpp"
 #include "util/currenton.hpp"
@@ -155,6 +156,9 @@ private:
   void save_level();
   void test_level(const boost::optional<std::pair<std::string, Vector>>& test_pos);
   void update_keyboard(const Controller& controller);
+  Rectf panel_grab_h() const;
+  Rectf panel_grab_v() const;
+  void update_grabbers();
 
 protected:
   std::unique_ptr<Level> m_level;
@@ -176,6 +180,8 @@ public:
 
   std::unique_ptr<Savegame> m_savegame;
   std::string* m_particle_editor_filename;
+
+  EditorSettingsWidget* m_settings_widget;
 
 private:
   Sector* m_sector;
@@ -201,6 +207,9 @@ private:
   float m_time_since_last_save;
 
   float m_scroll_speed;
+
+  float m_panel_grab_h, m_panel_grab_v;
+  bool m_grabbing_h, m_grabbing_v;
 
 private:
   Editor(const Editor&) = delete;
