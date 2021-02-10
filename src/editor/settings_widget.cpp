@@ -44,7 +44,9 @@ EditorSettingsWidget::EditorSettingsWidget(Editor& editor) :
     InterfaceTheme(Resources::control_font, Color(.9f, .9f, .9f, 1.f), Color::BLACK, 0.f), // focused
     InterfaceTheme(Resources::control_font, Color(.3f, .3f, .3f, 1.f), Color::BLACK, 0.f) // disabled
   );
-  m_scrollbar.m_on_change = [this] { reset_components(); };
+  m_scrollbar.m_on_scroll = [this] (float delta) {
+    this->move_components(-delta);
+  };
 }
 
 void
@@ -109,10 +111,16 @@ EditorSettingsWidget::on_mouse_wheel(const SDL_MouseWheelEvent& wheel)
   if (!m_rect.contains(m_mouse_pos))
     return false;
 
+  if (!m_scrollbar.is_valid())
+    // FIXME: (Discuss) Should mouse-wheeling over the widget when there is no
+    //        scrollbar make this return true anyways?
+    return true;
+
+  float old_progress = m_scrollbar.m_progress;
   m_scrollbar.m_progress = math::clamp(m_scrollbar.m_progress - static_cast<float>(wheel.y * 30),
                                        0.f,
                                        m_scrollbar.m_total_region - m_scrollbar.m_covered_region);
-  reset_components();
+  move_components(old_progress - m_scrollbar.m_progress);
 
   return true;
 }
@@ -165,6 +173,23 @@ EditorSettingsWidget::reset_components()
 
   m_scrollbar.m_total_region = top + m_scrollbar.m_progress;
   m_scrollbar.m_covered_region = m_rect.get_height();
+}
+
+void
+EditorSettingsWidget::move_components(float delta)
+{
+  // TODO: Make a "get children recursively" method
+  for (auto& control : m_children)
+  {
+    control->get_rect().move(Vector(0, delta));
+    if (control->m_label)
+      control->m_label->get_rect().move(Vector(0, delta));
+
+    auto container = dynamic_cast<InterfaceContainer*>(control.get());
+    if (container)
+      for (auto& child : container->m_children)
+        child->get_rect().move(Vector(0, delta));
+  }
 }
 
 /* EOF */

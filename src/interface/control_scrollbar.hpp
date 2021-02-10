@@ -65,6 +65,9 @@ public:
   /** `true` of the scroller is horizontal; `false` if it is vertical */
   bool m_horizontal;
 
+  /** Same as m_on_change, but passes the delta */
+  std::function<void(float)> m_on_scroll;
+
 private:
   Rectf get_bar_rect();
 

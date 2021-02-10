@@ -21,6 +21,7 @@
 
 #include "control/input_manager.hpp"
 #include "editor/widget.hpp"
+#include "interface/control_button.hpp"
 #include "interface/control_scrollbar.hpp"
 #include "object/tilemap.hpp"
 #include "supertux/screen.hpp"
@@ -89,6 +90,7 @@ private:
   bool m_has_mouse_focus;
 
   ControlScrollbar m_scrollbar;
+  ControlButton m_add_button;
 
   int m_right_margin;
 

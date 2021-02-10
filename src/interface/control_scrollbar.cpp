@@ -32,6 +32,7 @@ ControlScrollbar::ControlScrollbar() :
   m_progress(),
   m_offset(),
   m_horizontal(),
+  m_on_scroll(),
   last_mouse_pos(),
   m_mouse_dragging(),
   m_value(nullptr)
@@ -67,12 +68,16 @@ ControlScrollbar::on_mouse_motion(const SDL_MouseMotionEvent& motion)
   float delta = m_horizontal ?
         ((mouse_pos - last_mouse_pos).x / m_rect.get_width() * m_total_region) :
         ((mouse_pos - last_mouse_pos).y / m_rect.get_height() * m_total_region);
-  m_progress = math::clamp(m_progress + delta, 0.f, m_total_region - m_covered_region);
+  float diff = math::clamp(m_progress + delta, 0.f, m_total_region - m_covered_region) - m_progress;
+  m_progress += diff;
   if (m_value)
     *m_value = get_value();
 
   if (m_on_change)
     m_on_change();
+
+  if (m_on_scroll)
+    m_on_scroll(diff);
 
   last_mouse_pos = mouse_pos;
   return false;

@@ -98,8 +98,8 @@ Editor::Editor() :
   m_leveltested(false),
   m_tileset(nullptr),
   m_widgets(),
+  m_object_widget(),
   m_overlay_widget(),
-  m_toolbox_widget(),
   m_layers_widget(),
   m_enabled(false),
   m_bgr_surface(Surface::from_file("images/background/antarctic/arctis2.png")),
@@ -113,16 +113,16 @@ Editor::Editor() :
   m_grabbing_h(false),
   m_grabbing_v(false)
 {
-  auto toolbox_widget = std::make_unique<EditorToolboxWidget>(*this);
   auto layers_widget = std::make_unique<EditorLayersWidget>(*this);
+  auto object_widget = std::make_unique<EditorObjectWidget>(*this);
   auto overlay_widget = std::make_unique<EditorOverlayWidget>(*this);
   auto topbar_widget = std::make_unique<EditorTopbarWidget>(*this);
   auto settings_widget = std::make_unique<EditorSettingsWidget>(*this);
 
-  m_toolbox_widget = toolbox_widget.get();
   m_layers_widget = layers_widget.get();
   m_overlay_widget = overlay_widget.get();
   m_settings_widget = settings_widget.get();
+  m_object_widget = object_widget.get();
 
   auto undo_button_widget = std::make_unique<ButtonWidget>("images/engine/editor/undo.png",
     Rectf(0.f, 0.f, 24.f, 24.f), [this]{ undo(); });
@@ -134,7 +134,7 @@ Editor::Editor() :
   m_widgets.push_back(std::move(scroller_widget));
   m_widgets.push_back(std::move(undo_button_widget));
   m_widgets.push_back(std::move(redo_button_widget));
-  m_widgets.push_back(std::move(toolbox_widget));
+  m_widgets.push_back(std::move(object_widget));
   m_widgets.push_back(std::move(layers_widget));
   m_widgets.push_back(std::move(settings_widget));
   m_widgets.push_back(std::move(overlay_widget));
@@ -159,10 +159,18 @@ Editor::draw(Compositor& compositor)
                                      Color(0.0f, 0.0f, 0.0f),
                                      0.0f, std::numeric_limits<int>::min());
 
-  context.color().draw_filled_rect(panel_grab_h(), Color(1.f, 1.f, 1.f, .5f),
-                                   6.f, LAYER_GUI + 3);
-  context.color().draw_filled_rect(panel_grab_v(), Color(1.f, 1.f, 1.f, .5f),
-                                   6.f, LAYER_GUI + 3);
+    context.color().draw_line(Vector(context.get_width() - m_panel_grab_h + 16.f, m_panel_grab_v),
+                              Vector(context.get_width() - m_panel_grab_h / 2 - 36, m_panel_grab_v),
+                              Color(0.f, 0.f, 0.f, .5f),
+                              LAYER_GUI + 1);
+    context.color().draw_line(Vector(context.get_width() - m_panel_grab_h / 2 + 36, m_panel_grab_v),
+                              Vector(context.get_width(), m_panel_grab_v),
+                              Color(0.f, 0.f, 0.f, .5f),
+                              LAYER_GUI + 1);
+    context.color().draw_filled_rect(panel_grab_h(), Color(1.f, 1.f, 1.f, .5f),
+                                    6.f, LAYER_GUI + 3);
+    context.color().draw_filled_rect(panel_grab_v(), Color(1.f, 1.f, 1.f, .5f),
+                                    6.f, LAYER_GUI + 3);
 
   } else {
     context.color().draw_surface_scaled(m_bgr_surface,
@@ -358,13 +366,13 @@ Editor::set_world(std::unique_ptr<World> w)
 int
 Editor::get_tileselect_select_mode() const
 {
-  return m_toolbox_widget->get_tileselect_select_mode();
+  return m_object_widget->get_tileselect_select_mode();
 }
 
 int
 Editor::get_tileselect_move_mode() const
 {
-  return m_toolbox_widget->get_tileselect_move_mode();
+  return m_object_widget->get_tileselect_move_mode();
 }
 
 void
@@ -501,7 +509,7 @@ Editor::set_level(std::unique_ptr<Level> level, bool reset)
   m_enabled = true;
 
   if (reset) {
-    m_toolbox_widget->set_input_type(EditorToolboxWidget::InputType::NONE);
+    m_object_widget->set_input_type(EditorObjectWidget::InputType::NONE);
   }
 
   // Re/load level
@@ -526,7 +534,7 @@ Editor::set_level(std::unique_ptr<Level> level, bool reset)
     }
   }
 
-  m_toolbox_widget->update_mouse_icon();
+  m_object_widget->update_mouse_icon();
   m_overlay_widget->on_level_change();
   
   if (!m_level_first_loaded)
@@ -647,7 +655,7 @@ Editor::setup()
       MenuManager::instance().push_menu(MenuStorage::EDITOR_LEVELSET_SELECT_MENU);
     }
   }
-  m_toolbox_widget->setup();
+  m_object_widget->setup();
   m_layers_widget->setup();
   m_savegame = Savegame::from_file("levels/misc");
 
@@ -661,7 +669,7 @@ Editor::setup()
     SoundManager::current()->stop_music();
     m_deactivate_request = false;
     m_enabled = true;
-    m_toolbox_widget->update_mouse_icon();
+    m_object_widget->update_mouse_icon();
   }
   
 }
@@ -670,7 +678,7 @@ void
 Editor::resize()
 {
   // Calls on window resize.
-  m_toolbox_widget->resize();
+  m_object_widget->resize();
   m_layers_widget->resize();
   m_overlay_widget->update_pos();
 }
@@ -793,7 +801,7 @@ Editor::event(const SDL_Event& ev)
 
     // Scroll with mouse wheel, if the mouse is not over the toolbox.
     // The toolbox does scrolling independently from the main area.
-    if (ev.type == SDL_MOUSEWHEEL && !m_toolbox_widget->has_mouse_focus() && !m_layers_widget->has_mouse_focus()) {
+    if (ev.type == SDL_MOUSEWHEEL && !m_layers_widget->has_mouse_focus()) {
       float scroll_x = static_cast<float>(ev.wheel.x * -32);
       float scroll_y = static_cast<float>(ev.wheel.y * -32);
       scroll({scroll_x, scroll_y});
@@ -811,6 +819,9 @@ Editor::update_grabbers()
   m_settings_widget->set_left(m_panel_grab_h);
   m_settings_widget->set_top(m_panel_grab_v);
   m_settings_widget->resize();
+  m_object_widget->set_left(m_panel_grab_h);
+  m_object_widget->set_bottom(m_panel_grab_v);
+  m_object_widget->resize();
   m_layers_widget->set_right_margin(static_cast<int>(m_panel_grab_h));
   m_layers_widget->resize();
 }
@@ -836,7 +847,7 @@ Editor::sort_layers()
 void
 Editor::select_tilegroup(int id)
 {
-  m_toolbox_widget->select_tilegroup(id);
+  m_object_widget->select_tilegroup(id);
 }
 
 const std::vector<Tilegroup>&
@@ -849,7 +860,7 @@ void
 Editor::change_tileset()
 {
   m_tileset = TileManager::current()->get_tileset(m_level->get_tileset());
-  m_toolbox_widget->set_input_type(EditorToolboxWidget::InputType::NONE);
+  m_object_widget->set_input_type(EditorObjectWidget::InputType::NONE);
   for (const auto& sector : m_level->m_sectors) {
     for (auto& tilemap : sector->get_objects_by_type<TileMap>()) {
       tilemap.set_tileset(m_tileset);
@@ -860,13 +871,13 @@ Editor::change_tileset()
 void
 Editor::select_objectgroup(int id)
 {
-  m_toolbox_widget->select_objectgroup(id);
+  m_object_widget->select_objectgroup(id);
 }
 
 const std::vector<ObjectGroup>&
 Editor::get_objectgroups() const
 {
-  return m_toolbox_widget->get_object_info().m_groups;
+  return m_object_widget->get_object_info().m_groups;
 }
 
 void

@@ -54,6 +54,7 @@ InterfaceLabel::draw(DrawingContext& context)
                             Color::WHITE);
 
   if (!fits(m_label) && m_rect.contains(m_mouse_pos)) {
+    /*
     context.color().draw_filled_rect(Rectf(m_mouse_pos, m_mouse_pos + Vector(
                                        Resources::control_font
                                                     ->get_text_width(m_label),
@@ -74,7 +75,44 @@ InterfaceLabel::draw(DrawingContext& context)
                               FontAlignment::ALIGN_LEFT,
                               LAYER_GUI + 11,
                               Color::WHITE);
+                              */
+    context.push_transform();
+    context.transform().clip = Rect(0, 0, context.get_width(), context.get_height());
+    draw_tooltip(context, m_label);
+    context.pop_transform();
   }
+}
+
+void
+InterfaceLabel::draw_tooltip(DrawingContext& context, const std::string& text) const
+{
+  float w = Resources::control_font->get_text_width(text) + 10.f;
+  float h = Resources::control_font->get_height() + 10.f;
+
+  // Compression of a bazillion lines because I like messy stuff              /s
+  Vector pos(
+    (w > static_cast<float>(context.get_width()) - m_mouse_pos.x)
+      ? std::max(0.f, m_mouse_pos.x - w)
+      : m_mouse_pos.x,
+    (h > static_cast<float>(context.get_height()) - m_mouse_pos.y - 32.f)
+      ? std::max(0.f, m_mouse_pos.y - h)
+      : m_mouse_pos.y + 32.f
+  );
+
+  Rectf box(pos, pos + Vector(w, h));
+
+  context.color().draw_filled_rect(box,
+                                   Color(.1f, .1f, .1f, .8f),
+                                   LAYER_GUI + 10);
+  context.color().draw_filled_rect(box.grown(-2.f),
+                                   Color(1.f, 1.f, 1.f, .1f),
+                                   LAYER_GUI + 10);
+  context.color().draw_text(Resources::control_font,
+                            text,
+                            pos + Vector(5.f, 5.f),
+                            FontAlignment::ALIGN_LEFT,
+                            LAYER_GUI + 11,
+                            Color::WHITE);
 }
 
 bool

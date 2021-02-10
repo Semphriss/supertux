@@ -32,6 +32,8 @@ public:
   virtual void draw(DrawingContext& context) override;
   virtual bool on_mouse_motion(const SDL_MouseMotionEvent& motion) override;
 
+  void draw_tooltip(DrawingContext& context, const std::string& text) const;
+
   void set_rect(const Rectf& rect) { m_rect = rect; }
   Rectf& get_rect() { return m_rect; }
 

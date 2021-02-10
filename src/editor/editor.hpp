@@ -24,6 +24,7 @@
 #include "editor/overlay_widget.hpp"
 #include "editor/toolbox_widget.hpp"
 #include "editor/layers_widget.hpp"
+#include "editor/object_widget.hpp"
 #include "editor/scroller_widget.hpp"
 #include "editor/settings_widget.hpp"
 #include "supertux/screen.hpp"
@@ -87,10 +88,10 @@ public:
   World* get_world() const { return m_world.get(); }
 
   TileSet* get_tileset() const { return m_tileset; }
-  TileSelection* get_tiles() const { return m_toolbox_widget->get_tiles(); }
-  std::string get_tileselect_object() const { return m_toolbox_widget->get_object(); }
+  TileSelection* get_tiles() const { return m_object_widget->get_tiles(); }
+  std::string get_tileselect_object() const { return m_object_widget->get_object(); }
 
-  EditorToolboxWidget::InputType get_tileselect_input_type() const { return m_toolbox_widget->get_input_type(); }
+  EditorObjectWidget::InputType get_tileselect_input_type() const { return m_object_widget->get_input_type(); }
 
   int get_tileselect_select_mode() const;
   int get_tileselect_move_mode() const;
@@ -192,8 +193,8 @@ private:
   TileSet* m_tileset;
 
   std::vector<std::unique_ptr<Widget> > m_widgets;
+  EditorObjectWidget* m_object_widget;
   EditorOverlayWidget* m_overlay_widget;
-  EditorToolboxWidget* m_toolbox_widget;
   EditorLayersWidget* m_layers_widget;
 
   bool m_enabled;

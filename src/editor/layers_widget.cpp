@@ -46,6 +46,7 @@ EditorLayersWidget::EditorLayersWidget(Editor& editor) :
   m_object_tip(),
   m_has_mouse_focus(false),
   m_scrollbar(),
+  m_add_button("+"),
   m_right_margin(192)
 {
   m_scrollbar.set_rect(Rect(0, SCREEN_HEIGHT - 6,
@@ -58,6 +59,18 @@ EditorLayersWidget::EditorLayersWidget(Editor& editor) :
     InterfaceTheme(Resources::control_font, Color(.9f, .9f, .9f, 1.f), Color::BLACK, 0.f), // focused
     InterfaceTheme(Resources::control_font, Color(.3f, .3f, .3f, 1.f), Color::BLACK, 0.f) // disabled
   );
+  m_add_button.set_rect(Rect(m_Width - 12, m_Ypos - 12, m_Width, m_Ypos));
+  m_add_button.m_theme = InterfaceThemeSet(
+    InterfaceTheme(Resources::control_font, Color(.7f, .7f, .7f, 1.f), Color::BLACK, 0.f), // base
+    InterfaceTheme(Resources::control_font, Color(.9f, .9f, .9f, 1.f), Color::BLACK, 0.f), // hover
+    InterfaceTheme(Resources::control_font, Color(1.f, 1.f, 1.f, 1.f), Color::BLACK, 0.f), // active
+    InterfaceTheme(Resources::control_font, Color(.7f, .7f, .7f, 1.f), Color::BLACK, 0.f), // focused
+    InterfaceTheme(Resources::control_font, Color(.3f, .3f, .3f, 1.f), Color::BLACK, 0.f) // disabled
+  );
+  m_add_button.m_on_change = [] {
+    // TODO: Open the corresponding tab in the object widget
+    std::cerr << "Add sector stuff" << std::endl;
+  };
   update_scrollbar();
 }
 
@@ -113,9 +126,10 @@ EditorLayersWidget::draw(DrawingContext& context)
     pos++;
   }
 
-  m_scrollbar.draw(context);
-
   context.pop_transform();
+
+  m_scrollbar.draw(context);
+  m_add_button.draw(context);
 }
 
 void
@@ -137,14 +151,10 @@ EditorLayersWidget::update(float dt_sec)
 bool
 EditorLayersWidget::event(const SDL_Event& event)
 {
-  if (!m_scrollbar.event(event))
-  {
-    return Widget::event(event);
-  }
-  else
-  {
+  if (m_scrollbar.event(event) || m_add_button.event(event))
     return true;
-  }
+
+  return Widget::event(event);
 }
 
 bool
@@ -259,6 +269,7 @@ EditorLayersWidget::resize()
 
   m_scrollbar.set_rect(Rect(0, SCREEN_HEIGHT - 6,
                             SCREEN_WIDTH - m_right_margin, SCREEN_HEIGHT));
+  m_add_button.set_rect(Rect(m_Width - 12, m_Ypos - 12, m_Width, m_Ypos));
 
   update_scrollbar();
 }
