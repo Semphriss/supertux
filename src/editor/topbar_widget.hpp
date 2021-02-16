@@ -29,6 +29,7 @@ class EditorTopbarWidget final : public InterfaceContainer
 public:
   struct MenuEntry
   {
+    std::string id;
     std::string name;
     std::string icon;
     bool new_category;
@@ -48,8 +49,12 @@ public:
   virtual void draw(DrawingContext& context) override;
   virtual bool on_mouse_button_up(const SDL_MouseButtonEvent& button) override;
 
+  void refresh_menu();
+
 private:
   void reset_components();
+
+  MenuEntry* get_entry_by_id(const std::string& id);
 
 private:
   Editor& m_editor;

@@ -17,12 +17,15 @@
 #include "editor/topbar_widget.hpp"
 
 #include "editor/editor.hpp"
+#include "editor/topbar_entry.hpp"
+#include "gui/dialog.hpp"
 #include "gui/menu_manager.hpp"
-#include "interface/control_button.hpp"
 #include "sprite/sprite_manager.hpp"
+#include "supertux/level.hpp"
 #include "supertux/menu/editor_sectors_menu.hpp"
 #include "supertux/menu/menu_storage.hpp"
 #include "util/gettext.hpp"
+#include "video/compositor.hpp"
 
 #include <iostream>
 
@@ -30,20 +33,118 @@ EditorTopbarWidget::EditorTopbarWidget(Editor& editor) :
   InterfaceContainer(),
   m_editor(editor),
   m_menu({
+    {_("File"), {
+      {"file:save", _("Save Level"), "", false, [this]{
+        this->m_editor.check_save_prerequisites([this]() {
+          this->m_editor.m_save_request = true;
+        });
+      }},
+      {"file:test", _("Test Level"), "", false, [this]{
+        this->m_editor.check_save_prerequisites([this]() {
+          this->m_editor.m_test_pos = boost::none;
+          this->m_editor.m_test_request = true;
+        });
+      }},
+      {"file:share", _("Share Level"), "", false, [this]{
+        auto dialog = std::make_unique<Dialog>();
+        dialog->set_text(_("We encourage you to share your levels in the SuperTux forum.\nTo find your level, click the\n\"Open Level directory\" menu item.\nDo you want to go to the forum now?"));
+        dialog->add_default_button(_("Yes"), [] {
+          FileSystem::open_path("https://forum.freegamedev.net/viewforum.php?f=69");
+        });
+        dialog->add_cancel_button(_("No"));
+        MenuManager::instance().set_dialog(std::move(dialog));
+      }},
+      {"file:open-dir", _("Open Level Directory"), "", false, [this]{
+        this->m_editor.open_level_directory();
+      }},
+      {"file:change-level", _("Edit Another Level"), "", true, [this]{
+        this->m_editor.check_unsaved_changes([] {
+          MenuManager::instance().set_menu(MenuStorage::EDITOR_LEVEL_SELECT_MENU);
+        });
+      }},
+      {"file:change-world", _("Edit Another World"), "", false, [this]{
+        this->m_editor.check_unsaved_changes([] {
+          MenuManager::instance().set_menu(MenuStorage::EDITOR_LEVELSET_SELECT_MENU);
+        });
+      }},
+      {"file:exit", _("Exit Level Editor"), "", true, [this]{
+        this->m_editor.m_quit_request = true;
+      }}
+    }},
     {_("Sector"), {
-      {_("Manage sectors..."), "", false, [this]{
-        m_editor.disable_keyboard();
+      {"sector:manage", _("Manage sectors..."), "", false, [this]{
+        this->m_editor.disable_keyboard();
         MenuManager::instance().set_menu(MenuStorage::EDITOR_SECTORS_MENU);
       }},
-      {_("Create sector"), "", false, []{
+      {"sector:create", _("Create sector"), "", false, []{
         EditorSectorsMenu::create_sector();
       }},
-      {_("Delete sector"), "", false, []{
+      {"sector:delete", _("Delete sector"), "", false, []{
         EditorSectorsMenu::delete_sector();
       }}
     }},
+    {_("Settings"), {
+      {"settings:grid-size-0", _("Grid size: ") + _("tiny tile (4px)"), "", false, [this]{
+        EditorOverlayWidget::selected_snap_grid_size = 0;
+        this->refresh_menu();
+      }},
+      {"settings:grid-size-1", _("Grid size: ") + _("small tile (8px)"), "", false, [this]{
+        EditorOverlayWidget::selected_snap_grid_size = 1;
+        this->refresh_menu();
+      }},
+      {"settings:grid-size-2", _("Grid size: ") + _("medium tile (16px)"), "", false, [this]{
+        EditorOverlayWidget::selected_snap_grid_size = 2;
+        this->refresh_menu();
+      }},
+      {"settings:grid-size-3", _("Grid size: ") + _("big tile (32px)"), "", false, [this]{
+        EditorOverlayWidget::selected_snap_grid_size = 3;
+        this->refresh_menu();
+      }},
+      {"settings:show-grid", _("Show Grid"), "", true, [this]{
+        EditorOverlayWidget::render_grid = !EditorOverlayWidget::render_grid;
+        this->refresh_menu();
+      }},
+      {"settings:grid-snap", _("Grid Snapping"), "", false, [this]{
+        EditorOverlayWidget::snap_to_grid = !EditorOverlayWidget::snap_to_grid;
+        this->refresh_menu();
+      }},
+      {"settings:render-bkg", _("Render Background"), "", false, [this]{
+        EditorOverlayWidget::render_background = !EditorOverlayWidget::render_background;
+        this->refresh_menu();
+      }},
+      {"settings:render-light", _("Render Light"), "", false, [this]{
+        Compositor::s_render_lighting = !Compositor::s_render_lighting;
+        this->refresh_menu();
+      }},
+      {"settings:autotile", _("Autotile Mode"), "", false, [this]{
+        EditorOverlayWidget::autotile_mode = !EditorOverlayWidget::autotile_mode;
+        this->refresh_menu();
+      }},
+      {"settings:autotile-help", _("Enable Autotile Help"), "", false, [this]{
+        EditorOverlayWidget::autotile_help = !EditorOverlayWidget::autotile_help;
+        this->refresh_menu();
+      }},
+    }},
   })
 {
+  refresh_menu();
+}
+
+void
+EditorTopbarWidget::refresh_menu()
+{
+  get_entry_by_id("settings:grid-size-0")->icon = EditorOverlayWidget::selected_snap_grid_size == 0 ? "/images/engine/editor/arrow.png" : "";
+  get_entry_by_id("settings:grid-size-1")->icon = EditorOverlayWidget::selected_snap_grid_size == 1 ? "/images/engine/editor/arrow.png" : "";
+  get_entry_by_id("settings:grid-size-2")->icon = EditorOverlayWidget::selected_snap_grid_size == 2 ? "/images/engine/editor/arrow.png" : "";
+  get_entry_by_id("settings:grid-size-3")->icon = EditorOverlayWidget::selected_snap_grid_size == 3 ? "/images/engine/editor/arrow.png" : "";
+
+  get_entry_by_id("settings:show-grid")->icon = EditorOverlayWidget::render_grid ? "/images/engine/editor/arrow.png" : "";
+  get_entry_by_id("settings:grid-snap")->icon = EditorOverlayWidget::snap_to_grid ? "/images/engine/editor/arrow.png" : "";
+  get_entry_by_id("settings:render-bkg")->icon = EditorOverlayWidget::render_background ? "/images/engine/editor/arrow.png" : "";
+  get_entry_by_id("settings:render-light")->icon = Compositor::s_render_lighting ? "/images/engine/editor/arrow.png" : "";
+  get_entry_by_id("settings:autotile")->icon = EditorOverlayWidget::autotile_mode ? "/images/engine/editor/arrow.png" : "";
+  get_entry_by_id("settings:autotile-help")->icon = EditorOverlayWidget::autotile_help ? "/images/engine/editor/arrow.png" : "";
+
   reset_components();
 }
 
@@ -77,7 +178,7 @@ EditorTopbarWidget::reset_components()
 
     float submenu_width = btn_width;
     for (const auto& option : category.options)
-      submenu_width = std::max(submenu_width, submenu_theme.base.font->get_text_width(option.name) + 2.f * submenu_margin);
+      submenu_width = std::max(submenu_width, submenu_theme.base.font->get_text_width(option.name) + 2.f * submenu_margin + 25.f); // 25.f: Icon margin
 
     float y = 24.f;
 
@@ -85,7 +186,8 @@ EditorTopbarWidget::reset_components()
     auto submenu_ptr = submenu_container.get();
     for (const auto& option : category.options)
     {
-      auto entry = std::make_unique<ControlButton>(option.name);
+      auto entry = std::make_unique<TopbarEntry>(option.name, option.icon);
+      entry->separator = option.new_category;
       entry->set_rect(Rectf(x, y, x + submenu_width, y + 24.f));
       entry->m_theme = submenu_theme;
       entry->m_on_change = [submenu_ptr, option] {
@@ -165,6 +267,17 @@ EditorTopbarWidget::on_mouse_button_up(const SDL_MouseButtonEvent& button)
   }
 
   return r;
+}
+
+EditorTopbarWidget::MenuEntry*
+EditorTopbarWidget::get_entry_by_id(const std::string& id)
+{
+  for (auto& section : m_menu)
+    for (auto& entry : section.options)
+      if (entry.id == id)
+        return &entry;
+
+  return nullptr;
 }
 
 /* EOF */
