@@ -17,6 +17,7 @@
 #include "interface/control.hpp"
 
 #include "interface/container.hpp"
+#include "interface/label.hpp"
 #include "video/video_system.hpp"
 #include "video/viewport.hpp"
 
@@ -52,6 +53,14 @@ InterfaceControl::InterfaceControl(InterfaceThemeSet theme) :
 {
 }
 
+InterfaceControl::~InterfaceControl()
+{
+  // Lifetime needs to be managed manually because InterfaceLabel inherits
+  // InterfaceControl, and I can't include each other in a circular way
+  if (m_label)
+    delete m_label;
+}
+
 std::vector<std::function<void()>>
 InterfaceControl::set_focus(bool focus, std::vector<std::function<void()>> callbacks)
 {
@@ -74,6 +83,13 @@ InterfaceControl::set_focus(bool focus, std::vector<std::function<void()>> callb
   }
 
   return callbacks;
+}
+
+void
+InterfaceControl::draw(DrawingContext& context)
+{
+  if (m_label)
+    m_label->draw(context);
 }
 
 void

@@ -87,7 +87,7 @@ BoolObjectOption::add_to_settings(float width, Editor& editor, GameObject* go) c
   auto control = std::make_unique<ControlCheckbox>();
   control->set_rect(Rectf(width * 3.f / 4.f - 10.f, 0.f, width * 3.f / 4.f + 10.f, 20.f));
   control->bind_value(m_pointer);
-  control->m_label = std::make_unique<InterfaceLabel>();
+  control->m_label = new InterfaceLabel();
   control->m_label->set_rect(Rectf(10.f, 0.f, width / 2.f - 5.f, 20.f));
   control->m_label->set_label(get_text());
 
@@ -151,7 +151,7 @@ IntObjectOption::add_to_settings(float width, Editor& editor, GameObject* go) co
   auto control = std::make_unique<ControlTextboxInt>();
   control->set_rect(Rectf(width / 2.f + 5.f, 0.f, width - 10.f, 20.f));
   control->bind_value(m_pointer);
-  control->m_label = std::make_unique<InterfaceLabel>();
+  control->m_label = new InterfaceLabel();
   control->m_label->set_rect(Rectf(10.f, 0.f, width / 2.f - 5.f, 20.f));
   control->m_label->set_label(get_text());
 
@@ -205,7 +205,7 @@ RectfObjectOption::add_to_settings(float width, Editor& editor, GameObject* go) 
   control_h->set_rect(Rectf(width * 3.f / 4.f + 5.f, 0.f, width - 10.f, 20.f));
   control_h->bind_value(const_cast<float*>(&m_height));
 
-  container->m_label = std::make_unique<InterfaceLabel>();
+  container->m_label = new InterfaceLabel();
   container->m_label->set_rect(Rectf(10.f, 0.f, width / 2.f - 5.f, 20.f));
   container->m_label->set_label(_("Width") + " / " + _("Height"));
   container->m_children.push_back(std::move(control_w));
@@ -253,7 +253,7 @@ FloatObjectOption::add_to_settings(float width, Editor& editor, GameObject* go) 
   auto control = std::make_unique<ControlTextboxFloat>();
   control->set_rect(Rectf(width / 2.f + 5.f, 0.f, width - 10.f, 20.f));
   control->bind_value(m_pointer);
-  control->m_label = std::make_unique<InterfaceLabel>();
+  control->m_label = new InterfaceLabel();
   control->m_label->set_rect(Rectf(10.f, 0.f, width / 2.f - 5.f, 20.f));
   control->m_label->set_label(get_text());
 
@@ -299,7 +299,7 @@ StringObjectOption::add_to_settings(float width, Editor& editor, GameObject* go)
   auto control = std::make_unique<ControlTextbox>();
   control->set_rect(Rectf(width / 2.f + 5.f, 0.f, width - 10.f, 20.f));
   control->bind_string(&(*m_pointer));
-  control->m_label = std::make_unique<InterfaceLabel>();
+  control->m_label = new InterfaceLabel();
   control->m_label->set_rect(Rectf(10.f, 0.f, width / 2.f - 5.f, 20.f));
   control->m_label->set_label(get_text());
 
@@ -362,7 +362,7 @@ StringSelectObjectOption::add_to_settings(float width, Editor& editor, GameObjec
 
   control->bind_value(m_pointer);
 
-  control->m_label = std::make_unique<InterfaceLabel>();
+  control->m_label = new InterfaceLabel();
   control->m_label->set_rect(Rectf(10.f, 0.f, width / 2.f - 5.f, 20.f));
   control->m_label->set_label(get_text());
 
@@ -427,7 +427,7 @@ EnumObjectOption::add_to_settings(float width, Editor& editor, GameObject* go) c
 
   control->bind_value(m_pointer);
 
-  control->m_label = std::make_unique<InterfaceLabel>();
+  control->m_label = new InterfaceLabel();
   control->m_label->set_rect(Rectf(10.f, 0.f, width / 2.f - 5.f, 20.f));
   control->m_label->set_label(get_text());
 
@@ -475,7 +475,7 @@ ScriptObjectOption::add_to_settings(float width, Editor& editor, GameObject* go)
   auto control = std::make_unique<ControlTextbox>();
   control->set_rect(Rectf(width / 2.f + 5.f, 0.f, width - 10.f, 20.f));
   control->bind_string(m_pointer);
-  control->m_label = std::make_unique<InterfaceLabel>();
+  control->m_label = new InterfaceLabel();
   control->m_label->set_rect(Rectf(10.f, 0.f, width / 2.f - 5.f, 20.f));
   control->m_label->set_label(get_text());
 
@@ -603,7 +603,7 @@ ColorObjectOption::add_to_settings(float width, Editor& editor, GameObject* go) 
   control_a->set_rect(Rectf(width * 3.f / 4.f + 5.f, 24.f, width - 10.f, 44.f));
   control_a->bind_value(const_cast<float*>(&(m_pointer->alpha)));
 
-  container->m_label = std::make_unique<InterfaceLabel>();
+  container->m_label = new InterfaceLabel();
   container->m_label->set_rect(Rectf(10.f, 0.f, width / 2.f - 5.f, 20.f));
   container->m_label->set_label(get_text());
 

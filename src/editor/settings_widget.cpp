@@ -16,6 +16,7 @@
 
 #include "editor/settings_widget.hpp"
 
+#include "editor/settings_message.hpp"
 #include "interface/control_textbox.hpp"
 #include "interface/label.hpp"
 #include "object/moving_sprite.hpp"
@@ -75,7 +76,9 @@ EditorSettingsWidget::draw(DrawingContext& context)
   {
     auto sprite = SpriteManager::current()->create(ms->get_sprite_name());
     context.color().draw_surface(sprite->get_current_surface(),
-                                 Vector(128, 8) + m_rect.p1(), LAYER_GUI - 2);
+                                 Vector(128, 8 - m_scrollbar.m_progress)
+                                                                  + m_rect.p1(),
+                                 LAYER_GUI - 2);
   }
 
   InterfaceContainer::draw(context);
@@ -111,16 +114,7 @@ EditorSettingsWidget::on_mouse_wheel(const SDL_MouseWheelEvent& wheel)
   if (!m_rect.contains(m_mouse_pos))
     return false;
 
-  if (!m_scrollbar.is_valid())
-    // FIXME: (Discuss) Should mouse-wheeling over the widget when there is no
-    //        scrollbar make this return true anyways?
-    return true;
-
-  float old_progress = m_scrollbar.m_progress;
-  m_scrollbar.m_progress = math::clamp(m_scrollbar.m_progress - static_cast<float>(wheel.y * 30),
-                                       0.f,
-                                       m_scrollbar.m_total_region - m_scrollbar.m_covered_region);
-  move_components(old_progress - m_scrollbar.m_progress);
+  move_components(-static_cast<float>(wheel.y * 30));
 
   return true;
 }
@@ -144,7 +138,30 @@ EditorSettingsWidget::reset_components()
   if (!m_object)
     return;
 
-  float top = 64.f - m_scrollbar.m_progress;
+  // Reset scrollbar position if necessary
+  m_scrollbar.m_progress = math::clamp(m_scrollbar.m_progress, 0.f,
+                                       m_scrollbar.m_total_region - m_scrollbar.m_covered_region);
+  if (!m_scrollbar.is_valid())
+    m_scrollbar.m_progress = 0.f;
+
+  // Keeps track of the total height of all created components
+  float top = 70.f - m_scrollbar.m_progress;
+
+  const auto& messages = m_object->validate();
+  for (const auto& m : messages)
+  {
+    auto sm = std::make_unique<SettingsMessage>(Rectf(m_rect.get_left() + 10.f,
+                                                      m_rect.get_top() + top,
+                                                      m_rect.get_right() - 10.f,
+                                                      m_rect.get_top() + top + 20.f),
+                                                m.get_message(),
+                                                m.get_level());
+    m_children.push_back(std::move(sm));
+    top += 30.f;
+  }
+
+  top += 10.f;
+
   const auto& settings = m_object->get_settings();
   for (auto oo_ptr = settings.get_options().begin(); oo_ptr != settings.get_options().end(); oo_ptr++)
   {
@@ -176,8 +193,18 @@ EditorSettingsWidget::reset_components()
 }
 
 void
-EditorSettingsWidget::move_components(float delta)
+EditorSettingsWidget::move_components(float delta_)
 {
+  float old_progress = m_scrollbar.m_progress;
+  m_scrollbar.m_progress = math::clamp(m_scrollbar.m_progress + delta_,
+                                       0.f,
+                                       m_scrollbar.m_total_region - m_scrollbar.m_covered_region);
+
+  if (!m_scrollbar.is_valid())
+    m_scrollbar.m_progress = 0.f;
+
+  float delta = old_progress - m_scrollbar.m_progress;
+
   // TODO: Make a "get children recursively" method
   for (auto& control : m_children)
   {

@@ -27,7 +27,7 @@ InterfaceLabel::InterfaceLabel() :
 {
 }
 
-InterfaceLabel::InterfaceLabel(const Rectf& rect, std::string label) :
+InterfaceLabel::InterfaceLabel(const Rectf& rect, const std::string& label) :
   m_rect(rect),
   m_label(std::move(label)),
   m_mouse_pos()
@@ -83,38 +83,6 @@ InterfaceLabel::draw(DrawingContext& context)
   }
 }
 
-void
-InterfaceLabel::draw_tooltip(DrawingContext& context, const std::string& text) const
-{
-  float w = Resources::control_font->get_text_width(text) + 10.f;
-  float h = Resources::control_font->get_height() + 10.f;
-
-  // Compression of a bazillion lines because I like messy stuff              /s
-  Vector pos(
-    (w > static_cast<float>(context.get_width()) - m_mouse_pos.x)
-      ? std::max(0.f, m_mouse_pos.x - w)
-      : m_mouse_pos.x,
-    (h > static_cast<float>(context.get_height()) - m_mouse_pos.y - 32.f)
-      ? std::max(0.f, m_mouse_pos.y - h)
-      : m_mouse_pos.y + 32.f
-  );
-
-  Rectf box(pos, pos + Vector(w, h));
-
-  context.color().draw_filled_rect(box,
-                                   Color(.1f, .1f, .1f, .8f),
-                                   LAYER_GUI + 10);
-  context.color().draw_filled_rect(box.grown(-2.f),
-                                   Color(1.f, 1.f, 1.f, .1f),
-                                   LAYER_GUI + 10);
-  context.color().draw_text(Resources::control_font,
-                            text,
-                            pos + Vector(5.f, 5.f),
-                            FontAlignment::ALIGN_LEFT,
-                            LAYER_GUI + 11,
-                            Color::WHITE);
-}
-
 bool
 InterfaceLabel::fits(const std::string& text) const
 {
@@ -133,4 +101,4 @@ InterfaceLabel::get_truncated_text() const
   return temp + "...";
 }
 
-
+/* EOF */

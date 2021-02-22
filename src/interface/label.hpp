@@ -19,23 +19,18 @@
 
 #include <SDL.h>
 
-#include "editor/widget.hpp"
+#include "interface/control.hpp"
 #include "video/drawing_context.hpp"
 
-class InterfaceLabel : public Widget
+class InterfaceLabel : public InterfaceControl
 {
 public:
   InterfaceLabel();
-  InterfaceLabel(const Rectf& rect, std::string label);
+  InterfaceLabel(const Rectf& rect, const std::string& label);
   virtual ~InterfaceLabel() {}
 
   virtual void draw(DrawingContext& context) override;
   virtual bool on_mouse_motion(const SDL_MouseMotionEvent& motion) override;
-
-  void draw_tooltip(DrawingContext& context, const std::string& text) const;
-
-  void set_rect(const Rectf& rect) { m_rect = rect; }
-  Rectf& get_rect() { return m_rect; }
 
   void set_label(const std::string& label) { m_label = label; }
   std::string get_label() const { return m_label; }

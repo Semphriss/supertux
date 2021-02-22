@@ -21,21 +21,21 @@
 
 #include "control/input_manager.hpp"
 #include "editor/widget.hpp"
-#include "interface/label.hpp"
 #include "interface/theme.hpp"
 #include "video/drawing_context.hpp"
 
 class InterfaceContainer;
+class InterfaceLabel;
 
 class InterfaceControl : public Widget
 {
 public:
   InterfaceControl();
   InterfaceControl(InterfaceThemeSet theme);
-  virtual ~InterfaceControl() {}
+  virtual ~InterfaceControl();
 
   virtual bool event(const SDL_Event& ev) override { if (!m_enabled) return false; return Widget::event(ev); }
-  virtual void draw(DrawingContext& context) override { if (m_label) m_label->draw(context); }
+  virtual void draw(DrawingContext& context) override;
   virtual bool on_mouse_button_up(const SDL_MouseButtonEvent& button) override { m_mouse_down = false; return false; }
   virtual bool on_mouse_button_down(const SDL_MouseButtonEvent& button) override { m_mouse_down = true; return false; }
   virtual bool on_mouse_motion(const SDL_MouseMotionEvent& motion) override;
@@ -69,7 +69,7 @@ public:
   std::function<void()> m_on_focus;
 
   /** Optional; the label associated with the control */
-  std::unique_ptr<InterfaceLabel> m_label;
+  InterfaceLabel* m_label;
 
   /** A pointer to the parent container, or null if not in any container. */
   InterfaceContainer* m_parent;

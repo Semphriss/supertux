@@ -252,7 +252,7 @@ ParticleEditor::reset_texture_ui()
   auto likeliness_control = std::make_unique<ControlTextboxFloat>();
   likeliness_control.get()->bind_value(&((m_particles->m_textures.begin() + m_texture_current)->likeliness));
   likeliness_control.get()->set_rect(Rectf(150.f, 50.f, 350.f, 70.f));
-  likeliness_control.get()->m_label = std::make_unique<InterfaceLabel>(Rectf(5.f, 50.f, 135.f, 70.f), "Likeliness");
+  likeliness_control.get()->m_label = new InterfaceLabel(Rectf(5.f, 50.f, 135.f, 70.f), "Likeliness");
   likeliness_control.get()->m_on_change = std::function<void()>([this](){ m_particles->reinit_textures(); this->push_version(); });
   auto likeliness_control_ptr = likeliness_control.get();
   m_texture_rebinds.push_back( [this, likeliness_control_ptr]{
@@ -263,7 +263,7 @@ ParticleEditor::reset_texture_ui()
   auto color_r_control = std::make_unique<ControlTextboxFloat>();
   color_r_control.get()->bind_value(&((m_particles->m_textures.begin() + m_texture_current)->color.red));
   color_r_control.get()->set_rect(Rectf(150.f, 80.f, 192.f, 100.f));
-  color_r_control.get()->m_label = std::make_unique<InterfaceLabel>(Rectf(5.f, 80.f, 140.f, 100.f), "Color (RGBA)");
+  color_r_control.get()->m_label = new InterfaceLabel(Rectf(5.f, 80.f, 140.f, 100.f), "Color (RGBA)");
   color_r_control.get()->m_on_change = std::function<void()>([this](){ m_particles->reinit_textures(); this->push_version(); });
   color_r_control.get()->m_validate_float = m_clamp_0_1;
   auto color_r_control_ptr = color_r_control.get();
@@ -308,7 +308,7 @@ ParticleEditor::reset_texture_ui()
   auto scale_x_control = std::make_unique<ControlTextboxFloat>();
   scale_x_control.get()->bind_value(&((m_particles->m_textures.begin() + m_texture_current)->scale.x));
   scale_x_control.get()->set_rect(Rectf(150.f, 110.f, 240.f, 130.f));
-  scale_x_control.get()->m_label = std::make_unique<InterfaceLabel>(Rectf(5.f, 110.f, 150.f, 130.f), "Scale (x, y)");
+  scale_x_control.get()->m_label = new InterfaceLabel(Rectf(5.f, 110.f, 150.f, 130.f), "Scale (x, y)");
   scale_x_control.get()->m_on_change = std::function<void()>([this](){ m_particles->reinit_textures(); this->push_version(); });
   auto scale_x_control_ptr = scale_x_control.get();
   m_texture_rebinds.push_back( [this, scale_x_control_ptr]{
@@ -329,7 +329,7 @@ ParticleEditor::reset_texture_ui()
   auto hb_scale_x_control = std::make_unique<ControlTextboxFloat>();
   hb_scale_x_control.get()->bind_value(&((m_particles->m_textures.begin() + m_texture_current)->hb_scale.x));
   hb_scale_x_control.get()->set_rect(Rectf(150.f, 140.f, 240.f, 160.f));
-  hb_scale_x_control.get()->m_label = std::make_unique<InterfaceLabel>(Rectf(5.f, 140.f, 150.f, 160.f), "Hitbox scale (x, y)");
+  hb_scale_x_control.get()->m_label = new InterfaceLabel(Rectf(5.f, 140.f, 150.f, 160.f), "Hitbox scale (x, y)");
   hb_scale_x_control.get()->m_on_change = std::function<void()>([this](){ m_particles->reinit_textures(); this->push_version(); });
   auto hb_scale_x_control_ptr = hb_scale_x_control.get();
   m_texture_rebinds.push_back( [this, hb_scale_x_control_ptr]{
@@ -350,7 +350,7 @@ ParticleEditor::reset_texture_ui()
   auto hb_offset_x_control = std::make_unique<ControlTextboxFloat>();
   hb_offset_x_control.get()->bind_value(&((m_particles->m_textures.begin() + m_texture_current)->hb_offset.x));
   hb_offset_x_control.get()->set_rect(Rectf(150.f, 170.f, 240.f, 190.f));
-  hb_offset_x_control.get()->m_label = std::make_unique<InterfaceLabel>(Rectf(5.f, 170.f, 150.f, 190.f), "Hitbox offset relative to scale");
+  hb_offset_x_control.get()->m_label = new InterfaceLabel(Rectf(5.f, 170.f, 150.f, 190.f), "Hitbox offset relative to scale");
   hb_offset_x_control.get()->m_on_change = std::function<void()>([this](){ m_particles->reinit_textures(); this->push_version(); });
   auto hb_offset_x_control_ptr = hb_offset_x_control.get();
   m_texture_rebinds.push_back( [this, hb_offset_x_control_ptr]{
@@ -469,8 +469,8 @@ ParticleEditor::addTextboxFloatWithImprecision(const std::string& name, float* b
   float_control.get()->set_rect(Rectf(150.f, height, 235.f, height + 20.f));
   imp_control.get()->set_rect(Rectf(265.f, height, 350.f, height + 20.f));
 
-  float_control.get()->m_label = std::make_unique<InterfaceLabel>(Rectf(5.f, height, 145.f, height + 20.f), name);
-  imp_control.get()->m_label = std::make_unique<InterfaceLabel>(Rectf(240.f, height, 260.f, height + 20.f), "±");
+  float_control.get()->m_label = new InterfaceLabel(Rectf(5.f, height, 145.f, height + 20.f), name);
+  imp_control.get()->m_label = new InterfaceLabel(Rectf(240.f, height, 260.f, height + 20.f), "±");
 
   float_control.get()->m_on_change = std::function<void()>([this](){ this->push_version(); });
   imp_control.get()->m_on_change = std::function<void()>([this](){ this->push_version(); });
@@ -554,7 +554,7 @@ ParticleEditor::addControl(std::string name, std::unique_ptr<InterfaceControl> n
                                       height + new_control.get()->get_rect().get_height()));
   }
 
-  new_control.get()->m_label = std::make_unique<InterfaceLabel>(Rectf(5.f, height, 135.f, height + 20.f), std::move(name));
+  new_control.get()->m_label = new InterfaceLabel(Rectf(5.f, height, 135.f, height + 20.f), std::move(name));
   new_control.get()->m_on_change = std::function<void()>([this](){ this->push_version(); });
   m_controls.push_back(std::move(new_control));
 }

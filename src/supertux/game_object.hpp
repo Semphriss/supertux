@@ -48,6 +48,50 @@ class GameObject
   friend class GameObjectManager;
 
 public:
+  enum class ValidationLevel {
+    /**
+     * For situations that are expected and normal, but might create confustion
+     * under certain circumstances.
+     * 
+     * Example: Setting the "Speed" value on a path node will automatically
+     * override the "Time" value. This is expected and normal, but might confuse
+     * an unexperimented user.
+     */
+    NOTICE,
+    /**
+     * For situations that were likely not intended by the user, but that don't
+     * make the object invalid or unusable.
+     * 
+     * Example: Setting two mutually exclusive settings simultaneously. The user
+     * obviously didn't mean to do that, but the game can still run with it.
+     */
+    WARNING,
+    /**
+     * For situations that break one or more of the object's main features.
+     * 
+     * Example: An incorrectly formatted string.
+     */
+    ERROR
+  };
+
+  /** Class holding the details of a specific validation problem. */
+  class Validation {
+  public:
+    Validation(ValidationLevel l, std::string m) :
+      level(l),
+      message(m)
+    {
+    }
+
+    ValidationLevel get_level() const { return level; }
+    std::string get_message() const { return message; }
+
+  private:
+    ValidationLevel level;
+    std::string message;
+  };
+
+public:
   GameObject();
   GameObject(const std::string& name);
   GameObject(const ReaderMapping& reader);
@@ -158,6 +202,16 @@ public:
   /** Called each frame in the editor, used to keep linked objects
       together (e.g. platform on a path) */
   virtual void editor_update() {}
+
+  /**
+   * Performs validation on the object.
+   * 
+   * In case of error, this function MUST NOT THROW; instead, it must return a
+   * message describing the error (along with any other potential message).
+   * 
+   * @returns A list of error messages containing all the errors in the object.
+   */
+  virtual std::vector<Validation> validate() { return {}; }
 
 private:
   void set_uid(const UID& uid) { m_uid = uid; }

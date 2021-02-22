@@ -24,6 +24,7 @@
 EditorObjectWidget::EditorObjectWidget(Editor& editor) :
   m_editor(editor),
   m_scrollbar(),
+  m_side_scrollbar(),
   m_left(192),
   m_bottom(static_cast<float>(SCREEN_HEIGHT / 2)),
   m_rect(Rect(SCREEN_WIDTH - static_cast<int>(m_left), 0,
@@ -33,17 +34,25 @@ EditorObjectWidget::EditorObjectWidget(Editor& editor) :
   m_object(),
   m_input_type()
 {
-  m_scrollbar.set_rect(Rect(SCREEN_WIDTH - 5, SCREEN_HEIGHT / 2,
-                            SCREEN_WIDTH, SCREEN_HEIGHT));
-  m_scrollbar.m_horizontal = false;
-  m_scrollbar.m_theme = InterfaceThemeSet(
+  auto scrollbar_theme = InterfaceThemeSet(
     InterfaceTheme(Resources::control_font, Color(.7f, .7f, .7f, 1.f), Color::BLACK, 0.f), // base
     InterfaceTheme(Resources::control_font, Color(.8f, .8f, .8f, 1.f), Color::BLACK, 0.f), // hover
     InterfaceTheme(Resources::control_font, Color(1.f, 1.f, 1.f, 1.f), Color::BLACK, 0.f), // active
     InterfaceTheme(Resources::control_font, Color(.9f, .9f, .9f, 1.f), Color::BLACK, 0.f), // focused
     InterfaceTheme(Resources::control_font, Color(.3f, .3f, .3f, 1.f), Color::BLACK, 0.f) // disabled
   );
-  m_scrollbar.m_on_change = [this] { reset_components(); };
+
+  m_side_scrollbar.set_rect(Rect(SCREEN_WIDTH - 5, SCREEN_HEIGHT / 2,
+                                 SCREEN_WIDTH, SCREEN_HEIGHT));
+  m_side_scrollbar.m_horizontal = false;
+  m_side_scrollbar.m_theme = scrollbar_theme;
+  m_side_scrollbar.m_on_change = [this] { reset_sidebar(); };
+
+  m_scrollbar.set_rect(Rect(SCREEN_WIDTH - 37, SCREEN_HEIGHT / 2,
+                            SCREEN_WIDTH - 32, SCREEN_HEIGHT));
+  m_scrollbar.m_horizontal = false;
+  m_scrollbar.m_theme = scrollbar_theme;
+  m_scrollbar.m_on_change = [this] { reset_content(); };
 
   resize();
 }
@@ -56,9 +65,10 @@ EditorObjectWidget::draw(DrawingContext& context)
   context.push_transform();
   context.transform().clip = Rect(m_rect);
 
-  InterfaceContainer::draw(context);
+  InterfaceControl::draw(context);
 
   m_scrollbar.draw(context);
+  m_side_scrollbar.draw(context);
 
   context.pop_transform();
 }
@@ -73,11 +83,16 @@ EditorObjectWidget::resize()
 {
   m_rect = Rect(SCREEN_WIDTH - static_cast<int>(m_left), 0,
                 SCREEN_WIDTH, static_cast<int>(m_bottom));
-  m_scrollbar.set_rect(Rect(SCREEN_WIDTH - 5, 0,
-                            SCREEN_WIDTH, static_cast<int>(m_bottom)));
-  m_scrollbar.m_covered_region = m_rect.get_height();
 
-  reset_components();
+  m_side_scrollbar.m_covered_region = m_rect.get_height();
+  m_side_scrollbar.set_rect(Rect(SCREEN_WIDTH - 5, 0,
+                                 SCREEN_WIDTH, static_cast<int>(m_bottom)));
+
+  m_scrollbar.m_covered_region = m_rect.get_height();
+  m_scrollbar.set_rect(Rect(SCREEN_WIDTH - 37, 0,
+                            SCREEN_WIDTH - 32, static_cast<int>(m_bottom)));
+
+  reset_all();
 }
 
 bool
@@ -86,22 +101,45 @@ EditorObjectWidget::on_mouse_wheel(const SDL_MouseWheelEvent& wheel)
   if (!m_rect.contains(m_mouse_pos))
     return false;
 
-  m_scrollbar.m_progress = math::clamp(m_scrollbar.m_progress - static_cast<float>(wheel.y * 30),
-                                       0.f,
-                                       m_scrollbar.m_total_region - m_scrollbar.m_covered_region);
+  if (m_mouse_pos.x >= static_cast<float>(SCREEN_WIDTH - 32))
+  {
+    m_side_scrollbar.m_progress = math::clamp(m_side_scrollbar.m_progress - static_cast<float>(wheel.y * 30),
+                                              0.f,
+                                              m_side_scrollbar.m_total_region - m_side_scrollbar.m_covered_region);
 
-  reset_components();
+    if (!m_side_scrollbar.is_valid())
+      m_side_scrollbar.m_progress = 0.f;
+
+    reset_sidebar();
+  }
+  else
+  {
+    m_scrollbar.m_progress = math::clamp(m_scrollbar.m_progress - static_cast<float>(wheel.y * 30),
+                                        0.f,
+                                        m_scrollbar.m_total_region - m_scrollbar.m_covered_region);
+
+    if (!m_scrollbar.is_valid())
+      m_scrollbar.m_progress = 0.f;
+
+    reset_content();
+  }
+  
 
   return true;
 }
 
 void
-EditorObjectWidget::reset_components()
+EditorObjectWidget::reset_content()
 {
-  m_children.clear();
-
   m_scrollbar.m_total_region = 1000.f;
   m_scrollbar.m_covered_region = m_rect.get_height();
+}
+
+void
+EditorObjectWidget::reset_sidebar()
+{
+  m_side_scrollbar.m_total_region = 500.f;
+  m_side_scrollbar.m_covered_region = m_rect.get_height();
 }
 
 /* EOF */

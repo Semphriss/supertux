@@ -27,11 +27,11 @@ class Editor;
 class GameObject;
 
 /** A panel to hold an object's settings. */
-class EditorObjectWidget final : public InterfaceContainer
+class EditorObjectWidget final : public InterfaceControl
 {
 public:
   enum class InputType {
-    NONE, TILE, OBJECT
+    NONE, TILE, OBJECT, SECTOR
   };
 
 private:
@@ -46,9 +46,16 @@ public:
   virtual void resize() override;
   virtual bool on_mouse_wheel(const SDL_MouseWheelEvent& wheel) override;
 
-  virtual bool event(const SDL_Event& event) override { return m_scrollbar.event(event) || InterfaceContainer::event(event); }
+  virtual bool event(const SDL_Event& event) override
+  {
+    return m_scrollbar.event(event) ||
+           m_side_scrollbar.event(event) ||
+           InterfaceControl::event(event);
+  }
 
-  void reset_components();
+  void reset_all() { reset_sidebar(); reset_content(); }
+  void reset_content();
+  void reset_sidebar();
   void set_left(float left) { m_left = left; }
   void set_bottom(float bottom) { m_bottom = bottom; }
 
@@ -69,7 +76,7 @@ public:
 
 private:
   Editor& m_editor;
-  ControlScrollbar m_scrollbar;
+  ControlScrollbar m_scrollbar, m_side_scrollbar;
   float m_left, m_bottom;
   Rectf m_rect;
   std::unique_ptr<ObjectInfo> m_object_info;
