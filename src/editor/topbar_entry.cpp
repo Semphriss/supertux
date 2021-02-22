@@ -20,7 +20,8 @@
 
 TopbarEntry::TopbarEntry(std::string label, std::string icon) :
   ControlButton(label),
-  m_btn_icon(icon != "" ? SpriteManager::current()->create(icon) : nullptr)
+  m_btn_icon(icon != "" ? SpriteManager::current()->create(icon) : nullptr),
+  separator()
 {
 }
 

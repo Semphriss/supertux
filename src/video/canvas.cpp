@@ -405,7 +405,7 @@ Canvas::apply_translate(const Vector& pos) const
 Rectf
 Canvas::clip_src(const Rectf& src, const Rectf& dest) const
 {
-  return src.intersect(m_context.transform().clip.moved(-dest.p1().x, -dest.p1().y));
+  return src.intersect(Rectf(m_context.transform().clip).moved(-dest.p1()));
 }
 
 float

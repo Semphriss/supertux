@@ -159,12 +159,13 @@ Editor::draw(Compositor& compositor)
                                      Color(0.0f, 0.0f, 0.0f),
                                      0.0f, std::numeric_limits<int>::min());
 
-    context.color().draw_line(Vector(context.get_width() - m_panel_grab_h + 16.f, m_panel_grab_v),
-                              Vector(context.get_width() - m_panel_grab_h / 2 - 36, m_panel_grab_v),
+    float fw = static_cast<float>(context.get_width());
+    context.color().draw_line(Vector(fw - m_panel_grab_h + 16.f, m_panel_grab_v),
+                              Vector(fw - m_panel_grab_h / 2 - 36, m_panel_grab_v),
                               Color(0.f, 0.f, 0.f, .5f),
                               LAYER_GUI + 1);
-    context.color().draw_line(Vector(context.get_width() - m_panel_grab_h / 2 + 36, m_panel_grab_v),
-                              Vector(context.get_width(), m_panel_grab_v),
+    context.color().draw_line(Vector(fw - m_panel_grab_h / 2 + 36, m_panel_grab_v),
+                              Vector(fw, m_panel_grab_v),
                               Color(0.f, 0.f, 0.f, .5f),
                               LAYER_GUI + 1);
     context.color().draw_filled_rect(panel_grab_h(), Color(1.f, 1.f, 1.f, .5f),
