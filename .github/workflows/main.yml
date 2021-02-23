@@ -168,6 +168,31 @@ jobs:
         env:
           PREFIX: "${{ github.sha }}/gh-actions/${{ matrix.os }}-${{ matrix.arch }}/${{ github.run_id }}"
           DOWNLOAD_APIKEY: ${{ secrets.DOWNLOAD_APIKEY }}
+      - name: Upload to alternate nightly website
+        if: matrix.release == 'ON' && env.KEY != null && env.BRANCH != ''
+        working-directory: build/upload
+        env:
+          PLATFORM: ${{ format('{0}_{1}-bit', matrix.os == 'macos-latest' && 'macOS' || 'Linux', matrix.arch) }}
+          PATTERN: ${{ matrix.os == 'macos-latest' && '*.dmg' || '*.AppImage' }}
+          KEY: ${{ secrets.NIGHTLY_KEY }}
+          BRANCH: ${{ github.head_ref || github.ref }}
+        run: |
+          echo ${BRANCH#refs/heads/}
+          echo ${PLATFORM}
+          echo ${PATTERN}
+          pwd
+          find . -name ${PATTERN}
+          echo =====================
+          curl -F "subdir=${PLATFORM}" \
+               -F "branch=${BRANCH#refs/heads/}" \
+               -F "key=${KEY}" \
+               -F "artifact=@$(pwd)/$(find . -name ${PATTERN} | head -n 1)" \
+               supertux.semphris.com/api/nightlies
+          curl -F "subdir=source_code" \
+               -F "branch=${BRANCH#refs/heads/}" \
+               -F "key=${KEY}" \
+               -F "artifact=@$(pwd)/$(find . -name *.tar.gz | head -n 1)" \
+               supertux.semphris.com/api/nightlies
       - name: Create Release
         if: startsWith(github.ref, 'refs/tags/') && matrix.release == 'ON' && github.repository_owner == 'supertux'
         uses: softprops/action-gh-release@v1
