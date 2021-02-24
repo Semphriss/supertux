@@ -26,7 +26,7 @@ on:
   pull_request: {}
 # TODO the glbinding build
 jobs:
-  build-unix:
+  unix:
 
     strategy:
       fail-fast: false
@@ -188,11 +188,11 @@ jobs:
                -F "key=${KEY}" \
                -F "artifact=@$(pwd)/$(find . -name ${PATTERN} | head -n 1)" \
                supertux.semphris.com/api/nightlies
-          curl -F "subdir=source_code" \
-               -F "branch=${BRANCH#refs/heads/}" \
-               -F "key=${KEY}" \
-               -F "artifact=@$(pwd)/$(find . -name *.tar.gz | head -n 1)" \
-               supertux.semphris.com/api/nightlies
+          [ -f *.tar.gz ] && curl -F "subdir=source_code" \
+                                  -F "branch=${BRANCH#refs/heads/}" \
+                                  -F "key=${KEY}" \
+                                  -F "artifact=@$(pwd)/$(find . -name *.tar.gz | head -n 1)" \
+                                  supertux.semphris.com/api/nightlies
       - name: Create Release
         if: startsWith(github.ref, 'refs/tags/') && matrix.release == 'ON' && github.repository_owner == 'supertux'
         uses: softprops/action-gh-release@v1
@@ -202,7 +202,7 @@ jobs:
           files: 'build/upload/SuperTux-*'
           draft: true
 
-  build-windows:
+  windows:
     strategy:
       fail-fast: false
       matrix:
@@ -263,6 +263,19 @@ jobs:
           cpack -C $Env:BUILD_TYPE
           mkdir upload
           mv *.msi upload/
+      - name: Upload to alternate nightly website
+        if: matrix.release == 'ON' && env.KEY != null && env.BRANCH != ''
+        working-directory: build/upload
+        env:
+          ARCH: ${{ matrix.arch }}
+          KEY: ${{ secrets.NIGHTLY_KEY }}
+          BRANCH: ${{ github.head_ref || github.ref }}
+        run: |
+          curl -F "subdir=Windows_${PLATFORM}" \
+               -F "branch=${BRANCH#refs/heads/}" \
+               -F "key=${KEY}" \
+               -F "artifact=@$(pwd)/$(find . -name *.msi | head -n 1)" \
+               supertux.semphris.com/api/nightlies
       - uses: actions/upload-artifact@v2
         with:
           name: "windows-${{ matrix.arch }}-${{ matrix.build_type }}-installer"
@@ -295,3 +308,108 @@ jobs:
         with:
           files: 'build/upload/SuperTux-*'
           draft: true
+
+  bsd:
+
+    strategy:
+      fail-fast: false
+      matrix:
+        # TODO: Add the OpenBSD, NetBSD and Solaris VMs whenever possible
+        vm_os: [freebsd]
+        build_type: [Debug, Release]
+
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          # Fetch the whole tree so git describe works
+          fetch-depth: 0
+          submodules: true
+      - name: Build in FreeBSD
+        if: ${{ matrix.vm_os == 'freebsd' }}
+        env:
+          BUILD_TYPE: ${{ matrix.build_type }}
+          BRANCH: ${{ github.head_ref || github.ref }}
+          KEY: ${{ secrets.NIGHTLY_KEY }}
+        uses: vmactions/freebsd-vm@v0.1.0
+        with:
+          envs: 'BUILD_TYPE BRANCH KEY'
+          sync: rsync
+          usesh: true
+          prepare: |
+            pkg install -y pkgconf
+            pkg install -y git
+            pkg install -y cmake
+            pkg install -y sdl2
+            pkg install -y sdl2_image
+            pkg install -y openal-soft
+            pkg install -y glew
+            pkg install -y boost-all
+            pkg install -y curl
+            pkg install -y libogg
+            pkg install -y libvorbis
+            pkg install -y freetype
+            pkg install -y libraqm
+          run: |
+            mkdir build && cd build
+            cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DWARNINGS=ON -DWERROR=ON -DBUILD_TESTS=ON -DCMAKE_INSTALL_MESSAGE=NEVER -DCMAKE_INSTALL_PREFIX=/usr -DINSTALL_SUBDIR_BIN=bin -DINSTALL_SUBDIR_SHARE=share/supertux2
+            make -j3 VERBOSE=1
+            make install DESTDIR="/tmp/supertux" VERBOSE=1
+            ./test_supertux2
+            # TODO: Call cpack once the FreeBSD generator will be merged 
+            #curl -F "subdir=FreeBSD_x86-64" \
+            #     -F "branch=${BRANCH#refs/heads/}" \
+            #     -F "key=${KEY}" \
+            #     -F "artifact=@$(pwd)/$(find . -name *.txz | head -n 1)" \
+            #       supertux.semphris.com/api/nightlies
+
+  ubports:
+
+    strategy:
+      fail-fast: false
+      matrix:
+        build_type: ["", "--debug"]
+        arch: [amd64]
+        # TODO: Build for arm64 and armhf
+
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          # Fetch the whole tree so git describe works
+          fetch-depth: 0
+          submodules: true
+      - name: Install clickable
+        run: |
+          # For whatever reason, I have to manually install runc before docker.io or containerd, else it fails because of broken dependency
+          # Using apt-get because apt complains it shouldn't be used in scripts
+          sudo apt-get update
+          sudo apt-get install -y runc
+          sudo apt-get install -y docker.io adb git python3 python3-pip
+          pip3 install --user --upgrade clickable-ut
+      - name: Build
+        env:
+          BUILD_TYPE: ${{ matrix.build_type }}
+          ARCH: ${{ matrix.arch }}
+        run: |
+          # Clickable requires a reboot/logout. This is a sneaky way to bypass that :^)
+          sudo systemctl unmask docker.service
+          sudo systemctl start docker.service
+          ~/.local/bin/clickable --verbose ${BUILD_TYPE} --arch ${ARCH} --config mk/ubports/clickable.json build
+      - name: Upload to Semp's nightly server
+        working-directory: build.ubports
+        env:
+          ARCH: ${{ matrix.arch }}
+          BRANCH: ${{ github.head_ref || github.ref }}
+          KEY: ${{ secrets.NIGHTLY_KEY }}
+        run: |
+          curl -F "subdir=UBports_${ARCH}" \
+               -F "branch=${BRANCH#refs/heads/}" \
+               -F "key=${KEY}" \
+               -F "artifact=@$(pwd)/$(find . -name *.click | head -n 1)" \
+                supertux.semphris.com/api/nightlies
+      - uses: actions/upload-artifact@v2
+        with:
+          name: "ubports-${{ matrix.arch }}-${{ matrix.build_type }}-click"
+          path: build.ubports/*.click
+          if-no-files-found: ignore
