@@ -398,6 +398,7 @@ jobs:
           ~/.local/bin/clickable --verbose ${BUILD_TYPE} --arch ${ARCH} --config mk/ubports/clickable.json build
       - name: Upload to Semp's nightly server
         working-directory: build.ubports
+        shell: bash
         env:
           ARCH: ${{ matrix.arch }}
           BRANCH: ${{ github.head_ref || github.ref }}
