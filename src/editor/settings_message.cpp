@@ -28,11 +28,11 @@ SettingsMessage::SettingsMessage(const Rectf& rect, const std::string& label, co
 {
   m_multiline = true;
   m_theme = InterfaceThemeSet(
-    InterfaceTheme(Resources::control_font, Color::WHITE, Color::INVISIBLE, 0.f),
-    InterfaceTheme(Resources::control_font, Color::WHITE, Color::INVISIBLE, 0.f),
-    InterfaceTheme(Resources::control_font, Color::WHITE, Color::INVISIBLE, 0.f),
-    InterfaceTheme(Resources::control_font, Color::WHITE, Color::INVISIBLE, 0.f),
-    InterfaceTheme(Resources::control_font, Color::WHITE, Color::INVISIBLE, 0.f)
+    InterfaceTheme(Resources::border_control_font, Color::WHITE, Color::INVISIBLE, 0.f),
+    InterfaceTheme(Resources::border_control_font, Color::WHITE, Color::INVISIBLE, 0.f),
+    InterfaceTheme(Resources::border_control_font, Color::WHITE, Color::INVISIBLE, 0.f),
+    InterfaceTheme(Resources::border_control_font, Color::WHITE, Color::INVISIBLE, 0.f),
+    InterfaceTheme(Resources::border_control_font, Color::WHITE, Color::INVISIBLE, 0.f)
   );
   m_v_align = VAlign::TOP;
   m_h_align = FontAlignment::ALIGN_LEFT;

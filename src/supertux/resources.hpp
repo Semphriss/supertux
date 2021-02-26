@@ -50,6 +50,9 @@ public:
   /** Font used for control interface elements (particle editor) */
   static FontPtr control_font;
 
+  /** Same as above, but bordered */
+  static FontPtr border_control_font;
+
   static SurfacePtr checkbox;
   static SurfacePtr checkbox_checked;
   static SurfacePtr back;
