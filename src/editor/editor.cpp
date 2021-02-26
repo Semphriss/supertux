@@ -34,6 +34,7 @@
 #include "gui/dialog.hpp"
 #include "gui/menu_manager.hpp"
 #include "gui/mousecursor.hpp"
+#include "interface/control_textarea.hpp"
 #include "math/util.hpp"
 #include "object/camera.hpp"
 #include "object/player.hpp"
@@ -129,6 +130,10 @@ Editor::Editor() :
   auto redo_button_widget = std::make_unique<ButtonWidget>("images/engine/editor/redo.png",
     Rectf(24.f, 0.f, 48.f, 24.f), [this]{ redo(); });
   auto scroller_widget = std::make_unique<EditorScrollerWidget>(*this);
+
+  auto text_editor = std::make_unique<ControlTextarea>();
+  text_editor->set_rect(Rectf(SCREEN_WIDTH / 10, SCREEN_HEIGHT / 10, SCREEN_WIDTH * 9 / 10, SCREEN_HEIGHT * 9 / 10));
+  m_widgets.push_back(std::move(text_editor));
 
   m_widgets.push_back(std::move(topbar_widget));
   m_widgets.push_back(std::move(scroller_widget));
