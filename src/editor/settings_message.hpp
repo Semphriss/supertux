@@ -23,19 +23,19 @@
 class SettingsMessage : public InterfaceLabel
 {
 public:
-  SettingsMessage(const Rectf& rect, const std::string& label, const GameObject::ValidationLevel& type) :
-    InterfaceLabel(rect, label),
-    m_type(type)
-  {}
+  SettingsMessage(const Rectf& rect, const std::string& label,
+                  const GameObject::ValidationLevel& type);
   virtual ~SettingsMessage() {}
 
   virtual void draw(DrawingContext& context) override;
 
 private:
   Color get_color() const;
+  std::string get_icon() const;
 
 private:
-  GameObject::ValidationLevel m_type;
+  const GameObject::ValidationLevel m_type;
+  const SurfacePtr m_icon;
 
 private:
   SettingsMessage(const SettingsMessage&) = delete;

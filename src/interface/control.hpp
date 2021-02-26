@@ -27,6 +27,12 @@
 class InterfaceContainer;
 class InterfaceLabel;
 
+// List of characters that must be rendered but that can break the line after
+// them. The space character is included.
+// Please only put characters which are commonly *not* followed by a space, as
+// a space will make the preceeding character breakable anyways.
+const std::string breakable_chars = "- ";
+
 class InterfaceControl : public Widget
 {
 public:

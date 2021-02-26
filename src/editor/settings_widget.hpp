@@ -50,6 +50,9 @@ public:
 private:
   void move_components(float delta);
 
+public:
+  bool m_reset_components_request;
+
 private:
   Editor& m_editor;
   ControlScrollbar m_scrollbar;

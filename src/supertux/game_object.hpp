@@ -211,7 +211,11 @@ public:
    * 
    * @returns A list of error messages containing all the errors in the object.
    */
-  virtual std::vector<Validation> validate() { return {}; }
+  virtual std::vector<Validation> validate() { return {
+    {ValidationLevel::NOTICE, "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do tempor incididunt ut labore et dolore magna aliqua."},
+    {ValidationLevel::WARNING, "Dolor incididunt sitamet, adipiscing elit, sed do eiusmod tempor incididuntlabore et dolore magna aliqua."},
+    {ValidationLevel::ERROR, "Aliqua dolor sit amet, consectetur elit, sed do eiusmodeiusmodeiusmod incididunt ut labore dolore magna aliqua."},
+  }; }
 
 private:
   void set_uid(const UID& uid) { m_uid = uid; }

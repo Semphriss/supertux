@@ -17,8 +17,26 @@
 #include "editor/settings_message.hpp"
 
 #include "supertux/resources.hpp"
+#include "video/surface.hpp"
 
 #include <iostream>
+
+SettingsMessage::SettingsMessage(const Rectf& rect, const std::string& label, const GameObject::ValidationLevel& type) :
+  InterfaceLabel(rect, label),
+  m_type(type),
+  m_icon(Surface::from_file(get_icon()))
+{
+  m_multiline = true;
+  m_theme = InterfaceThemeSet(
+    InterfaceTheme(Resources::control_font, Color::WHITE, Color::INVISIBLE, 0.f),
+    InterfaceTheme(Resources::control_font, Color::WHITE, Color::INVISIBLE, 0.f),
+    InterfaceTheme(Resources::control_font, Color::WHITE, Color::INVISIBLE, 0.f),
+    InterfaceTheme(Resources::control_font, Color::WHITE, Color::INVISIBLE, 0.f),
+    InterfaceTheme(Resources::control_font, Color::WHITE, Color::INVISIBLE, 0.f)
+  );
+  m_v_align = VAlign::TOP;
+  m_h_align = FontAlignment::ALIGN_LEFT;
+}
 
 void
 SettingsMessage::draw(DrawingContext& context)
@@ -31,14 +49,13 @@ SettingsMessage::draw(DrawingContext& context)
                                    Color(0.f, 0.f, 0.f, .5f),
                                    3.f,
                                    LAYER_GUI);
-  context.color().draw_text(Resources::control_font,
-                            get_truncated_text(),
-                            Vector(m_rect.get_left() + 5.f,
-                                   (m_rect.get_top() + m_rect.get_bottom()) / 2 -
-                                    Resources::control_font->get_height() / 2 + 1.f),
-                            FontAlignment::ALIGN_LEFT,
-                            LAYER_GUI,
-                            Color::WHITE);
+
+  context.push_transform();
+  context.transform().clip = Rect(m_rect).intersect(context.transform().clip);
+  context.color().draw_surface(m_icon, m_rect.p1() - Vector(32, 32), LAYER_GUI);
+  context.pop_transform();
+
+  InterfaceLabel::draw(context);
 }
 
 Color
@@ -52,6 +69,23 @@ SettingsMessage::get_color() const
       return Color(.7f, .7f, .2f);
     case GameObject::ValidationLevel::ERROR:
       return Color(.7f, .2f, .2f);
+  }
+
+  // problem
+  assert(false);
+}
+
+std::string
+SettingsMessage::get_icon() const
+{
+  switch (m_type)
+  {
+    case GameObject::ValidationLevel::NOTICE:
+      return "images/engine/editor/info.png";
+    case GameObject::ValidationLevel::WARNING:
+      return "images/engine/editor/warn.png";
+    case GameObject::ValidationLevel::ERROR:
+      return "images/engine/editor/error.png";
   }
 
   // problem

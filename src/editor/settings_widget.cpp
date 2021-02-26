@@ -26,7 +26,10 @@
 #include "video/video_system.hpp"
 #include "video/viewport.hpp"
 
+#include <iostream>
+
 EditorSettingsWidget::EditorSettingsWidget(Editor& editor) :
+  m_reset_components_request(false),
   m_editor(editor),
   m_scrollbar(),
   m_left(192),
@@ -53,6 +56,12 @@ EditorSettingsWidget::EditorSettingsWidget(Editor& editor) :
 void
 EditorSettingsWidget::draw(DrawingContext& context)
 {
+  if (m_reset_components_request)
+  {
+    m_reset_components_request = false;
+    reset_components();
+  }
+
   context.color().draw_filled_rect(m_rect, Color(.15f, .15f, .15f), LAYER_GUI - 3);
 
   context.push_transform();
@@ -91,6 +100,12 @@ EditorSettingsWidget::draw(DrawingContext& context)
 void
 EditorSettingsWidget::update(float dt_sec)
 {
+  if (m_reset_components_request)
+  {
+    m_reset_components_request = false;
+    reset_components();
+  }
+
   // Shouldn't be needed, but just in case
   if (m_object && !m_object->is_valid())
     set_object(nullptr);
@@ -105,7 +120,7 @@ EditorSettingsWidget::resize()
                             SCREEN_WIDTH, SCREEN_HEIGHT));
   m_scrollbar.m_covered_region = m_rect.get_height();
 
-  reset_components();
+  m_reset_components_request = true;
 }
 
 bool
@@ -127,7 +142,7 @@ EditorSettingsWidget::set_object(GameObject* object)
 
   m_object = object;
 
-  reset_components();
+  m_reset_components_request = true;
 }
 
 void
@@ -153,11 +168,12 @@ EditorSettingsWidget::reset_components()
     auto sm = std::make_unique<SettingsMessage>(Rectf(m_rect.get_left() + 10.f,
                                                       m_rect.get_top() + top,
                                                       m_rect.get_right() - 10.f,
-                                                      m_rect.get_top() + top + 20.f),
+                                                      m_rect.get_top() + top + 100.f),
                                                 m.get_message(),
                                                 m.get_level());
+    sm->autoresize_bottom();
+    top += sm->get_rect().get_height() + 10.f;
     m_children.push_back(std::move(sm));
-    top += 30.f;
   }
 
   top += 10.f;
