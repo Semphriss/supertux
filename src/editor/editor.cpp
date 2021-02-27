@@ -132,7 +132,7 @@ Editor::Editor() :
   auto scroller_widget = std::make_unique<EditorScrollerWidget>(*this);
 
   auto text_editor = std::make_unique<ControlTextarea>();
-  text_editor->set_rect(Rectf(SCREEN_WIDTH / 10, SCREEN_HEIGHT / 10, SCREEN_WIDTH * 9 / 10, SCREEN_HEIGHT * 9 / 10));
+  text_editor->set_rect(Rectf(SCREEN_WIDTH / 10, SCREEN_HEIGHT / 10, SCREEN_WIDTH * 5 / 10, SCREEN_HEIGHT * 5 / 10));
   m_widgets.push_back(std::move(text_editor));
 
   m_widgets.push_back(std::move(topbar_widget));

@@ -16,6 +16,8 @@
 
 #include "util/line_iterator.hpp"
 
+#include <algorithm>
+
 LineIterator::LineIterator(const std::string& str)
   : first(str.begin()),
     last(str.end()),
@@ -54,7 +56,9 @@ LineIterator::next()
 std::string
 LineIterator::get()
 {
-  return std::string(first, line_end);
+  std::string str(first, line_end);
+  str.erase(std::remove(str.begin(), str.end(), '\n'), str.end());
+  return str;
 }
 
 /* EOF */

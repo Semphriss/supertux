@@ -37,14 +37,14 @@ public:
 
   virtual void update(float dt_sec) override;
 
+  /** Gets at which (absolute) index, in the text, corresponds an on-screen point */
+  virtual int get_text_position(const Vector& pos) const;
+
   /** Binds a string to the textbox */
   void bind_string(std::string* value) { m_string = value; if (value) m_internal_string_backup = *value; revert_value(); }
 
   /** Returns the full string held in m_charlist */
   std::string get_string() const;
-
-  /** Gets at which (absolute) index, in the text, corresponds an on-screen point */
-  int get_text_position(const Vector& pos) const;
 
   /** Returns true if the given text would fit inside the box */
   bool fits(const std::string& text) const;
