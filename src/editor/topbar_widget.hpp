@@ -43,15 +43,12 @@ public:
   };
 
 public:
-  EditorTopbarWidget(Editor& editor);
+  EditorTopbarWidget(Editor& editor, std::vector<MenuSection> menu);
   virtual ~EditorTopbarWidget() {}
 
   virtual void draw(DrawingContext& context) override;
   virtual bool on_mouse_button_up(const SDL_MouseButtonEvent& button) override;
 
-  void refresh_menu();
-
-private:
   void reset_components();
 
   MenuEntry* get_entry_by_id(const std::string& id);

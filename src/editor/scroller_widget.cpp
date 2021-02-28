@@ -29,16 +29,22 @@ namespace {
 
 const float SIZE = 96;
 
+// TODO: Get the user's preferred delay based on system settings (for touchscreen devices)
+const float DOUBLETAP_TIME = 0.5f;
+
 }
 
-bool EditorScrollerWidget::rendered = false;
+bool EditorScrollerWidget::rendered = true;
 
 EditorScrollerWidget::EditorScrollerWidget(Editor& editor) :
   m_editor(editor),
   m_scrolling(),
   m_scrolling_vec(0, 0),
   m_mouse_pos(0, 0),
-  m_rect(8, 40, 8 + SIZE, 40 + SIZE)
+  m_rect(8, 40, 8 + SIZE, 40 + SIZE),
+  m_doubletap_timer(0.f),
+  m_doubletapped(false),
+  m_last_mouse_pos()
 {
 }
 
@@ -87,16 +93,20 @@ EditorScrollerWidget::draw_arrow(DrawingContext& context, const Vector& pos)
 void
 EditorScrollerWidget::update(float dt_sec)
 {
-  if (!rendered || !is_scrolling())
+  if (!rendered)
     return;
 
-  m_editor.scroll(m_scrolling_vec * 32.0f * dt_sec);
+  if (is_scrolling())
+    m_editor.scroll(m_scrolling_vec * 32.0f * dt_sec);
+
+  m_doubletap_timer = std::max(m_doubletap_timer - dt_sec, 0.f);
 }
 
 bool
 EditorScrollerWidget::on_mouse_button_up(const SDL_MouseButtonEvent& button)
 {
   m_scrolling = false;
+  m_doubletapped = false;
   return false;
 }
 
@@ -107,7 +117,9 @@ EditorScrollerWidget::on_mouse_button_down(const SDL_MouseButtonEvent& button)
     return false;
 
   if (button.button == SDL_BUTTON_LEFT) {
-    m_scrolling = true;
+    m_scrolling = m_doubletap_timer == 0.f;
+    m_doubletapped = m_doubletap_timer > 0.f;
+    m_doubletap_timer = DOUBLETAP_TIME;
     return true;
   }
 
@@ -127,7 +139,13 @@ EditorScrollerWidget::on_mouse_motion(const SDL_MouseMotionEvent& motion)
       float norm = m_scrolling_vec.norm();
       m_scrolling_vec *= powf(static_cast<float>(M_E), norm / 16.0f - 1.0f);
     }
+
+    if (m_doubletapped)
+    {
+      m_rect.move(m_mouse_pos - m_last_mouse_pos);
+    }
   }
+  m_last_mouse_pos = m_mouse_pos;
 
   return false;
 }

@@ -19,6 +19,8 @@
 
 #include "sdk/integration.hpp"
 
+#include <SDL.h>
+
 class Compositor;
 class Controller;
 
@@ -55,6 +57,12 @@ public:
    * updates and logic here
    */
   virtual void update(float dt_sec, const Controller& controller) = 0;
+
+  /**
+   * gets called whenever an event is sent by SDL (mouse move, clicks, keyboard,
+   * etc). Useful for editor screens.
+   */
+  virtual void event(const SDL_Event& ev) {}
 
   /** 
    * Gives details about what the user is doing right now.

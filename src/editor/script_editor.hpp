@@ -1,5 +1,5 @@
 //  SuperTux
-//  Copyright (C) 2021 A. Semphris <semphris@protonmail.com>
+//  Copyright (C) 2020 A. Semphris <semphris@protonmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -17,40 +17,35 @@
 #ifndef HEADER_SUPERTUX_EDITOR_SCRIPT_EDITOR_HPP
 #define HEADER_SUPERTUX_EDITOR_SCRIPT_EDITOR_HPP
 
-#include "interface/control_textarea.hpp"
+#include "editor/editor.hpp"
+#include "editor/script_editor_widget.hpp"
+#include "editor/topbar_widget.hpp"
+#include "supertux/screen.hpp"
+#include "util/currenton.hpp"
 
-#include "squirrel/squirrel_util.hpp"
+#include <SDL.h>
 
-class ScriptEditor : public ControlTextarea
+class ScriptEditor final : public Screen,
+                           public Currenton<ScriptEditor>
 {
 public:
-  static ScriptEditor* squirrel_callback_editor;
+  static bool is_active();
 
 public:
-  ScriptEditor();
+  ScriptEditor(Editor& editor, std::string* source);
+  ~ScriptEditor();
 
-  virtual void draw(DrawingContext& context) override;
-  virtual void update(float dt_sec) override;
-  virtual bool event(const SDL_Event& ev) override;
-
-  virtual void draw_text(DrawingContext& context) override;
-
-  void set_error(int l, int c, std::string m)
-  {
-    m_err_line = l;
-    m_err_col = c;
-    m_err_msg = m;
-  }
+public:
+  virtual void draw(Compositor&) override;
+  virtual void update(float dt_sec, const Controller& controller) override;
+  virtual void event(const SDL_Event& ev) override;
+  virtual IntegrationStatus get_status() const override;
 
 private:
-  void refresh_script_validation();
-
-private:
-  float m_validate_timer;
-
-  int m_err_line;
-  int m_err_col;
-  std::string m_err_msg;
+  Editor& m_editor;
+  std::vector<std::unique_ptr<Widget> > m_widgets;
+  ScriptEditorWidget* m_script_editor;
+  EditorTopbarWidget* m_topbar_widget;
 
 private:
   ScriptEditor(const ScriptEditor&) = delete;

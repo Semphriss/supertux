@@ -38,14 +38,14 @@ TopbarEntry::draw(DrawingContext& context)
   context.color().draw_filled_rect(m_rect,
                                    theme.bkg_color,
                                    theme.round_corner,
-                                   LAYER_GUI);
+                                   LAYER_GUI + 15);
 
   context.color().draw_text(theme.font,
                             m_btn_label,
                             Vector(m_rect.get_left() + m_rect.get_height() + 5.f,
                                    (m_rect.get_top() + m_rect.get_bottom()) / 2 - theme.font->get_height() / 2),
                             FontAlignment::ALIGN_LEFT,
-                            LAYER_GUI,
+                            LAYER_GUI + 15,
                             theme.txt_color);
 
   context.color().draw_line(Vector(m_rect.get_left() + m_rect.get_height(),
@@ -53,18 +53,18 @@ TopbarEntry::draw(DrawingContext& context)
                             Vector(m_rect.get_left() + m_rect.get_height(),
                                    m_rect.get_bottom()),
                             Color(1.f,1.f,1.f,.3f),
-                            LAYER_GUI);
+                            LAYER_GUI + 15);
 
   if (separator)
   {
     context.color().draw_line(m_rect.p1(),
                               Vector(m_rect.p2().x, m_rect.p1().y),
                               Color(1.f, 1.f, 1.f, .1f),
-                              LAYER_GUI);
+                              LAYER_GUI + 15);
     context.color().draw_line(m_rect.p1() - Vector(0.f, 1.f),
                               Vector(m_rect.p2().x, m_rect.p1().y - 1.f),
                               Color(1.f, 1.f, 1.f, .1f),
-                              LAYER_GUI);
+                              LAYER_GUI + 15);
   }
 
   if (m_btn_icon)
@@ -74,7 +74,7 @@ TopbarEntry::draw(DrawingContext& context)
                                               m_rect.get_left() +
                                                   m_rect.get_height() - 4.f,
                                               m_rect.get_bottom() - 4.f),
-                                        LAYER_GUI);
+                                        LAYER_GUI + 15);
 }
 
 /* EOF */

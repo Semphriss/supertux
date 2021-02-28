@@ -53,6 +53,9 @@ private:
   Vector m_scrolling_vec;
   Vector m_mouse_pos;
   Rectf m_rect;
+  float m_doubletap_timer;
+  bool m_doubletapped;
+  Vector m_last_mouse_pos;
 
 private:
   EditorScrollerWidget(const EditorScrollerWidget&) = delete;

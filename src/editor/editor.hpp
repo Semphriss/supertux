@@ -36,6 +36,7 @@
 #include "util/string_util.hpp"
 #include "video/surface_ptr.hpp"
 
+class EditorTopbarWidget;
 class GameObject;
 class Level;
 class ObjectGroup;
@@ -78,7 +79,7 @@ public:
 
   virtual IntegrationStatus get_status() const override;
 
-  void event(const SDL_Event& ev);
+  virtual void event(const SDL_Event& ev) override;
   void resize();
 
   void disable_keyboard() { m_enabled = false; }
@@ -152,6 +153,9 @@ public:
 
   void open_script_editor(std::string* s);
 
+  float get_zoom() const { return m_zoom; }
+  void set_zoom(float zoom) { m_zoom = zoom; }
+
 private:
   void set_sector(Sector* sector);
   void set_level(std::unique_ptr<Level> level, bool reset = true);
@@ -163,6 +167,7 @@ private:
   Rectf panel_grab_h() const;
   Rectf panel_grab_v() const;
   void update_grabbers();
+  void refresh_menu();
 
 protected:
   std::unique_ptr<Level> m_level;
@@ -198,6 +203,7 @@ private:
   std::vector<std::unique_ptr<Widget> > m_widgets;
   EditorObjectWidget* m_object_widget;
   EditorOverlayWidget* m_overlay_widget;
+  EditorTopbarWidget* m_topbar_widget;
   EditorLayersWidget* m_layers_widget;
 
   bool m_enabled;
@@ -215,7 +221,7 @@ private:
   float m_panel_grab_h, m_panel_grab_v;
   bool m_grabbing_h, m_grabbing_v;
 
-  ScriptEditor* m_script_editor;
+  float m_zoom;
 
 private:
   Editor(const Editor&) = delete;

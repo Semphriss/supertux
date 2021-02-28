@@ -47,6 +47,7 @@
 #include "supertux/globals.hpp"
 #include "supertux/level.hpp"
 #include "supertux/level_parser.hpp"
+#include "supertux/menu/editor_sectors_menu.hpp"
 #include "supertux/menu/menu_storage.hpp"
 #include "supertux/savegame.hpp"
 #include "supertux/screen_fade.hpp"
@@ -100,6 +101,7 @@ Editor::Editor() :
   m_widgets(),
   m_object_widget(),
   m_overlay_widget(),
+  m_topbar_widget(),
   m_layers_widget(),
   m_enabled(false),
   m_bgr_surface(Surface::from_file("images/background/antarctic/arctis2.png")),
@@ -111,21 +113,115 @@ Editor::Editor() :
   m_panel_grab_h(192.f),
   m_panel_grab_v(static_cast<float>(SCREEN_HEIGHT / 2)),
   m_grabbing_h(false),
-  m_grabbing_v(false)
+  m_grabbing_v(false),
+  m_zoom(1.f)
 {
+  std::vector<EditorTopbarWidget::MenuSection> menu = {
+    {_("File"), {
+      {"file:save", _("Save Level"), "", false, [this]{
+        this->check_save_prerequisites([this]() {
+          this->m_save_request = true;
+        });
+      }},
+      {"file:test", _("Test Level"), "", false, [this]{
+        this->check_save_prerequisites([this]() {
+          this->m_test_pos = boost::none;
+          this->m_test_request = true;
+        });
+      }},
+      {"file:share", _("Share Level"), "", false, [this]{
+        auto dialog = std::make_unique<Dialog>();
+        dialog->set_text(_("We encourage you to share your levels in the SuperTux forum.\nTo find your level, click the\n\"Open Level directory\" menu item.\nDo you want to go to the forum now?"));
+        dialog->add_default_button(_("Yes"), [] {
+          FileSystem::open_path("https://forum.freegamedev.net/viewforum.php?f=69");
+        });
+        dialog->add_cancel_button(_("No"));
+        MenuManager::instance().set_dialog(std::move(dialog));
+      }},
+      {"file:open-dir", _("Open Level Directory"), "", false, [this]{
+        this->open_level_directory();
+      }},
+      {"file:change-level", _("Edit Another Level"), "", true, [this]{
+        this->check_unsaved_changes([] {
+          MenuManager::instance().set_menu(MenuStorage::EDITOR_LEVEL_SELECT_MENU);
+        });
+      }},
+      {"file:change-world", _("Edit Another World"), "", false, [this]{
+        this->check_unsaved_changes([] {
+          MenuManager::instance().set_menu(MenuStorage::EDITOR_LEVELSET_SELECT_MENU);
+        });
+      }},
+      {"file:exit", _("Exit Level Editor"), "", true, [this]{
+        this->m_quit_request = true;
+      }}
+    }},
+    {_("Sector"), {
+      {"sector:manage", _("Manage sectors..."), "", false, [this]{
+        this->disable_keyboard();
+        MenuManager::instance().set_menu(MenuStorage::EDITOR_SECTORS_MENU);
+      }},
+      {"sector:create", _("Create sector"), "", false, []{
+        EditorSectorsMenu::create_sector();
+      }},
+      {"sector:delete", _("Delete sector"), "", false, []{
+        EditorSectorsMenu::delete_sector();
+      }}
+    }},
+    {_("Settings"), {
+      {"settings:grid-size-0", _("Grid size: ") + _("tiny tile (4px)"), "", false, [this]{
+        EditorOverlayWidget::selected_snap_grid_size = 0;
+        this->refresh_menu();
+      }},
+      {"settings:grid-size-1", _("Grid size: ") + _("small tile (8px)"), "", false, [this]{
+        EditorOverlayWidget::selected_snap_grid_size = 1;
+        this->refresh_menu();
+      }},
+      {"settings:grid-size-2", _("Grid size: ") + _("medium tile (16px)"), "", false, [this]{
+        EditorOverlayWidget::selected_snap_grid_size = 2;
+        this->refresh_menu();
+      }},
+      {"settings:grid-size-3", _("Grid size: ") + _("big tile (32px)"), "", false, [this]{
+        EditorOverlayWidget::selected_snap_grid_size = 3;
+        this->refresh_menu();
+      }},
+      {"settings:show-grid", _("Show Grid"), "", true, [this]{
+        EditorOverlayWidget::render_grid = !EditorOverlayWidget::render_grid;
+        this->refresh_menu();
+      }},
+      {"settings:grid-snap", _("Grid Snapping"), "", false, [this]{
+        EditorOverlayWidget::snap_to_grid = !EditorOverlayWidget::snap_to_grid;
+        this->refresh_menu();
+      }},
+      {"settings:render-bkg", _("Render Background"), "", false, [this]{
+        EditorOverlayWidget::render_background = !EditorOverlayWidget::render_background;
+        this->refresh_menu();
+      }},
+      {"settings:render-light", _("Render Light"), "", false, [this]{
+        Compositor::s_render_lighting = !Compositor::s_render_lighting;
+        this->refresh_menu();
+      }},
+      {"settings:autotile", _("Autotile Mode"), "", false, [this]{
+        EditorOverlayWidget::autotile_mode = !EditorOverlayWidget::autotile_mode;
+        this->refresh_menu();
+      }},
+      {"settings:autotile-help", _("Enable Autotile Help"), "", false, [this]{
+        EditorOverlayWidget::autotile_help = !EditorOverlayWidget::autotile_help;
+        this->refresh_menu();
+      }},
+    }},
+  };
   auto layers_widget = std::make_unique<EditorLayersWidget>(*this);
   auto object_widget = std::make_unique<EditorObjectWidget>(*this);
   auto overlay_widget = std::make_unique<EditorOverlayWidget>(*this);
-  auto topbar_widget = std::make_unique<EditorTopbarWidget>(*this);
+  auto topbar_widget = std::make_unique<EditorTopbarWidget>(*this, menu);
   auto settings_widget = std::make_unique<EditorSettingsWidget>(*this);
-  auto script_editor = std::make_unique<ScriptEditor>();
-  script_editor->set_rect(Rectf(SCREEN_WIDTH / 10, SCREEN_HEIGHT / 10, SCREEN_WIDTH * 9 / 10, SCREEN_HEIGHT * 9 / 10));
+  auto scroller_widget = std::make_unique<EditorScrollerWidget>(*this);
 
   m_layers_widget = layers_widget.get();
   m_overlay_widget = overlay_widget.get();
+  m_topbar_widget = topbar_widget.get();
   m_settings_widget = settings_widget.get();
   m_object_widget = object_widget.get();
-  m_script_editor = script_editor.get();
 
   open_script_editor(nullptr);
 
@@ -133,9 +229,7 @@ Editor::Editor() :
     Rectf(0.f, 0.f, 24.f, 24.f), [this]{ undo(); });
   auto redo_button_widget = std::make_unique<ButtonWidget>("images/engine/editor/redo.png",
     Rectf(24.f, 0.f, 48.f, 24.f), [this]{ redo(); });
-  auto scroller_widget = std::make_unique<EditorScrollerWidget>(*this);
 
-  m_widgets.push_back(std::move(script_editor));
   m_widgets.push_back(std::move(topbar_widget));
   m_widgets.push_back(std::move(scroller_widget));
   m_widgets.push_back(std::move(undo_button_widget));
@@ -144,6 +238,26 @@ Editor::Editor() :
   m_widgets.push_back(std::move(layers_widget));
   m_widgets.push_back(std::move(settings_widget));
   m_widgets.push_back(std::move(overlay_widget));
+
+  refresh_menu();
+}
+
+void
+Editor::refresh_menu()
+{
+  m_topbar_widget->get_entry_by_id("settings:grid-size-0")->icon = EditorOverlayWidget::selected_snap_grid_size == 0 ? "/images/engine/editor/arrow.png" : "";
+  m_topbar_widget->get_entry_by_id("settings:grid-size-1")->icon = EditorOverlayWidget::selected_snap_grid_size == 1 ? "/images/engine/editor/arrow.png" : "";
+  m_topbar_widget->get_entry_by_id("settings:grid-size-2")->icon = EditorOverlayWidget::selected_snap_grid_size == 2 ? "/images/engine/editor/arrow.png" : "";
+  m_topbar_widget->get_entry_by_id("settings:grid-size-3")->icon = EditorOverlayWidget::selected_snap_grid_size == 3 ? "/images/engine/editor/arrow.png" : "";
+
+  m_topbar_widget->get_entry_by_id("settings:show-grid")->icon = EditorOverlayWidget::render_grid ? "/images/engine/editor/arrow.png" : "";
+  m_topbar_widget->get_entry_by_id("settings:grid-snap")->icon = EditorOverlayWidget::snap_to_grid ? "/images/engine/editor/arrow.png" : "";
+  m_topbar_widget->get_entry_by_id("settings:render-bkg")->icon = EditorOverlayWidget::render_background ? "/images/engine/editor/arrow.png" : "";
+  m_topbar_widget->get_entry_by_id("settings:render-light")->icon = Compositor::s_render_lighting ? "/images/engine/editor/arrow.png" : "";
+  m_topbar_widget->get_entry_by_id("settings:autotile")->icon = EditorOverlayWidget::autotile_mode ? "/images/engine/editor/arrow.png" : "";
+  m_topbar_widget->get_entry_by_id("settings:autotile-help")->icon = EditorOverlayWidget::autotile_help ? "/images/engine/editor/arrow.png" : "";
+
+  m_topbar_widget->reset_components();
 }
 
 Editor::~Editor()
@@ -160,7 +274,11 @@ Editor::draw(Compositor& compositor)
     for(const auto& widget : m_widgets)
       widget->draw(context);
 
+    context.push_transform();
+    context.transform().scale = m_zoom;
     m_sector->draw(context);
+    context.pop_transform();
+
     context.color().draw_filled_rect(context.get_rect(),
                                      Color(0.0f, 0.0f, 0.0f),
                                      0.0f, std::numeric_limits<int>::min());
@@ -279,18 +397,11 @@ Editor::update(float dt_sec, const Controller& controller)
 void
 Editor::open_script_editor(std::string* s)
 {
-  if (s)
-  {
-    m_script_editor->m_visible = true;
-    m_script_editor->m_enabled = true;
-    m_script_editor->bind_string(s);
-  }
-  else
-  {
-    m_script_editor->m_visible = false;
-    m_script_editor->m_enabled = false;
-    m_script_editor->bind_string(nullptr);
-  }
+  if (!s)
+    return;
+
+  auto script_screen = std::make_unique<ScriptEditor>(*this, s);
+  ScreenManager::current()->push_screen(std::move(script_screen));
 }
 
 void
@@ -829,6 +940,8 @@ Editor::event(const SDL_Event& ev)
       float scroll_x = static_cast<float>(ev.wheel.x * -32);
       float scroll_y = static_cast<float>(ev.wheel.y * -32);
       scroll({scroll_x, scroll_y});
+
+      //m_zoom = m_zoom * std::pow(1.1f, ev.wheel.y);
     }
   }
   catch(const std::exception& err)
