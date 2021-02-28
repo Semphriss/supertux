@@ -81,6 +81,17 @@ ControlTextbox::delete_char_before_caret()
 }
 
 void
+ControlTextbox::bind_string(std::string* value)
+{
+  m_string = value;
+
+  if (value)
+    m_internal_string_backup = *value;
+
+  revert_value();
+}
+
+void
 ControlTextbox::draw(DrawingContext& context)
 {
   if (!m_visible)

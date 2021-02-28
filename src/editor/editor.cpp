@@ -26,7 +26,6 @@
 #include "editor/object_info.hpp"
 #include "editor/particle_editor.hpp"
 #include "editor/resize_marker.hpp"
-#include "editor/script_editor.hpp"
 #include "editor/tile_selection.hpp"
 #include "editor/tip.hpp"
 #include "editor/tool_icon.hpp"
@@ -119,11 +118,16 @@ Editor::Editor() :
   auto overlay_widget = std::make_unique<EditorOverlayWidget>(*this);
   auto topbar_widget = std::make_unique<EditorTopbarWidget>(*this);
   auto settings_widget = std::make_unique<EditorSettingsWidget>(*this);
+  auto script_editor = std::make_unique<ScriptEditor>();
+  script_editor->set_rect(Rectf(SCREEN_WIDTH / 10, SCREEN_HEIGHT / 10, SCREEN_WIDTH * 9 / 10, SCREEN_HEIGHT * 9 / 10));
 
   m_layers_widget = layers_widget.get();
   m_overlay_widget = overlay_widget.get();
   m_settings_widget = settings_widget.get();
   m_object_widget = object_widget.get();
+  m_script_editor = script_editor.get();
+
+  open_script_editor(nullptr);
 
   auto undo_button_widget = std::make_unique<ButtonWidget>("images/engine/editor/undo.png",
     Rectf(0.f, 0.f, 24.f, 24.f), [this]{ undo(); });
@@ -131,10 +135,7 @@ Editor::Editor() :
     Rectf(24.f, 0.f, 48.f, 24.f), [this]{ redo(); });
   auto scroller_widget = std::make_unique<EditorScrollerWidget>(*this);
 
-  auto text_editor = std::make_unique<ScriptEditor>();
-  text_editor->set_rect(Rectf(SCREEN_WIDTH / 10, SCREEN_HEIGHT / 10, SCREEN_WIDTH * 5 / 10, SCREEN_HEIGHT * 5 / 10));
-  m_widgets.push_back(std::move(text_editor));
-
+  m_widgets.push_back(std::move(script_editor));
   m_widgets.push_back(std::move(topbar_widget));
   m_widgets.push_back(std::move(scroller_widget));
   m_widgets.push_back(std::move(undo_button_widget));
@@ -272,6 +273,23 @@ Editor::update(float dt_sec, const Controller& controller)
     m_sector->flush_game_objects();
 
     update_keyboard(controller);
+  }
+}
+
+void
+Editor::open_script_editor(std::string* s)
+{
+  if (s)
+  {
+    m_script_editor->m_visible = true;
+    m_script_editor->m_enabled = true;
+    m_script_editor->bind_string(s);
+  }
+  else
+  {
+    m_script_editor->m_visible = false;
+    m_script_editor->m_enabled = false;
+    m_script_editor->bind_string(nullptr);
   }
 }
 

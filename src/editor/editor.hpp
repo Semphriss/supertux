@@ -25,6 +25,7 @@
 #include "editor/toolbox_widget.hpp"
 #include "editor/layers_widget.hpp"
 #include "editor/object_widget.hpp"
+#include "editor/script_editor.hpp"
 #include "editor/scroller_widget.hpp"
 #include "editor/settings_widget.hpp"
 #include "supertux/screen.hpp"
@@ -149,6 +150,8 @@ public:
   void undo();
   void redo();
 
+  void open_script_editor(std::string* s);
+
 private:
   void set_sector(Sector* sector);
   void set_level(std::unique_ptr<Level> level, bool reset = true);
@@ -211,6 +214,8 @@ private:
 
   float m_panel_grab_h, m_panel_grab_v;
   bool m_grabbing_h, m_grabbing_v;
+
+  ScriptEditor* m_script_editor;
 
 private:
   Editor(const Editor&) = delete;

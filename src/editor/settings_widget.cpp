@@ -16,6 +16,7 @@
 
 #include "editor/settings_widget.hpp"
 
+#include "editor/editor.hpp"
 #include "editor/settings_message.hpp"
 #include "interface/control_textbox.hpp"
 #include "interface/label.hpp"
@@ -149,6 +150,8 @@ void
 EditorSettingsWidget::reset_components()
 {
   m_children.clear();
+
+  m_editor.open_script_editor(nullptr);
 
   if (!m_object)
     return;

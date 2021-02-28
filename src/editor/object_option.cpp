@@ -472,9 +472,18 @@ ScriptObjectOption::add_to_menu(Menu& menu) const
 std::unique_ptr<InterfaceControl>
 ScriptObjectOption::add_to_settings(float width, Editor& editor, GameObject* go) const
 {
-  auto control = std::make_unique<ControlTextbox>();
+  auto control = std::make_unique<ControlButton>();
   control->set_rect(Rectf(width / 2.f + 5.f, 0.f, width - 10.f, 20.f));
-  control->bind_string(m_pointer);
+  control->m_btn_label = _("Open in Script Editor");
+
+  // Passing "this" and using "this->m_pointer" in the lambda gives a segfault
+  // when selecting an object, opening a script, re-selecting the object and
+  // re-opening the same script (possibly does the same with other scripts).
+  auto v = m_pointer;
+  control->m_on_change = [&editor, v](){
+    editor.open_script_editor(v);
+  };
+
   control->m_label = new InterfaceLabel();
   control->m_label->set_rect(Rectf(10.f, 0.f, width / 2.f - 5.f, 20.f));
   control->m_label->set_label(get_text());
