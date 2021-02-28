@@ -61,7 +61,7 @@ ControlTextbox::update(float dt_sec)
   }
 
   // Apparently the stuff bugs from time to time
-  recenter_offset();
+  //recenter_offset();
 }
 
 void
@@ -176,6 +176,7 @@ ControlTextbox::on_mouse_motion(const SDL_MouseMotionEvent& motion)
   if (m_mouse_pressed) {
     m_cursor_timer = CONTROL_CURSOR_TIMER;
     m_caret_pos = get_text_position(mouse_pos);
+    recenter_offset();
     return true;
   }
   return false;
@@ -303,10 +304,10 @@ ControlTextbox::on_key_down(const SDL_KeyboardEvent& key)
   {
     m_caret_pos = 0;
     m_secondary_caret_pos = static_cast<int>(m_charlist.size());
-    recenter_offset();
+    //recenter_offset();
     return true;
   }
-  else if (key.keysym.sym == SDLK_RETURN)
+  else if (key.keysym.sym == SDLK_RETURN || key.keysym.sym == SDLK_RETURN2)
   {
     parse_value();
     return true;
@@ -320,12 +321,13 @@ ControlTextbox::event(const SDL_Event& ev) {
   if (!m_enabled)
     return false;
 
-  Widget::event(ev);
-
   if (ev.type == SDL_TEXTINPUT && m_has_focus)
+  {
     put_text(std::string(ev.text.text));
+    return true;
+  }
 
-  return false;
+  return Widget::event(ev);;
 }
 
 bool

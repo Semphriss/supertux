@@ -33,8 +33,10 @@ public:
   virtual void set_rect(const Rectf& rect) override;
 
   virtual int get_text_position(const Vector& pos) const override;
+  virtual void draw_text(DrawingContext& context);
+  virtual void recenter_offset() override;
 
-private:
+protected:
   void reset_scrollbar();
 
   /** Get the @p line th line (without any line ending "\\n") */
@@ -58,8 +60,8 @@ private:
   /** @returns the offset from the beginning of the text corresponding to this line/xpos pair. */
   int get_offset_from_pos(int line, int xpos) const;
 
-private:
-  ControlScrollbar m_scrollbar;
+protected:
+  ControlScrollbar m_v_scrollbar, m_h_scrollbar;
 
 private:
   ControlTextarea(const ControlTextarea&) = delete;

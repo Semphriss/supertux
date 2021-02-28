@@ -37,6 +37,7 @@ FontPtr Resources::small_font;
 FontPtr Resources::big_font;
 FontPtr Resources::control_font;
 FontPtr Resources::border_control_font;
+FontPtr Resources::editor_font;
 
 SurfacePtr Resources::checkbox;
 SurfacePtr Resources::checkbox_checked;
@@ -63,6 +64,7 @@ Resources::load()
     big_font.reset(new BitmapFont(BitmapFont::VARIABLE, "fonts/white-big.stf", 3));
     control_font.reset(new BitmapFont(BitmapFont::FIXED, "fonts/white.stf")); // TODO: Make a better-looking font for this
     border_control_font.reset(new BitmapFont(BitmapFont::FIXED, "fonts/white.stf"));
+    editor_font.reset(new BitmapFont(BitmapFont::FIXED, "fonts/andale12.stf", 1));
   }
   else
   {
@@ -78,6 +80,7 @@ Resources::load()
       big_font.reset(new TTFFont(font, 22, 1.25f, 2, 1));
       control_font.reset(new TTFFont("fonts/Roboto-Regular.ttf", 15, 1.25f));
       border_control_font.reset(new TTFFont("fonts/Roboto-Regular.ttf", 15, 1.25f, 1, 1));
+      editor_font.reset(new TTFFont("fonts/DejaVuSansMono.ttf", 15, 1.25f));
     }
   }
 
@@ -121,6 +124,7 @@ Resources::unload()
   big_font.reset();
   control_font.reset();
   border_control_font.reset();
+  editor_font.reset();
 
   mouse_cursor.reset();
 }

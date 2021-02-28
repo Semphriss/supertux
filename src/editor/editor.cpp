@@ -26,6 +26,7 @@
 #include "editor/object_info.hpp"
 #include "editor/particle_editor.hpp"
 #include "editor/resize_marker.hpp"
+#include "editor/script_editor.hpp"
 #include "editor/tile_selection.hpp"
 #include "editor/tip.hpp"
 #include "editor/tool_icon.hpp"
@@ -34,7 +35,6 @@
 #include "gui/dialog.hpp"
 #include "gui/menu_manager.hpp"
 #include "gui/mousecursor.hpp"
-#include "interface/control_textarea.hpp"
 #include "math/util.hpp"
 #include "object/camera.hpp"
 #include "object/player.hpp"
@@ -131,7 +131,7 @@ Editor::Editor() :
     Rectf(24.f, 0.f, 48.f, 24.f), [this]{ redo(); });
   auto scroller_widget = std::make_unique<EditorScrollerWidget>(*this);
 
-  auto text_editor = std::make_unique<ControlTextarea>();
+  auto text_editor = std::make_unique<ScriptEditor>();
   text_editor->set_rect(Rectf(SCREEN_WIDTH / 10, SCREEN_HEIGHT / 10, SCREEN_WIDTH * 5 / 10, SCREEN_HEIGHT * 5 / 10));
   m_widgets.push_back(std::move(text_editor));
 

@@ -40,6 +40,9 @@ public:
   /** Gets at which (absolute) index, in the text, corresponds an on-screen point */
   virtual int get_text_position(const Vector& pos) const;
 
+  /** Changes m_current_offset so that the caret is visible */
+  virtual void recenter_offset();
+
   /** Binds a string to the textbox */
   void bind_string(std::string* value) { m_string = value; if (value) m_internal_string_backup = *value; revert_value(); }
 
@@ -176,9 +179,6 @@ protected:
 
   /** Returns the largest string fitting in the box. */
   std::string get_truncated_text(std::string text) const;
-
-  /** Changes m_current_offset so that the caret is visible */
-  void recenter_offset();
 
 private:
   ControlTextbox(const ControlTextbox&) = delete;
