@@ -49,6 +49,9 @@ public:
   /** Returns the full string held in m_charlist */
   std::string get_string() const;
 
+  /** Forces the full content of the textbox to this specific value. */
+  void set_string(std::string s, bool override_pointer = true);
+
   /** Returns true if the given text would fit inside the box */
   bool fits(const std::string& text) const;
 
@@ -81,6 +84,16 @@ public:
    * @returns true if some text was deleted; false if no text was replaced.
    */
   bool put_text(const std::string& text);
+
+  /** @returns the position of the primary caret. */
+  int get_caret_pos() const { return m_caret_pos; }
+  /** Sets the position of the primary caret. */
+  void set_caret_pos(int pos) { m_caret_pos = pos; }
+
+  /** @returns the position of the secondary caret. */
+  int get_secondary_caret_pos() const { return m_secondary_caret_pos; }
+  /** Sets the position of the secondary caret. */
+  void set_secondary_caret_pos(int pos) { m_secondary_caret_pos = pos; }
 
 protected:
   /** Transfers the string into the binded variable, if any. Can be overridden

@@ -42,6 +42,9 @@ public:
     m_err_msg = m;
   }
 
+  /** Publicly accessible bridge to get_contents() */
+  std::string get_contents_hot() { return get_contents(); }
+
 private:
   void refresh_script_validation();
 

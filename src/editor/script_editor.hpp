@@ -28,24 +28,36 @@
 class ScriptEditor final : public Screen,
                            public Currenton<ScriptEditor>
 {
-public:
-  static bool is_active();
+private:
+  struct Version {
+    std::string content;
+    int caret_1, caret_2;
+  };
 
 public:
   ScriptEditor(Editor& editor, std::string* source);
   ~ScriptEditor();
 
-public:
   virtual void draw(Compositor&) override;
   virtual void update(float dt_sec, const Controller& controller) override;
   virtual void event(const SDL_Event& ev) override;
   virtual IntegrationStatus get_status() const override;
 
 private:
+  void quit();
+  void save();
+
+  void undo();
+  void redo();
+
+private:
+  std::string* m_source;
+  std::vector<Version> m_undo_stack, m_redo_stack;
   Editor& m_editor;
   std::vector<std::unique_ptr<Widget> > m_widgets;
   ScriptEditorWidget* m_script_editor;
   EditorTopbarWidget* m_topbar_widget;
+  bool m_enabled;
 
 private:
   ScriptEditor(const ScriptEditor&) = delete;

@@ -34,7 +34,7 @@ const float DOUBLETAP_TIME = 0.5f;
 
 }
 
-bool EditorScrollerWidget::rendered = true;
+bool EditorScrollerWidget::rendered = false;
 
 EditorScrollerWidget::EditorScrollerWidget(Editor& editor) :
   m_editor(editor),

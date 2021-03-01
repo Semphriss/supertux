@@ -739,7 +739,7 @@ Editor::check_unsaved_changes(const std::function<void ()>& action)
       action();
       m_enabled = true;
     });
-    dialog->add_button(_("Cancel"), [this] {
+    dialog->add_cancel_button(_("Cancel"), [this] {
       m_enabled = true;
     });
     MenuManager::instance().set_dialog(std::move(dialog));

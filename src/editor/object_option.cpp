@@ -480,7 +480,19 @@ ScriptObjectOption::add_to_settings(float width, Editor& editor, GameObject* go)
   // when selecting an object, opening a script, re-selecting the object and
   // re-opening the same script (possibly does the same with other scripts).
   auto v = m_pointer;
-  control->m_on_change = [&editor, v](){
+
+  // Same thing, but that's because the "control" variable won't exist anymore
+  // at the moment the lambda will be called.
+  auto c = control.get();
+
+  control->m_on_change = [&editor, v, c](){
+
+    // When closing the script editor, the control won't have noticed that the
+    // mouse moved and it lost both focus and hover. This will simulate a mouse
+    // deselection.
+    c->set_focus(false);
+    c->on_mouse_motion(SDL_MouseMotionEvent());
+
     editor.open_script_editor(v);
   };
 

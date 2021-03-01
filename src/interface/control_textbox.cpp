@@ -389,6 +389,17 @@ ControlTextbox::get_string() const
   return m_internal_string_backup;
 }
 
+void
+ControlTextbox::set_string(std::string s, bool override_pointer)
+{
+  m_internal_string_backup = s;
+
+  revert_value();
+
+  if (override_pointer && m_string)
+    *m_string = s;
+}
+
 std::string
 ControlTextbox::get_contents() const
 {
