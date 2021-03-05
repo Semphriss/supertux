@@ -115,6 +115,8 @@ ScriptEditorWidget::draw(DrawingContext& context)
   if (!m_visible)
     return;
 
+  calculate_margin();
+
   ControlTextarea::draw(context);
 
   auto theme = get_current_theme();
@@ -180,36 +182,34 @@ ScriptEditorWidget::draw_text(DrawingContext& context)
   auto theme = get_current_theme();
 
   // Using http://www.squirrel-lang.org/doc/squirrel3.html#d0e61
+  Color tx_col = Color(0.f, 0.f, 0.f); // Regular text
+  Color kw_col = Color(.3f, .1f, .4f); // Keywords
+  Color sy_col = Color(.5f, .4f, .1f); // Symbols (parentheses, semicolons...)
+  Color op_col = Color(.5f, .5f, .4f); // Operators
+  Color cm_col = Color(.1f, .4f, .0f); // Comments
+  Color st_col = Color(.5f, .1f, .4f); // Strings
+  Color nb_col = Color(.1f, .4f, .5f); // Numbers
+  Color bl_col = Color(.1f, .1f, .5f); // Boolean keywords (true, false)
 
-  // Regular text
-  Color tx_col = Color(0.f, 0.f, 0.f);
+  std::string s = get_contents();
+  int nlines = get_line_num(s.size());
 
-  // Keywords
-  Color kw_col = Color(.3f, .1f, .4f);
+  const float left_base = m_rect.p1().x + 5.f - m_h_scrollbar.m_progress + m_right_margin;
+  const float top_base = m_rect.p1().y + 5.f - m_v_scrollbar.m_progress;
 
-  // Symbols (parentheses, brackets, semicolons, etc.)
-  Color sy_col = Color(.5f, .4f, .1f);
+  for (int i = 0; i <= nlines; i++)
+        context.color().draw_text(theme.font,
+                                  std::to_string(i + 1),
+                                  Vector(left_base - 10.f,
+                                         top_base + float(i) * theme.font->get_height()),
+                                  FontAlignment::ALIGN_RIGHT,
+                                  LAYER_GUI + 1,
+                                  Color::BLACK);
 
-  // Operators
-  Color op_col = Color(.5f, .5f, .4f);
-
-  // Comments
-  Color cm_col = Color(.1f, .4f, .0f);
-
-  // Strings
-  Color st_col = Color(.5f, .1f, .4f);
-
-  // Numbers
-  Color nb_col = Color(.1f, .4f, .5f);
-
-  // Boolean keywords (true, false)
-  Color bl_col = Color(.1f, .1f, .5f);
-
-  float top = 0.f;
-  float left = 0.f;
+  float top = top_base;
+  float left = left_base;
 
   int pos = 0;
-  std::string s = get_contents();
 
   while (pos < s.length())
   {
@@ -219,7 +219,7 @@ ScriptEditorWidget::draw_text(DrawingContext& context)
       if (s.at(pos) == '\n')
       {
         top += theme.font->get_height();
-        left = 0.f;
+        left = left_base;
       }
       else
       {
@@ -254,8 +254,7 @@ ScriptEditorWidget::draw_text(DrawingContext& context)
         // It's an error!
         context.color().draw_text(theme.font,
                                   word,
-                                  Vector(m_rect.p1().x + left + 5.f - m_h_scrollbar.m_progress,
-                                         m_rect.p1().y + top + 5.f - m_v_scrollbar.m_progress),
+                                  Vector(left, top),
                                   FontAlignment::ALIGN_LEFT,
                                   LAYER_GUI + 1,
                                   Color::RED);
@@ -266,8 +265,7 @@ ScriptEditorWidget::draw_text(DrawingContext& context)
         // It's a boolean constant
         context.color().draw_text(theme.font,
                                   word,
-                                  Vector(m_rect.p1().x + left + 5.f - m_h_scrollbar.m_progress,
-                                         m_rect.p1().y + top + 5.f - m_v_scrollbar.m_progress),
+                                  Vector(left, top),
                                   FontAlignment::ALIGN_LEFT,
                                   LAYER_GUI + 1,
                                   bl_col);
@@ -278,8 +276,7 @@ ScriptEditorWidget::draw_text(DrawingContext& context)
         // It's a keyword
         context.color().draw_text(theme.font,
                                   word,
-                                  Vector(m_rect.p1().x + left + 5.f - m_h_scrollbar.m_progress,
-                                         m_rect.p1().y + top + 5.f - m_v_scrollbar.m_progress),
+                                  Vector(left, top),
                                   FontAlignment::ALIGN_LEFT,
                                   LAYER_GUI + 1,
                                   kw_col);
@@ -290,8 +287,7 @@ ScriptEditorWidget::draw_text(DrawingContext& context)
         // It's a number
         context.color().draw_text(theme.font,
                                   word,
-                                  Vector(m_rect.p1().x + left + 5.f - m_h_scrollbar.m_progress,
-                                         m_rect.p1().y + top + 5.f - m_v_scrollbar.m_progress),
+                                  Vector(left, top),
                                   FontAlignment::ALIGN_LEFT,
                                   LAYER_GUI + 1,
                                   nb_col);
@@ -302,8 +298,7 @@ ScriptEditorWidget::draw_text(DrawingContext& context)
         // It's an identifier
         context.color().draw_text(theme.font,
                                   word,
-                                  Vector(m_rect.p1().x + left + 5.f - m_h_scrollbar.m_progress,
-                                         m_rect.p1().y + top + 5.f - m_v_scrollbar.m_progress),
+                                  Vector(left, top),
                                   FontAlignment::ALIGN_LEFT,
                                   LAYER_GUI + 1,
                                   tx_col);
@@ -358,8 +353,7 @@ ScriptEditorWidget::draw_text(DrawingContext& context)
           std::string l = word.substr(0, pos2);
           context.color().draw_text(theme.font,
                                     l,
-                                    Vector(m_rect.p1().x + left + 5.f - m_h_scrollbar.m_progress,
-                                          m_rect.p1().y + top + 5.f - m_v_scrollbar.m_progress),
+                                  Vector(left, top),
                                     FontAlignment::ALIGN_LEFT,
                                     LAYER_GUI + 1,
                                     is_error ? Color::RED : cm_col);
@@ -368,7 +362,7 @@ ScriptEditorWidget::draw_text(DrawingContext& context)
             break;
 
           top += theme.font->get_height();
-          left = 0.f;
+          left = left_base;
 
           pos2++;
           word = word.substr(pos2);
@@ -433,8 +427,7 @@ ScriptEditorWidget::draw_text(DrawingContext& context)
           std::string l = word.substr(0, pos2);
           context.color().draw_text(theme.font,
                                     l,
-                                    Vector(m_rect.p1().x + left + 5.f - m_h_scrollbar.m_progress,
-                                          m_rect.p1().y + top + 5.f - m_v_scrollbar.m_progress),
+                                    Vector(left, top),
                                     FontAlignment::ALIGN_LEFT,
                                     LAYER_GUI + 1,
                                     is_error ? Color::RED : cm_col);
@@ -445,7 +438,7 @@ ScriptEditorWidget::draw_text(DrawingContext& context)
             break;
 
           top += theme.font->get_height();
-          left = 0.f;
+          left = left_base;
 
           pos2++;
           word = word.substr(pos2);
@@ -506,8 +499,7 @@ ScriptEditorWidget::draw_text(DrawingContext& context)
           std::string l = word.substr(0, pos2);
           context.color().draw_text(theme.font,
                                     l,
-                                    Vector(m_rect.p1().x + left + 5.f - m_h_scrollbar.m_progress,
-                                          m_rect.p1().y + top + 5.f - m_v_scrollbar.m_progress),
+                                    Vector(left, top),
                                     FontAlignment::ALIGN_LEFT,
                                     LAYER_GUI + 1,
                                     is_error ? Color::RED : st_col);
@@ -518,7 +510,7 @@ ScriptEditorWidget::draw_text(DrawingContext& context)
             break;
 
           top += theme.font->get_height();
-          left = 0.f;
+          left = left_base;
 
           pos2++;
           word = word.substr(pos2);
@@ -550,8 +542,7 @@ ScriptEditorWidget::draw_text(DrawingContext& context)
 
         context.color().draw_text(theme.font,
                                   word,
-                                  Vector(m_rect.p1().x + left + 5.f - m_h_scrollbar.m_progress,
-                                         m_rect.p1().y + top + 5.f - m_v_scrollbar.m_progress),
+                                  Vector(left, top),
                                   FontAlignment::ALIGN_LEFT,
                                   LAYER_GUI + 1,
                                   is_operator ? op_col : sy_col);
@@ -689,6 +680,20 @@ ScriptEditorWidget::refresh_script_validation()
 
   sq_setcompilererrorhandler(vm, nullptr);
   squirrel_callback_editor = nullptr;
+}
+
+float
+ScriptEditorWidget::calculate_margin()
+{
+  auto font = get_current_theme().font;
+
+  int nlines = get_line_num(get_contents().size());
+  float line_margin = 0.f;
+
+  for (int i = 0; i <= nlines; i++)
+    line_margin = std::max(line_margin, font->get_text_width(std::to_string(i + 1)));
+
+  m_right_margin = line_margin + 10.f;
 }
 
 /* EOF */

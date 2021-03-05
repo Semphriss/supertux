@@ -47,6 +47,7 @@ public:
 
 private:
   void refresh_script_validation();
+  float calculate_margin();
 
 private:
   float m_validate_timer;

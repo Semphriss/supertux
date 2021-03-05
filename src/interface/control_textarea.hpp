@@ -62,6 +62,7 @@ protected:
 
 protected:
   ControlScrollbar m_v_scrollbar, m_h_scrollbar;
+  float m_right_margin;
 
 private:
   ControlTextarea(const ControlTextarea&) = delete;

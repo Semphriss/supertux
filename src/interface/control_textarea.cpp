@@ -21,7 +21,8 @@
 ControlTextarea::ControlTextarea() :
   ControlTextbox(),
   m_v_scrollbar(),
-  m_h_scrollbar()
+  m_h_scrollbar(),
+  m_right_margin(0.f)
 {
 }
 
@@ -85,10 +86,10 @@ ControlTextarea::draw(DrawingContext& context)
     for (int i = line_1; i <= line_2; i++)
     {
       float hgt = theme.font->get_height() * static_cast<float>(i) + 5.f;
-      float lft = (i != line_1) ? 0.f :
-                  theme.font->get_text_width(get_line(i).substr(0, get_xpos(caret_1)));
-      float rgt = (i != line_2) ? theme.font->get_text_width(get_line(i)) :
-                  theme.font->get_text_width(get_line(i).substr(0, get_xpos(caret_2)));
+      float lft = m_right_margin + ((i != line_1) ? 0.f :
+                  theme.font->get_text_width(get_line(i).substr(0, get_xpos(caret_1))));
+      float rgt = m_right_margin + ((i != line_2) ? theme.font->get_text_width(get_line(i)) :
+                  theme.font->get_text_width(get_line(i).substr(0, get_xpos(caret_2))));
       
       context.color().draw_filled_rect(Rectf(m_rect.p1() + Vector(lft + 5.f, hgt),
                                             m_rect.p1() + Vector(rgt + 5.f, hgt + theme.font->get_height())
@@ -108,7 +109,7 @@ ControlTextarea::draw(DrawingContext& context)
                   theme.font->get_text_height(get_contents().substr(0, hpos)) :
                   0.f;
     hgt -= m_v_scrollbar.m_progress;
-    lgt -= m_h_scrollbar.m_progress;
+    lgt -= m_h_scrollbar.m_progress - m_right_margin;
 
     context.color().draw_line(m_rect.p1() + Vector(lgt + 6.f, hgt + 4.f),
                               m_rect.p1() + Vector(lgt + 6.f,
@@ -130,7 +131,7 @@ ControlTextarea::draw_text(DrawingContext& context)
 
   context.color().draw_text(theme.font,
                             get_contents(),
-                            Vector(m_rect.get_left() + 5.f - m_h_scrollbar.m_progress,
+                            Vector(m_rect.get_left() + 5.f - m_h_scrollbar.m_progress + m_right_margin,
                                    m_rect.get_top() + 5.f - m_v_scrollbar.m_progress),
                             FontAlignment::ALIGN_LEFT,
                             LAYER_GUI + 1,
@@ -399,7 +400,7 @@ ControlTextarea::get_pos_from_x(float x, int line) const
   std::string s = get_line(line);
   int xpos = 0;
 
-  x -= 5.f;
+  x -= 5.f + m_right_margin;
 
   for (int i = 1; i <= static_cast<int>(s.size()); i++)
   {
