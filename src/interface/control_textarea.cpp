@@ -163,7 +163,7 @@ ControlTextarea::on_key_down(const SDL_KeyboardEvent& key)
       auto font = get_current_theme().font;
       std::string s = get_line(line);
       float x = font->get_text_width(s.substr(0, get_xpos(m_caret_pos)));
-      x += 5.f;
+      x += 5.f + m_right_margin;
       m_caret_pos = get_offset_from_pos(line - 1, get_pos_from_x(x, line - 1));
     }
 
@@ -186,7 +186,7 @@ ControlTextarea::on_key_down(const SDL_KeyboardEvent& key)
       auto font = get_current_theme().font;
       std::string s = get_line(line);
       float x = font->get_text_width(s.substr(0, get_xpos(m_caret_pos)));
-      x += 5.f;
+      x += 5.f + m_right_margin;;
       m_caret_pos = get_offset_from_pos(line + 1, get_pos_from_x(x, line + 1));
     }
 
@@ -211,7 +211,7 @@ ControlTextarea::on_key_down(const SDL_KeyboardEvent& key)
     {
       std::string s = get_line(line);
       float x = font->get_text_width(s.substr(0, get_xpos(m_caret_pos)));
-      x += 5.f;
+      x += 5.f + m_right_margin;;
       m_caret_pos = get_offset_from_pos(line + nlines, get_pos_from_x(x, line + nlines));
     }
 
@@ -236,7 +236,7 @@ ControlTextarea::on_key_down(const SDL_KeyboardEvent& key)
     {
       std::string s = get_line(line);
       float x = font->get_text_width(s.substr(0, get_xpos(m_caret_pos)));
-      x += 5.f;
+      x += 5.f + m_right_margin;;
       m_caret_pos = get_offset_from_pos(line - nlines, get_pos_from_x(x, line - nlines));
     }
 
