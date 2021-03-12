@@ -80,6 +80,7 @@ ControlButton::on_mouse_button_down(const SDL_MouseButtonEvent& button)
 {
   InterfaceControl::on_mouse_button_down(button);
 
+  // TODO: Clean this code and use m_mouse_hover or something
   if (button.button == SDL_BUTTON_LEFT) {
     Vector mouse_pos = VideoSystem::current()->get_viewport().to_logical(button.x, button.y);
     if (!m_rect.contains(mouse_pos)) {
@@ -89,6 +90,7 @@ ControlButton::on_mouse_button_down(const SDL_MouseButtonEvent& button)
       m_mouse_down = true;
       if (m_on_change && m_action_on_mousedown)
         m_on_change();
+      return true;
     }
   }
   return false;

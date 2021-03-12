@@ -16,6 +16,8 @@
 
 #include "editor/script_editor.hpp"
 
+#include "version.h"
+
 #include "gui/dialog.hpp"
 #include "gui/mousecursor.hpp"
 #include "supertux/globals.hpp"
@@ -51,6 +53,20 @@ ScriptEditor::ScriptEditor(Editor& editor, std::string* source) :
       }},
       {"edit:redo", _("Redo"), "", false, [this]{
         this->redo();
+      }},
+    }},
+    {_("Settings"), {
+      {"settings:autocomplete", _("Enable autocomplete"), "", false, [this]{
+        this->undo();
+      }},
+    }},
+    {_("Help"), {
+      {"help:tutorial", _("Scripting reference"), "", false, [this]{
+        Dialog::show_confirmation("This will open the following link in your browser:\n"
+                                  SUPERTUX_LINK_SCRIPTING_REFERENCE "\n"
+                                  "Continue?", []{
+          FileSystem::open_path(SUPERTUX_LINK_SCRIPTING_REFERENCE);
+        });
       }},
     }},
   };
@@ -117,10 +133,25 @@ ScriptEditor::event(const SDL_Event& ev)
     });
     m_redo_stack.clear();
   }
-
-  if (ev.type == SDL_KEYDOWN && ev.key.keysym.sym == SDLK_ESCAPE)
+  else
   {
-    quit();
+    m_undo_stack.back().caret_1 = m_script_editor->get_caret_pos();
+    m_undo_stack.back().caret_2 = m_script_editor->get_secondary_caret_pos();
+  }
+
+  if (ev.type == SDL_KEYDOWN)
+  {
+    if (ev.key.keysym.sym == SDLK_ESCAPE)
+      quit();
+
+    if (ev.key.keysym.sym == SDLK_s && (ev.key.keysym.mod & KMOD_CTRL))
+      save();
+
+    if (ev.key.keysym.sym == SDLK_z && (ev.key.keysym.mod & KMOD_CTRL))
+      undo();
+
+    if (ev.key.keysym.sym == SDLK_y && (ev.key.keysym.mod & KMOD_CTRL))
+      redo();
   }
 }
 
