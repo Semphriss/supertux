@@ -27,7 +27,7 @@ EditorObjectWidget::EditorObjectWidget(Editor& editor) :
   m_side_scrollbar(),
   m_left(192),
   m_bottom(static_cast<float>(SCREEN_HEIGHT / 2)),
-  m_rect(Rect(SCREEN_WIDTH - static_cast<int>(m_left), 0,
+  m_rect(Rect(SCREEN_WIDTH - static_cast<int>(m_left), 24.f,
               SCREEN_WIDTH, static_cast<int>(m_bottom))),
   m_object_info(new ObjectInfo()),
   m_tiles(),
@@ -42,14 +42,10 @@ EditorObjectWidget::EditorObjectWidget(Editor& editor) :
     InterfaceTheme(Resources::control_font, Color(.3f, .3f, .3f, 1.f), Color::BLACK, 0.f) // disabled
   );
 
-  m_side_scrollbar.set_rect(Rect(SCREEN_WIDTH - 5, SCREEN_HEIGHT / 2,
-                                 SCREEN_WIDTH, SCREEN_HEIGHT));
   m_side_scrollbar.m_horizontal = false;
   m_side_scrollbar.m_theme = scrollbar_theme;
   m_side_scrollbar.m_on_change = [this] { reset_sidebar(); };
 
-  m_scrollbar.set_rect(Rect(SCREEN_WIDTH - 37, SCREEN_HEIGHT / 2,
-                            SCREEN_WIDTH - 32, SCREEN_HEIGHT));
   m_scrollbar.m_horizontal = false;
   m_scrollbar.m_theme = scrollbar_theme;
   m_scrollbar.m_on_change = [this] { reset_content(); };
@@ -81,15 +77,15 @@ EditorObjectWidget::update(float dt_sec)
 void
 EditorObjectWidget::resize()
 {
-  m_rect = Rect(SCREEN_WIDTH - static_cast<int>(m_left), 0,
+  m_rect = Rect(SCREEN_WIDTH - static_cast<int>(m_left), 24.f,
                 SCREEN_WIDTH, static_cast<int>(m_bottom));
 
   m_side_scrollbar.m_covered_region = m_rect.get_height();
-  m_side_scrollbar.set_rect(Rect(SCREEN_WIDTH - 5, 0,
+  m_side_scrollbar.set_rect(Rect(SCREEN_WIDTH - 5, 24.f,
                                  SCREEN_WIDTH, static_cast<int>(m_bottom)));
 
   m_scrollbar.m_covered_region = m_rect.get_height();
-  m_scrollbar.set_rect(Rect(SCREEN_WIDTH - 37, 0,
+  m_scrollbar.set_rect(Rect(SCREEN_WIDTH - 37, 24.f,
                             SCREEN_WIDTH - 32, static_cast<int>(m_bottom)));
 
   reset_all();
