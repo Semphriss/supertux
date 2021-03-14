@@ -27,19 +27,19 @@
 /** User-defined renderer for virtual canvas */
 struct UserRenderer {
   /** Name of the canvas */
-  std::string name;
+  std::string src_name;
+  /** Source canvas type */
+  DrawingTarget src_target = DrawingTarget::USER;
   /** Target canvas type */
-  DrawingTarget target = DrawingTarget::COLORMAP;
+  DrawingTarget dst_target = DrawingTarget::COLORMAP;
   /** Name of the target canvas (the canvas this canvas will be drawn onto) */
-  std::string target_name = "";
+  std::string dst_name = "";
   /** Blend mode */
   Blend blend = Blend::BLEND;
   /** Flip mode */
   Flip flip = 0;
   /** Transparency */
   float alpha = 1.f;
-  /** Base color */
-  Color color_base = Color(1.f, 1.f, 1.f, 0.f);
   /** Color multiplier */
   Color color_mult = Color::WHITE;
 };

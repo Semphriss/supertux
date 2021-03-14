@@ -48,71 +48,90 @@ Compositor::make_context(bool overlay)
   return *m_drawing_contexts.back();
 }
 
-std::vector<std::unique_ptr<TextureRequest>>
-Compositor::paint_tree(const DrawingTarget& target, const std::string& name)
+std::pair<std::vector<std::unique_ptr<TextureRequest>>,
+          std::vector<std::unique_ptr<TextureRequest>>>
+Compositor::paint_user_canvases()
 {
-  std::vector<std::unique_ptr<TextureRequest>> textures;
+  std::pair<std::vector<std::unique_ptr<TextureRequest>>,
+            std::vector<std::unique_ptr<TextureRequest>>> requests;
 
-  for (const auto& r_data : m_video_system.get_user_renderers_data())
+  // Draw each canvas on their own renderer
+  for (const std::string& canvas_name : m_video_system.get_user_renderers())
   {
-    // The logic in this "if" can be simplified to:
-    //
-    //   r_data.target == target && (target != DrawingTarget::USER || r_data.target_name == name)
-    //
-    // but it would be more difficult to understand that way IMO. ~ Semphris
-    if (r_data.target == target && ((target == DrawingTarget::USER)
-          ? r_data.target_name == name : true))
+    auto* renderer = m_video_system.get_user_renderer(canvas_name);
+
+    assert(renderer);
+
+    renderer->start_draw();
+    Painter& painter = renderer->get_painter();
+
+    for (auto& ctx : m_drawing_contexts)
     {
-      auto* renderer = m_video_system.get_user_renderer(r_data.name);
+      if (!ctx->has_user_canvas(canvas_name))
+        continue;
 
-      assert(renderer);
+      painter.set_clip_rect(ctx->get_viewport());
+      ctx->get_canvas(DrawingTarget::USER, canvas_name).render(*renderer, Canvas::BELOW_LIGHTMAP);
+      painter.clear_clip_rect();
+    }
 
-      const auto head_reqs = paint_tree(DrawingTarget::USER, r_data.name);
+    renderer->end_draw();
+  }
 
-      renderer->start_draw();
-      Painter& painter = renderer->get_painter();
+  // Mix each canvas through linking data
+  for (const auto& link : m_video_system.get_user_renderers_data())
+  {
+    // FIXME: Lightmap/Colormap canvases cannot be read from here (segfault when getting texture)
+    if (link.src_target != DrawingTarget::USER)
+      continue;
 
-      for (auto& ctx : m_drawing_contexts)
-      {
-        if (!ctx->has_user_canvas(r_data.name))
-          continue;
+    auto* renderer_src = m_video_system.get_renderer(link.src_target, link.src_name);
+    assert(renderer_src);
 
-        painter.set_clip_rect(ctx->get_viewport());
-        ctx->get_canvas(DrawingTarget::USER, r_data.name).render(*renderer, Canvas::BELOW_LIGHTMAP);
-        painter.clear_clip_rect();
-      }
+    const auto& texture = renderer_src->get_texture();
 
-      for (const auto& req : head_reqs)
-        painter.draw_texture(*req);
+    auto request = std::make_unique<TextureRequest>();
 
-      renderer->end_draw();
+    request->type = TEXTURE;
+    request->flip = link.flip;
+    request->alpha = link.alpha;
+    request->blend = link.blend;
 
-      TexturePtr texture = renderer->get_texture();
+    request->srcrects.emplace_back(0, 0,
+                                  static_cast<float>(texture->get_image_width()),
+                                  static_cast<float>(texture->get_image_height()));
+    request->dstrects.emplace_back(Vector(0, 0), renderer_src->get_logical_size());
+    request->angles.emplace_back(0.0f);
 
-      if (texture)
-      {
-        auto request = std::make_unique<TextureRequest>();
+    request->texture = texture.get();
+    request->color = link.color_mult;
 
-        request->type = TEXTURE;
-        request->flip = r_data.flip;
-        request->alpha = r_data.alpha;
-        request->blend = r_data.blend;
+    if (link.dst_target == DrawingTarget::USER)
+    {
+      auto* renderer_dst = m_video_system.get_renderer(link.dst_target, link.dst_name);
+      assert(renderer_dst);
 
-        request->srcrects.emplace_back(0, 0,
-                                      static_cast<float>(texture->get_image_width()),
-                                      static_cast<float>(texture->get_image_height()));
-        request->dstrects.emplace_back(Vector(0, 0), renderer->get_logical_size());
-        request->angles.emplace_back(0.0f);
-
-        request->texture = texture.get();
-        request->color = r_data.color_mult;
-
-        textures.push_back(std::move(request));
-      }
+      renderer_dst->start_draw();
+      auto& painter = renderer_dst->get_painter();
+      painter.draw_texture(*request);
+      renderer_dst->end_draw();
+    }
+    else if (link.dst_target == DrawingTarget::COLORMAP)
+    {
+      requests.first.push_back(std::move(request));
+    }
+    else if (link.dst_target == DrawingTarget::LIGHTMAP)
+    {
+      requests.second.push_back(std::move(request));
+    }
+    else
+    {
+      log_fatal << "DrawingTarget enum incomplete" << std::endl;
+      throw std::runtime_error("DrawingTarget enum incomplete");
     }
   }
 
-  return textures;
+  return requests;
 }
 
 void
@@ -125,6 +144,8 @@ Compositor::render()
                                   [](std::unique_ptr<DrawingContext>& ctx){
                                     return ctx->use_lightmap();
                                   });
+
+  const auto user_canvas_requests = paint_user_canvases();
 
   // prepare lightmap
   if (use_lightmap)
@@ -144,6 +165,10 @@ Compositor::render()
         painter.clear_clip_rect();
       }
     }
+
+    for (const auto& req : user_canvas_requests.second)
+      painter.draw_texture(*req);
+
     lightmap.end_draw();
   }
 
@@ -168,8 +193,6 @@ Compositor::render()
   {
     auto& renderer = m_video_system.get_renderer();
 
-    const auto head_reqs = paint_tree(DrawingTarget::COLORMAP);
-
     renderer.start_draw();
     Painter& painter = renderer.get_painter();
 
@@ -180,7 +203,7 @@ Compositor::render()
       painter.clear_clip_rect();
     }
 
-    for (const auto& req : head_reqs)
+    for (const auto& req : user_canvas_requests.first)
       painter.draw_texture(*req);
 
     if (use_lightmap)

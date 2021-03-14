@@ -39,7 +39,7 @@ class GLVideoSystem final : public SDLBaseVideoSystem
 {
 public:
   struct GLUserRenderer {
-    UserRenderer canvas;
+    std::vector<UserRenderer> canvases;
     std::unique_ptr<GLTextureRenderer> renderer;
   };
 

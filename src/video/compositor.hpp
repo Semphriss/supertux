@@ -54,7 +54,9 @@ public:
   DrawingContext& make_context(bool overlay = false);
 
 private:
-  std::vector<std::unique_ptr<TextureRequest>> paint_tree(const DrawingTarget& target, const std::string& name = "");
+  /** Links each canvas together according to user instructions */
+  std::pair<std::vector<std::unique_ptr<TextureRequest>>,
+            std::vector<std::unique_ptr<TextureRequest>>> paint_user_canvases();
 
 private:
   VideoSystem& m_video_system;

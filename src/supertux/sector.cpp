@@ -392,7 +392,10 @@ Sector::draw(DrawingContext& context)
 
   Camera& camera = get_camera();
 
-  context.set_user_canvases({{"test", DrawingTarget::COLORMAP, "", Blend::ADD}});
+  context.set_user_canvases({
+    {"test", DrawingTarget::USER, DrawingTarget::COLORMAP, "", Blend::ADD},
+    {"test", DrawingTarget::USER, DrawingTarget::LIGHTMAP, "", Blend::ADD},
+  });
 
   context.push_transform();
   context.set_translation(camera.get_translation());

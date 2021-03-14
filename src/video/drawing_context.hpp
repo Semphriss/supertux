@@ -66,7 +66,7 @@ public:
 
       case DrawingTarget::USER:
         for (auto& c : m_user_canvases)
-          if (c.renderer.name == name)
+          if (c.renderer.src_name == name)
             return *(c.canvas);
         return color();
       default:
@@ -75,7 +75,7 @@ public:
   }
   bool has_user_canvas(std::string name) {
     for (auto& c : m_user_canvases)
-      if (c.renderer.name == name)
+      if (c.renderer.src_name == name)
         return true;
     return false;
   }

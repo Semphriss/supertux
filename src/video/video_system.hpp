@@ -61,7 +61,9 @@ public:
   virtual Renderer& get_renderer() const = 0;
   virtual Renderer& get_lightmap() const = 0;
   virtual Renderer* get_user_renderer(std::string name) const = 0;
+  virtual Renderer* get_renderer(DrawingTarget target, std::string name) const;
   virtual void set_user_renderers(std::vector<UserRenderer> renderers) { m_user_renderers_data = renderers; }
+  virtual std::vector<std::string> get_user_renderers() const;
   virtual std::vector<UserRenderer> get_user_renderers_data() const { return m_user_renderers_data; };
 
   virtual TexturePtr new_texture(const SDL_Surface& image, const Sampler& sampler = Sampler()) = 0;

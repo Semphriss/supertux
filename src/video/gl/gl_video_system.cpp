@@ -285,7 +285,7 @@ Renderer*
 GLVideoSystem::get_user_renderer(std::string name) const
 {
   for (auto& r : m_user_renderers)
-    if (r->canvas.name == name)
+    if (r->canvases.back().src_name == name)
       return r->renderer.get();
 
   return nullptr;
@@ -300,12 +300,30 @@ GLVideoSystem::set_user_renderers(std::vector<UserRenderer> renderers)
 
   for (auto r : renderers)
   {
-    auto ur = std::make_unique<GLUserRenderer>();
-    ur->canvas = r;
-    ur->renderer = std::make_unique<GLTextureRenderer>(*this,
+    GLUserRenderer* renderer = nullptr;
+
+    for (const auto& rend : m_user_renderers)
+    {
+      if (rend->canvases.back().src_name == r.src_name)
+      {
+        renderer = rend.get();
+        break;
+      }
+    }
+
+    if (renderer)
+    {
+      renderer->canvases.push_back(r);
+    }
+    else
+    {
+      auto ur = std::make_unique<GLUserRenderer>();
+      ur->canvases.push_back(r);
+      ur->renderer = std::make_unique<GLTextureRenderer>(*this,
                                                   m_viewport.get_screen_size(),
                                                   1);
-    m_user_renderers.push_back(std::move(ur));
+      m_user_renderers.push_back(std::move(ur));
+    }
   }
 }
 

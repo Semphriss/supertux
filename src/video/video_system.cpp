@@ -191,4 +191,44 @@ VideoSystem::do_take_screenshot()
   }
 }
 
+Renderer*
+VideoSystem::get_renderer(DrawingTarget target, std::string name) const
+{
+  switch(target)
+  {
+    case DrawingTarget::COLORMAP:
+      return &get_renderer();
+    case DrawingTarget::LIGHTMAP:
+      return &get_lightmap();
+    case DrawingTarget::USER:
+      return get_user_renderer(name);
+  }
+};
+
+std::vector<std::string>
+VideoSystem::get_user_renderers() const
+{
+  std::vector<std::string> renderers;
+
+  for (const auto& r : m_user_renderers_data)
+  {
+    if (r.src_target != DrawingTarget::USER)
+      continue;
+
+    bool skip = false;
+    for (const auto& r2 : renderers)
+    {
+      if (r2 == r.src_name)
+      {
+        skip = true;
+        break;
+      }
+    }
+    if (!skip)
+      renderers.push_back(r.src_name);
+  }
+
+  return renderers;
+};
+
 /* EOF */

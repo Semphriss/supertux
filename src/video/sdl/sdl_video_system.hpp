@@ -32,7 +32,7 @@ class SDLVideoSystem final : public SDLBaseVideoSystem
 {
 public:
   struct SDLUserRenderer {
-    UserRenderer canvas;
+    std::vector<UserRenderer> canvases;
     std::unique_ptr<SDLTextureRenderer> renderer;
   };
 
