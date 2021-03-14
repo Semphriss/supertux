@@ -392,10 +392,7 @@ Sector::draw(DrawingContext& context)
 
   Camera& camera = get_camera();
 
-  context.set_user_canvases({
-    {"test", DrawingTarget::USER, DrawingTarget::COLORMAP, "", Blend::ADD},
-    {"test", DrawingTarget::USER, DrawingTarget::LIGHTMAP, "", Blend::ADD},
-  });
+  context.set_user_canvases(m_canvases);
 
   context.push_transform();
   context.set_translation(camera.get_translation());
@@ -614,6 +611,22 @@ Sector::save(Writer &writer)
   if (m_init_script.size()) {
     writer.write("init-script", m_init_script,false);
   }
+
+  writer.start_list("canvases", false);
+  for (const auto& canvas : m_canvases)
+  {
+    writer.start_list("canvas", false);
+    writer.write("src_name", canvas.src_name);
+    writer.write("src_target", to_string(canvas.src_target));
+    writer.write("dst_name", canvas.dst_name);
+    writer.write("dst_target", to_string(canvas.dst_target));
+    writer.write("alpha", canvas.alpha);
+    writer.write("blend", Blend_to_string(canvas.blend));
+    writer.write("color_mult", canvas.color_mult.toVector());
+    writer.write("flip", static_cast<int>(canvas.flip));
+    writer.end_list("canvas");
+  }
+  writer.end_list("canvases");
 
   // saving objects;
   std::vector<GameObject*> objects(get_objects().size());

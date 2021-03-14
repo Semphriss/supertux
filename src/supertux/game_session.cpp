@@ -311,6 +311,7 @@ GameSession::setup()
 void
 GameSession::leave()
 {
+  VideoSystem::current()->set_user_renderers({});
 }
 
 void

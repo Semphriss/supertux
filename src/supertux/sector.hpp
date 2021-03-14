@@ -26,6 +26,7 @@
 #include "supertux/d_scope.hpp"
 #include "supertux/game_object_manager.hpp"
 #include "video/color.hpp"
+#include "video/user_renderer.hpp"
 
 namespace collision {
 class Constraints;
@@ -159,6 +160,9 @@ private:
   /** Convert tiles into their corresponding GameObjects (e.g.
       bonusblocks, add light to lava tiles) */
   void convert_tiles2gameobject();
+
+public:
+  std::vector<UserRenderer> m_canvases;
 
 private:
   /** Parent level containing this sector */

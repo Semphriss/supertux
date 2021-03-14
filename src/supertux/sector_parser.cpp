@@ -108,6 +108,8 @@ SectorParser::parse(const ReaderMapping& sector)
       float value;
       iter.get(value);
       m_sector.set_gravity(value);
+    } else if (iter.get_key() == "canvases") {
+      parse_canvases(iter.as_mapping());
     } else if (iter.get_key() == "music") {
       const auto& sx = iter.get_sexp();
       if (sx.is_array() && sx.as_array().size() == 2 && sx.as_array()[1].is_string()) {
@@ -147,6 +149,42 @@ SectorParser::parse(const ReaderMapping& sector)
   }
 
   m_sector.finish_construction(m_editable);
+}
+
+void
+SectorParser::parse_canvases(const ReaderMapping& canvases)
+{
+  auto iter = canvases.get_iter();
+  while (iter.next()) {
+    if (iter.get_key() != "canvas")
+      log_warning << "Canvas not labeled as canvas" << std::endl;
+
+    const auto canvas = iter.as_mapping();
+
+    UserRenderer renderer;
+    canvas.get("src_name", renderer.src_name);
+    canvas.get_custom("src_target", renderer.src_target, DrawingTarget_from_string);
+    canvas.get("dst_name", renderer.dst_name);
+    canvas.get_custom("dst_target", renderer.dst_target, DrawingTarget_from_string);
+    canvas.get("alpha", renderer.alpha);
+    canvas.get_custom("blend", renderer.blend, Blend_from_string);
+
+    std::vector<float> color_mult;
+    if (canvas.get("color", color_mult))
+    {
+      if (color_mult.size() < 3) {
+        log_warning << "ambient-light requires three float arguments" << std::endl;
+      } else {
+        renderer.color_mult = Color(color_mult);
+      }
+    }
+
+    int flip;
+    if (canvas.get("flip", flip))
+      renderer.flip = static_cast<Flip>(flip);
+
+    m_sector.m_canvases.push_back(std::move(renderer));
+  }
 }
 
 void

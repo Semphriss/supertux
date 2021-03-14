@@ -39,6 +39,7 @@ private:
   void parse(const ReaderMapping& sector);
   void create_sector();
   std::unique_ptr<GameObject> parse_object(const std::string& name_, const ReaderMapping& reader);
+  void parse_canvases(const ReaderMapping& canvases);
 
 private:
   Sector& m_sector;
