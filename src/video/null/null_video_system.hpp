@@ -36,6 +36,8 @@ public:
   virtual Renderer* get_back_renderer() const override;
   virtual Renderer& get_renderer() const override;
   virtual Renderer& get_lightmap() const override;
+  virtual Renderer* get_user_renderer(std::string name) const override { return nullptr; }
+  virtual void set_user_renderers(std::vector<UserRenderer> renderers) override { VideoSystem::set_user_renderers(renderers); }
 
   virtual TexturePtr new_texture(const SDL_Surface& image, const Sampler& sampler)  override;
 

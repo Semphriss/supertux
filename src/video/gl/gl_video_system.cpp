@@ -46,6 +46,7 @@ GLVideoSystem::GLVideoSystem(bool use_opengl33core) :
   m_renderer(),
   m_lightmap(),
   m_back_renderer(),
+  m_user_renderers(),
   m_context(),
   m_glcontext(),
   m_viewport()
@@ -278,6 +279,34 @@ Renderer*
 GLVideoSystem::get_back_renderer() const
 {
   return m_back_renderer.get();
+}
+
+Renderer*
+GLVideoSystem::get_user_renderer(std::string name) const
+{
+  for (auto& r : m_user_renderers)
+    if (r->canvas.name == name)
+      return r->renderer.get();
+
+  return nullptr;
+}
+
+void
+GLVideoSystem::set_user_renderers(std::vector<UserRenderer> renderers)
+{
+  VideoSystem::set_user_renderers(renderers);
+
+  m_user_renderers.clear();
+
+  for (auto r : renderers)
+  {
+    auto ur = std::make_unique<GLUserRenderer>();
+    ur->canvas = r;
+    ur->renderer = std::make_unique<GLTextureRenderer>(*this,
+                                                  m_viewport.get_screen_size(),
+                                                  1);
+    m_user_renderers.push_back(std::move(ur));
+  }
 }
 
 TexturePtr

@@ -28,6 +28,10 @@ DrawingTarget DrawingTarget_from_string(const std::string& text)
   {
     return DrawingTarget::COLORMAP;
   }
+  else if (text == "user")
+  {
+    return DrawingTarget::USER;
+  }
   else
   {
     log_warning << "unknown drawing target: " << text << std::endl;
@@ -44,6 +48,9 @@ std::string to_string(DrawingTarget value)
 
     case DrawingTarget::COLORMAP:
       return "colormap";
+
+    case DrawingTarget::USER:
+      return "user";
 
     default:
       return "colormap";

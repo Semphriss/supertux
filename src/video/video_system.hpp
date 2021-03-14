@@ -24,6 +24,7 @@
 #include "util/currenton.hpp"
 #include "video/sampler.hpp"
 #include "video/texture_ptr.hpp"
+#include "video/user_renderer.hpp"
 
 class Rect;
 class Renderer;
@@ -59,6 +60,9 @@ public:
   virtual Renderer* get_back_renderer() const = 0;
   virtual Renderer& get_renderer() const = 0;
   virtual Renderer& get_lightmap() const = 0;
+  virtual Renderer* get_user_renderer(std::string name) const = 0;
+  virtual void set_user_renderers(std::vector<UserRenderer> renderers) { m_user_renderers_data = renderers; }
+  virtual std::vector<UserRenderer> get_user_renderers_data() const { return m_user_renderers_data; };
 
   virtual TexturePtr new_texture(const SDL_Surface& image, const Sampler& sampler = Sampler()) = 0;
 
@@ -76,6 +80,9 @@ public:
   virtual SDLSurfacePtr make_screenshot() = 0;
 
   void do_take_screenshot();
+
+private:
+  std::vector<UserRenderer> m_user_renderers_data;
 
 private:
   VideoSystem(const VideoSystem&) = delete;

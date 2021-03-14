@@ -36,7 +36,8 @@ DrawingContext::DrawingContext(VideoSystem& video_system_, obstack& obst, bool o
   m_ambient_color(Color::WHITE),
   m_transform_stack(1),
   m_colormap_canvas(*this, m_obst),
-  m_lightmap_canvas(*this, m_obst)
+  m_lightmap_canvas(*this, m_obst),
+  m_user_canvases()
 {
 }
 
@@ -141,6 +142,20 @@ Vector
 DrawingContext::get_size() const
 {
   return Vector(static_cast<float>(get_width()), static_cast<float>(get_height())) * transform().scale;
+}
+
+void
+DrawingContext::set_user_canvases(const std::vector<UserRenderer>& renderers)
+{
+  for (const auto& r : renderers)
+  {
+    UserCanvas c;
+    c.renderer = r;
+    c.canvas = std::make_unique<Canvas>(*this, m_obst);
+    m_user_canvases.push_back(std::move(c));
+  }
+
+  m_video_system.set_user_renderers(renderers);
 }
 
 /* EOF */

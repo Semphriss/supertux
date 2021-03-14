@@ -34,7 +34,8 @@ SDLVideoSystem::SDLVideoSystem() :
   m_viewport(),
   m_renderer(),
   m_lightmap(),
-  m_texture_manager()
+  m_texture_manager(),
+  m_user_renderers()
 {
   create_window();
 
@@ -105,6 +106,35 @@ Renderer&
 SDLVideoSystem::get_lightmap() const
 {
   return *m_lightmap;
+}
+
+Renderer*
+SDLVideoSystem::get_user_renderer(std::string name) const
+{
+  for (auto& r : m_user_renderers)
+    if (r->canvas.name == name)
+      return r->renderer.get();
+
+  return nullptr;
+}
+
+void
+SDLVideoSystem::set_user_renderers(std::vector<UserRenderer> renderers)
+{
+  VideoSystem::set_user_renderers(renderers);
+
+  m_user_renderers.clear();
+
+  for (auto r : renderers)
+  {
+    auto ur = std::make_unique<SDLUserRenderer>();
+    ur->canvas = r;
+    ur->renderer = std::make_unique<SDLTextureRenderer>(*this,
+                                                   m_sdl_renderer.get(),
+                                                   m_viewport.get_screen_size(),
+                                                   5);
+    m_user_renderers.push_back(std::move(ur));
+  }
 }
 
 TexturePtr

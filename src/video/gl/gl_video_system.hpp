@@ -38,6 +38,12 @@ struct SDL_Surface;
 class GLVideoSystem final : public SDLBaseVideoSystem
 {
 public:
+  struct GLUserRenderer {
+    UserRenderer canvas;
+    std::unique_ptr<GLTextureRenderer> renderer;
+  };
+
+public:
   GLVideoSystem(bool use_opengl33core);
   ~GLVideoSystem();
 
@@ -46,6 +52,8 @@ public:
   virtual Renderer* get_back_renderer() const override;
   virtual Renderer& get_renderer() const override;
   virtual Renderer& get_lightmap() const override;
+  virtual Renderer* get_user_renderer(std::string name) const override;
+  virtual void set_user_renderers(std::vector<UserRenderer> renderers) override;
 
   virtual TexturePtr new_texture(const SDL_Surface& image, const Sampler& sampler) override;
 
@@ -70,6 +78,7 @@ private:
   std::unique_ptr<GLScreenRenderer> m_renderer;
   std::unique_ptr<GLTextureRenderer> m_lightmap;
   std::unique_ptr<GLTextureRenderer> m_back_renderer;
+  std::vector<std::unique_ptr<GLUserRenderer>> m_user_renderers;
   std::unique_ptr<GLContext> m_context;
 
   SDL_GLContext m_glcontext;

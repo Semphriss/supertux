@@ -31,6 +31,7 @@
 #include "video/drawing_transform.hpp"
 #include "video/font.hpp"
 #include "video/font_ptr.hpp"
+#include "video/user_renderer.hpp"
 
 class VideoSystem;
 struct DrawingRequest;
@@ -42,6 +43,13 @@ struct obstack;
 class DrawingContext final
 {
 public:
+  // TODO: Convert this to an actual class since we have a unique_ptr
+  struct UserCanvas {
+    UserRenderer renderer;
+    std::unique_ptr<Canvas> canvas;
+  };
+
+public:
   DrawingContext(VideoSystem& video_system, obstack& obst, bool overlay);
   ~DrawingContext();
 
@@ -50,16 +58,31 @@ public:
 
   Canvas& color() { return m_colormap_canvas; }
   Canvas& light() { assert(!m_overlay); return m_lightmap_canvas; }
-  Canvas& get_canvas(DrawingTarget target) {
+  Canvas& get_canvas(DrawingTarget target, std::string name = {}) {
     switch (target)
     {
       case DrawingTarget::LIGHTMAP:
         return light();
 
+      case DrawingTarget::USER:
+        for (auto& c : m_user_canvases)
+          if (c.renderer.name == name)
+            return *(c.canvas);
+        return color();
       default:
         return color();
     }
   }
+  bool has_user_canvas(std::string name) {
+    for (auto& c : m_user_canvases)
+      if (c.renderer.name == name)
+        return true;
+    return false;
+  }
+
+  std::vector<UserCanvas>& get_user_canvases() { return m_user_canvases; }
+  const std::vector<UserCanvas>& get_user_canvases() const { return m_user_canvases; }
+  void set_user_canvases(const std::vector<UserRenderer>& renderers);
 
   void set_ambient_color(Color ambient_color);
   Color get_ambient_color() const { return m_ambient_color; }
@@ -128,6 +151,8 @@ private:
 
   Canvas m_colormap_canvas;
   Canvas m_lightmap_canvas;
+
+  std::vector<UserCanvas> m_user_canvases;
 
 private:
   DrawingContext(const DrawingContext&) = delete;

@@ -31,6 +31,12 @@ class TextureManager;
 class SDLVideoSystem final : public SDLBaseVideoSystem
 {
 public:
+  struct SDLUserRenderer {
+    UserRenderer canvas;
+    std::unique_ptr<SDLTextureRenderer> renderer;
+  };
+
+public:
   SDLVideoSystem();
   ~SDLVideoSystem();
 
@@ -39,6 +45,8 @@ public:
   virtual Renderer* get_back_renderer() const override { return nullptr; }
   virtual Renderer& get_renderer() const override;
   virtual Renderer& get_lightmap() const override;
+  virtual Renderer* get_user_renderer(std::string name) const override;
+  virtual void set_user_renderers(std::vector<UserRenderer> renderers) override;
 
   virtual TexturePtr new_texture(const SDL_Surface& image, const Sampler& sampler) override;
 
@@ -60,6 +68,7 @@ private:
   std::unique_ptr<SDLScreenRenderer> m_renderer;
   std::unique_ptr<SDLTextureRenderer> m_lightmap;
   std::unique_ptr<TextureManager> m_texture_manager;
+  std::vector<std::unique_ptr<SDLUserRenderer>> m_user_renderers;
 
 private:
   SDLVideoSystem(const SDLVideoSystem&) = delete;

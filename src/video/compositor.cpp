@@ -18,7 +18,9 @@
 #include "video/compositor.hpp"
 
 #include "math/rect.hpp"
+#include "util/log.hpp"
 #include "video/drawing_request.hpp"
+#include "video/drawing_target.hpp"
 #include "video/painter.hpp"
 #include "video/renderer.hpp"
 #include "video/video_system.hpp"
@@ -46,17 +48,83 @@ Compositor::make_context(bool overlay)
   return *m_drawing_contexts.back();
 }
 
+std::vector<std::unique_ptr<TextureRequest>>
+Compositor::paint_tree(const DrawingTarget& target, const std::string& name)
+{
+  std::vector<std::unique_ptr<TextureRequest>> textures;
+
+  for (const auto& r_data : m_video_system.get_user_renderers_data())
+  {
+    // The logic in this "if" can be simplified to:
+    //
+    //   r_data.target == target && (target != DrawingTarget::USER || r_data.target_name == name)
+    //
+    // but it would be more difficult to understand that way IMO. ~ Semphris
+    if (r_data.target == target && ((target == DrawingTarget::USER)
+          ? r_data.target_name == name : true))
+    {
+      auto* renderer = m_video_system.get_user_renderer(r_data.name);
+
+      assert(renderer);
+
+      const auto head_reqs = paint_tree(DrawingTarget::USER, r_data.name);
+
+      renderer->start_draw();
+      Painter& painter = renderer->get_painter();
+
+      for (auto& ctx : m_drawing_contexts)
+      {
+        if (!ctx->has_user_canvas(r_data.name))
+          continue;
+
+        painter.set_clip_rect(ctx->get_viewport());
+        ctx->get_canvas(DrawingTarget::USER, r_data.name).render(*renderer, Canvas::BELOW_LIGHTMAP);
+        painter.clear_clip_rect();
+      }
+
+      for (const auto& req : head_reqs)
+        painter.draw_texture(*req);
+
+      renderer->end_draw();
+
+      TexturePtr texture = renderer->get_texture();
+
+      if (texture)
+      {
+        auto request = std::make_unique<TextureRequest>();
+
+        request->type = TEXTURE;
+        request->flip = r_data.flip;
+        request->alpha = r_data.alpha;
+        request->blend = r_data.blend;
+
+        request->srcrects.emplace_back(0, 0,
+                                      static_cast<float>(texture->get_image_width()),
+                                      static_cast<float>(texture->get_image_height()));
+        request->dstrects.emplace_back(Vector(0, 0), renderer->get_logical_size());
+        request->angles.emplace_back(0.0f);
+
+        request->texture = texture.get();
+        request->color = r_data.color_mult;
+
+        textures.push_back(std::move(request));
+      }
+    }
+  }
+
+  return textures;
+}
+
 void
 Compositor::render()
 {
   auto& lightmap = m_video_system.get_lightmap();
 
-  bool use_lightmap = std::any_of(m_drawing_contexts.begin(), m_drawing_contexts.end(),
+  bool use_lightmap = s_render_lighting &&
+              std::any_of(m_drawing_contexts.begin(), m_drawing_contexts.end(),
                                   [](std::unique_ptr<DrawingContext>& ctx){
                                     return ctx->use_lightmap();
                                   });
-
-  use_lightmap = use_lightmap && s_render_lighting;
 
   // prepare lightmap
   if (use_lightmap)
@@ -100,6 +168,8 @@ Compositor::render()
   {
     auto& renderer = m_video_system.get_renderer();
 
+    const auto head_reqs = paint_tree(DrawingTarget::COLORMAP);
+
     renderer.start_draw();
     Painter& painter = renderer.get_painter();
 
@@ -110,9 +180,13 @@ Compositor::render()
       painter.clear_clip_rect();
     }
 
+    for (const auto& req : head_reqs)
+      painter.draw_texture(*req);
+
     if (use_lightmap)
     {
-      const TexturePtr& texture = lightmap.get_texture();
+      TexturePtr texture = lightmap.get_texture();
+
       if (texture)
       {
         TextureRequest request;

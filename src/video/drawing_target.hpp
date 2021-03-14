@@ -27,7 +27,10 @@ enum class DrawingTarget {
 
   /** The lightmap is drawn on top of the color layer and darkens it,
       elements drawn here act as lightsources. */
-  LIGHTMAP
+  LIGHTMAP,
+
+  /** User-defined target. */
+  USER
 };
 
 DrawingTarget DrawingTarget_from_string(const std::string& text);

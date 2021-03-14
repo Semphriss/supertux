@@ -21,13 +21,22 @@
 #include <memory>
 
 #include "util/obstackpp.hpp"
+#include "video/drawing_request.hpp"
 
 class DrawingContext;
+enum class DrawingTarget;
+class Painter;
 class Rect;
 class VideoSystem;
 
 class Compositor final
 {
+private:
+  struct TreeNode {
+    std::string name;
+    std::vector<TreeNode> children;
+  };
+
 public:
   /** Debug flag to disable lighting, used in the editor */
   static bool s_render_lighting;
@@ -43,6 +52,9 @@ public:
       overlap with other context (e.g. the HUD in ScreenManager) as
       otherwise their lighting would get messed up. */
   DrawingContext& make_context(bool overlay = false);
+
+private:
+  std::vector<std::unique_ptr<TextureRequest>> paint_tree(const DrawingTarget& target, const std::string& name = "");
 
 private:
   VideoSystem& m_video_system;
