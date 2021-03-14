@@ -62,11 +62,11 @@ ScriptEditor::ScriptEditor(Editor& editor, std::string* source) :
     }},
     {_("Help"), {
       {"help:tutorial", _("Scripting reference"), "", false, [this]{
-        Dialog::show_confirmation("This will open the following link in your browser:\n"
+        /*Dialog::show_confirmation("This will open the following link in your browser:\n"
                                   SUPERTUX_LINK_SCRIPTING_REFERENCE "\n"
                                   "Continue?", []{
           FileSystem::open_path(SUPERTUX_LINK_SCRIPTING_REFERENCE);
-        });
+        });*/
       }},
     }},
   };
