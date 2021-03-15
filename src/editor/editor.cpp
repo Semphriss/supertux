@@ -22,6 +22,7 @@
 #include "audio/sound_manager.hpp"
 #include "control/input_manager.hpp"
 #include "editor/button_widget.hpp"
+#include "editor/canvas_editor.hpp"
 #include "editor/layer_icon.hpp"
 #include "editor/object_info.hpp"
 #include "editor/particle_editor.hpp"
@@ -165,7 +166,10 @@ Editor::Editor() :
       }},
       {"sector:delete", _("Delete sector"), "", false, []{
         EditorSectorsMenu::delete_sector();
-      }}
+      }},
+      {"sector:canvas", _("Open Canvas editor"), "", true, [this]{
+        ScreenManager::current()->push_screen(std::make_unique<CanvasEditor>(*this, *get_sector()));
+      }},
     }},
     {_("Settings"), {
       {"settings:grid-size-0", _("Grid size: ") + _("tiny tile (4px)"), "", false, [this]{
