@@ -37,16 +37,13 @@ Canvas::Canvas(DrawingContext& context, obstack& obst) :
 
 Canvas::~Canvas()
 {
-  clear();
+  // No need to do that anymore, now it uses unique pointers
+  //clear();
 }
 
 void
 Canvas::clear()
 {
-  for (auto& request : m_requests)
-  {
-    request->~DrawingRequest();
-  }
   m_requests.clear();
 }
 
@@ -57,7 +54,7 @@ Canvas::render(Renderer& renderer, Filter filter)
   // batching it was 1000-3000), the sort comparator function is
   // called approximatly 3-7 times for each request.
   std::stable_sort(m_requests.begin(), m_requests.end(),
-                   [](const DrawingRequest* r1, const DrawingRequest* r2){
+                   [](const std::unique_ptr<DrawingRequest>& r1, const std::unique_ptr<DrawingRequest>& r2){
                      return r1->layer < r2->layer;
                    });
 
@@ -119,7 +116,7 @@ Canvas::draw_surface(const SurfacePtr& surface,
      position.y + static_cast<float>(surface->get_height()) < cliprect.get_top())
     return;
 
-  auto request = new(m_obst) TextureRequest();
+  auto request = std::make_unique<TextureRequest>();
 
   request->type = TEXTURE;
   request->layer = layer;
@@ -143,7 +140,7 @@ Canvas::draw_surface(const SurfacePtr& surface,
   request->displacement_texture = surface->get_displacement_texture().get();
   request->color = color;
 
-  m_requests.push_back(request);
+  m_requests.push_back(std::move(request));
 }
 
 void
@@ -166,7 +163,7 @@ Canvas::draw_surface_part(const SurfacePtr& surface, const Rectf& srcrect, const
 {
   if (!surface) return;
 
-  auto request = new(m_obst) TextureRequest();
+  auto request = std::make_unique<TextureRequest>();
 
   request->type = TEXTURE;
   request->layer = layer;
@@ -184,7 +181,7 @@ Canvas::draw_surface_part(const SurfacePtr& surface, const Rectf& srcrect, const
   request->displacement_texture = surface->get_displacement_texture().get();
   request->color = style.get_color();
 
-  m_requests.push_back(request);
+  m_requests.push_back(std::move(request));
 }
 
 void
@@ -212,7 +209,7 @@ Canvas::draw_surface_batch(const SurfacePtr& surface,
 {
   if (!surface) return;
 
-  auto request = new(m_obst) TextureRequest();
+  auto request = std::make_unique<TextureRequest>();
 
   request->type = TEXTURE;
   request->layer = layer;
@@ -236,7 +233,7 @@ Canvas::draw_surface_batch(const SurfacePtr& surface,
   request->texture = surface->get_texture().get();
   request->displacement_texture = surface->get_displacement_texture().get();
 
-  m_requests.push_back(request);
+  m_requests.push_back(std::move(request));
 }
 
 void
@@ -259,7 +256,7 @@ Canvas::draw_gradient(const Color& top, const Color& bottom, int layer,
                       const GradientDirection& direction, const Rectf& region,
                       const Blend& blend)
 {
-  auto request = new(m_obst) GradientRequest();
+  auto request = std::make_unique<GradientRequest>();
 
   request->type = GRADIENT;
   request->layer = layer;
@@ -275,7 +272,7 @@ Canvas::draw_gradient(const Color& top, const Color& bottom, int layer,
                           apply_translate(region.p2())*scale()
                          ).intersect(m_context.transform().clip);
 
-  m_requests.push_back(request);
+  m_requests.push_back(std::move(request));
 }
 
 void
@@ -288,7 +285,7 @@ Canvas::draw_filled_rect(const Rectf& rect, const Color& color,
 void
 Canvas::draw_filled_rect(const Rectf& rect, const Color& color, float radius, int layer)
 {
-  auto request = new(m_obst) FillRectRequest;
+  auto request = std::make_unique<FillRectRequest>();
 
   request->type   = FILLRECT;
   request->layer  = layer;
@@ -303,13 +300,13 @@ Canvas::draw_filled_rect(const Rectf& rect, const Color& color, float radius, in
   request->color.alpha = color.alpha * m_context.transform().alpha;
   request->radius = radius;
 
-  m_requests.push_back(request);
+  m_requests.push_back(std::move(request));
 }
 
 void
 Canvas::draw_inverse_ellipse(const Vector& pos, const Vector& size, const Color& color, int layer)
 {
-  auto request = new(m_obst) InverseEllipseRequest;
+  auto request = std::make_unique<InverseEllipseRequest>();
 
   request->type   = INVERSEELLIPSE;
   request->layer  = layer;
@@ -323,13 +320,13 @@ Canvas::draw_inverse_ellipse(const Vector& pos, const Vector& size, const Color&
   request->color.alpha  = color.alpha * m_context.transform().alpha;
   request->size         = size*scale();
 
-  m_requests.push_back(request);
+  m_requests.push_back(std::move(request));
 }
 
 void
 Canvas::draw_line(const Vector& pos1, const Vector& pos2, const Color& color, int layer)
 {
-  auto request = new(m_obst) LineRequest;
+  auto request = std::make_unique<LineRequest>();
 
   request->type   = LINE;
   request->layer  = layer;
@@ -344,13 +341,13 @@ Canvas::draw_line(const Vector& pos1, const Vector& pos2, const Color& color, in
   request->color.alpha  = color.alpha * m_context.transform().alpha;
   request->dest_pos     = std::get<1>(line);
 
-  m_requests.push_back(request);
+  m_requests.push_back(std::move(request));
 }
 
 void
 Canvas::draw_triangle(const Vector& pos1, const Vector& pos2, const Vector& pos3, const Color& color, int layer)
 {
-  auto request = new(m_obst) TriangleRequest;
+  auto request = std::make_unique<TriangleRequest>();
 
   request->type   = TRIANGLE;
   request->layer  = layer;
@@ -365,7 +362,7 @@ Canvas::draw_triangle(const Vector& pos1, const Vector& pos2, const Vector& pos3
   request->color = color;
   request->color.alpha = color.alpha * m_context.transform().alpha;
 
-  m_requests.push_back(request);
+  m_requests.push_back(std::move(request));
 }
 
 void
@@ -385,13 +382,13 @@ Canvas::get_pixel(const Vector& position, const std::shared_ptr<Color>& color_ou
     return;
   }
 
-  auto request = new(m_obst) GetPixelRequest();
+  auto request = std::make_unique<GetPixelRequest>();
 
   request->layer = LAYER_GETPIXEL;
   request->pos = pos;
   request->color_ptr = color_out;
 
-  m_requests.push_back(request);
+  m_requests.push_back(std::move(request));
 }
 
 Vector

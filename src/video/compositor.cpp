@@ -65,6 +65,11 @@ Compositor::paint_user_canvases()
     renderer->start_draw();
     Painter& painter = renderer->get_painter();
 
+    // Forces the background to be invisible, not solid black. This is already
+    // done in GLTextureRenderer (not in GLScreenRenderer though), but it's done
+    // again for good practice.
+    painter.clear(Color::INVISIBLE);
+
     for (auto& ctx : m_drawing_contexts)
     {
       if (!ctx->has_user_canvas(canvas_name))

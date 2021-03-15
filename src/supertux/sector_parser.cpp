@@ -170,7 +170,7 @@ SectorParser::parse_canvases(const ReaderMapping& canvases)
     canvas.get_custom("blend", renderer.blend, Blend_from_string);
 
     std::vector<float> color_mult;
-    if (canvas.get("color", color_mult))
+    if (canvas.get("color_mult", color_mult))
     {
       if (color_mult.size() < 3) {
         log_warning << "ambient-light requires three float arguments" << std::endl;

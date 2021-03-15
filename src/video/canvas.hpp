@@ -98,7 +98,7 @@ private:
 private:
   DrawingContext& m_context;
   obstack& m_obst;
-  std::vector<DrawingRequest*> m_requests;
+  std::vector<std::unique_ptr<DrawingRequest>> m_requests;
 
 private:
   Canvas(const Canvas&) = delete;
