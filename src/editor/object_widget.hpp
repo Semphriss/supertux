@@ -31,7 +31,7 @@ class EditorObjectWidget final : public InterfaceControl
 {
 public:
   enum class InputType {
-    NONE, TILE, OBJECT, SECTOR
+    NONE, TILE, OBJECT
   };
 
 private:
@@ -43,7 +43,10 @@ public:
 
   virtual void draw(DrawingContext& context) override;
   virtual void update(float dt_sec) override;
+
   virtual void resize() override;
+  virtual void setup() override;
+
   virtual bool on_mouse_wheel(const SDL_MouseWheelEvent& wheel) override;
 
   virtual bool event(const SDL_Event& event) override

@@ -51,7 +51,7 @@ public:
   static std::string get_video_string(Enum video);
 
 public:
-  VideoSystem() {}
+  VideoSystem() : m_user_renderers_data() {}
   virtual ~VideoSystem() {}
 
   /** Return a human readable name of the current video system */

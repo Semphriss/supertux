@@ -30,7 +30,7 @@ EditorObjectWidget::EditorObjectWidget(Editor& editor) :
   m_rect(Rect(SCREEN_WIDTH - static_cast<int>(m_left), 24.f,
               SCREEN_WIDTH, static_cast<int>(m_bottom))),
   m_object_info(new ObjectInfo()),
-  m_tiles(),
+  m_tiles(new TileSelection()),
   m_object(),
   m_input_type()
 {
@@ -49,8 +49,6 @@ EditorObjectWidget::EditorObjectWidget(Editor& editor) :
   m_scrollbar.m_horizontal = false;
   m_scrollbar.m_theme = scrollbar_theme;
   m_scrollbar.m_on_change = [this] { reset_content(); };
-
-  resize();
 }
 
 void
@@ -89,6 +87,13 @@ EditorObjectWidget::resize()
                             SCREEN_WIDTH - 32, static_cast<int>(m_bottom)));
 
   reset_all();
+}
+
+void
+EditorObjectWidget::setup()
+{
+  resize();
+  m_tiles->set_tile(0);
 }
 
 bool
