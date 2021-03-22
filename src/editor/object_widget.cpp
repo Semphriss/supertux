@@ -18,6 +18,8 @@
 
 #include "editor/object_info.hpp"
 #include "supertux/globals.hpp"
+#include "util/fade_helper.hpp"
+#include "util/gettext.hpp"
 #include "video/video_system.hpp"
 #include "video/viewport.hpp"
 
@@ -32,7 +34,11 @@ EditorObjectWidget::EditorObjectWidget(Editor& editor) :
   m_object_info(new ObjectInfo()),
   m_tiles(new TileSelection()),
   m_object(),
-  m_input_type()
+  m_input_type(),
+  m_tool_icon(SCREEN_WIDTH - m_left - 32.f, 32.f, SCREEN_WIDTH - m_left - 16.f, 48.f),
+  m_secondary_tool_icon(SCREEN_WIDTH - m_left - 64.f, 32.f, SCREEN_WIDTH - m_left - 48.f, 48.f),
+  m_tool_fade(),
+  m_secondary_tool_fade()
 {
   auto scrollbar_theme = InterfaceThemeSet(
     InterfaceTheme(Resources::control_font, Color(.7f, .7f, .7f, 1.f), Color::BLACK, 0.f), // base
@@ -64,7 +70,32 @@ EditorObjectWidget::draw(DrawingContext& context)
   m_scrollbar.draw(context);
   m_side_scrollbar.draw(context);
 
+  context.color().draw_text(Resources::border_control_font,
+                            _("Tiles"),
+                            Vector(m_rect.get_left() + m_rect.get_width() / 4.f,
+                                   40.f - Resources::border_control_font->get_height() / 2.f),
+                            FontAlignment::ALIGN_CENTER,
+                            LAYER_GUI + 2);
+
+  context.color().draw_line(Vector(m_rect.get_left() + m_rect.get_width() / 2.f, 24.f),
+                            Vector(m_rect.get_left() + m_rect.get_width() / 2.f, 56.f),
+                            Color(0.f, 0.05f, 0.1f),
+                            LAYER_GUI + 2);
+
+  context.color().draw_text(Resources::border_control_font,
+                            _("Objects"),
+                            Vector(m_rect.get_right() - m_rect.get_width() / 4.f,
+                                   40.f - Resources::border_control_font->get_height() / 2.f),
+                            FontAlignment::ALIGN_CENTER,
+                            LAYER_GUI + 2);
+
   context.pop_transform();
+
+  context.color().draw_filled_rect(m_tool_icon, Color(.15f, .15f, .15f),
+                                   m_tool_icon.get_width(), LAYER_GUI);
+
+  context.color().draw_filled_rect(m_secondary_tool_icon, Color(.15f, .15f, .15f),
+                                   m_secondary_tool_icon.get_width(), LAYER_GUI);
 }
 
 void
@@ -75,16 +106,19 @@ EditorObjectWidget::update(float dt_sec)
 void
 EditorObjectWidget::resize()
 {
-  m_rect = Rect(SCREEN_WIDTH - static_cast<int>(m_left), 24.f,
+  m_rect = Rect(SCREEN_WIDTH - static_cast<int>(m_left), 24,
                 SCREEN_WIDTH, static_cast<int>(m_bottom));
 
   m_side_scrollbar.m_covered_region = m_rect.get_height();
-  m_side_scrollbar.set_rect(Rect(SCREEN_WIDTH - 5, 24.f,
+  m_side_scrollbar.set_rect(Rect(SCREEN_WIDTH - 5, 56,
                                  SCREEN_WIDTH, static_cast<int>(m_bottom)));
 
   m_scrollbar.m_covered_region = m_rect.get_height();
-  m_scrollbar.set_rect(Rect(SCREEN_WIDTH - 37, 24.f,
+  m_scrollbar.set_rect(Rect(SCREEN_WIDTH - 37, 56,
                             SCREEN_WIDTH - 32, static_cast<int>(m_bottom)));
+
+  m_tool_icon = Rectf(SCREEN_WIDTH - m_left - 32.f, 32.f, SCREEN_WIDTH - m_left - 16.f, 48.f);
+  m_secondary_tool_icon = Rectf(SCREEN_WIDTH - m_left - 64.f, 32.f, SCREEN_WIDTH - m_left - 48.f, 48.f);
 
   reset_all();
 }
@@ -124,9 +158,41 @@ EditorObjectWidget::on_mouse_wheel(const SDL_MouseWheelEvent& wheel)
 
     reset_content();
   }
-  
 
   return true;
+}
+
+bool
+EditorObjectWidget::on_mouse_button_up(const SDL_MouseButtonEvent& button)
+{
+  // Use the button's x and y rather than InterfaceControl's m_mouse_pos because
+  // we can't reliably assume m_mouse_pos has been updated to be the same as
+  // the click location.
+  Vector mouse_pos = VideoSystem::current()->get_viewport().to_logical(button.x, button.y);
+
+  if (mouse_pos.y > 24.f && mouse_pos.y < 56.f)
+  {
+    if (mouse_pos.x > m_rect.get_middle().x)
+    {
+      set_input_type(InputType::OBJECT);
+    }
+    else
+    {
+      set_input_type(InputType::TILE);
+    }
+  }
+
+  return m_rect.contains(mouse_pos);
+}
+
+bool
+EditorObjectWidget::on_mouse_button_down(const SDL_MouseButtonEvent& button)
+{
+  // Use the button's x and y rather than InterfaceControl's m_mouse_pos because
+  // we can't reliably assume m_mouse_pos has been updated to be the same as
+  // the click location.
+  Vector mouse_pos = VideoSystem::current()->get_viewport().to_logical(button.x, button.y);
+  return m_rect.contains(mouse_pos);
 }
 
 void

@@ -24,6 +24,7 @@
 
 class DrawingContext;
 class Editor;
+class FadeHelper;
 class GameObject;
 
 /** A panel to hold an object's settings. */
@@ -48,6 +49,8 @@ public:
   virtual void setup() override;
 
   virtual bool on_mouse_wheel(const SDL_MouseWheelEvent& wheel) override;
+  virtual bool on_mouse_button_down(const SDL_MouseButtonEvent& button) override;
+  virtual bool on_mouse_button_up(const SDL_MouseButtonEvent& button) override;
 
   virtual bool event(const SDL_Event& event) override
   {
@@ -86,6 +89,12 @@ private:
   std::unique_ptr<TileSelection> m_tiles;
   std::string m_object;
   InputType m_input_type;
+
+  Rectf m_tool_icon,
+        m_secondary_tool_icon;
+
+  FadeHelper* m_tool_fade,
+            * m_secondary_tool_fade;
 
 private:
   EditorObjectWidget(const EditorObjectWidget&) = delete;
