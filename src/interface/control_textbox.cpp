@@ -220,6 +220,8 @@ ControlTextbox::on_key_down(const SDL_KeyboardEvent& key)
   if (!m_has_focus)
     return false;
 
+  m_cursor_timer = CONTROL_CURSOR_TIMER;
+
   if (key.keysym.sym == SDLK_LEFT && m_caret_pos > 0)
   {
     if (!m_shift_pressed && m_secondary_caret_pos != m_caret_pos)

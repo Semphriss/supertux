@@ -144,6 +144,10 @@ ControlTextarea::on_key_down(const SDL_KeyboardEvent& key)
   if (!m_has_focus)
     return false;
 
+  // FIXME: Hardcoded; make CONTROL_CURSOR_TIMER from
+  // src/interface/control_textbox.cpp accessible somehow, and use that
+  m_cursor_timer = 0.5f;
+
   if (key.keysym.sym == SDLK_RETURN && (key.keysym.mod & (KMOD_CTRL | KMOD_ALT | KMOD_SHIFT)) == 0)
   {
     put_text("\n");
