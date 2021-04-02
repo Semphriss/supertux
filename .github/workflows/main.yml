@@ -271,11 +271,41 @@ jobs:
           KEY: ${{ secrets.NIGHTLY_KEY }}
           BRANCH: ${{ github.head_ref || github.ref }}
         run: |
-          curl -F "subdir=Windows_${PLATFORM}" \
-               -F "branch=${BRANCH#refs/heads/}" \
-               -F "key=${KEY}" \
-               -F "artifact=@$(pwd)/$(find . -name *.msi | head -n 1)" \
-               supertux.semphris.com/api/nightlies
+          $ErrorActionPreference = 'Stop'
+
+          $fieldName = 'artifact'
+          $filePath = @(gci *.msi)[0]
+          $url = 'http://supertux.semphris.com/api/nightlies'
+
+          Try
+          {
+              Add-Type -AssemblyName 'System.Net.Http'
+
+              $client = New-Object System.Net.Http.HttpClient
+              $content = New-Object System.Net.Http.MultipartFormDataContent
+              $fileStream = [System.IO.File]::OpenRead($filePath)
+              $fileName = [System.IO.Path]::GetFileName($filePath)
+              $fileContent = New-Object System.Net.Http.StreamContent($fileStream)
+              $content.Add($fileContent, $fieldName, $fileName)
+              $content.Add("Windows_$Env:ARCH", 'subdir')
+              $content.Add($Env:KEY, 'key')
+              $content.Add($Env:BRANCH.Substring(11), 'branch')
+
+              $result = $client.PostAsync($url, $content).Result
+              $result.EnsureSuccessStatusCode()
+          }
+          Catch
+          {
+              Write-Error $_
+              exit 1
+          }
+          Finally
+          {
+              if ($client -ne $null) { $client.Dispose() }
+              if ($content -ne $null) { $content.Dispose() }
+              if ($fileStream -ne $null) { $fileStream.Dispose() }
+              if ($fileContent -ne $null) { $fileContent.Dispose() }
+          }
       - uses: actions/upload-artifact@v2
         with:
           name: "windows-${{ matrix.arch }}-${{ matrix.build_type }}-installer"
