@@ -202,6 +202,13 @@ EditorSettingsWidget::reset_components()
       for (auto& child : container->m_children)
         child->get_rect().move(m_rect.p1() + Vector(0, top));
 
+    auto old_func = control->m_on_change;
+    control->m_on_change = [this, old_func](){
+      if (old_func)
+        old_func();
+      m_object->after_editor_set();
+    };
+
     m_children.push_back(std::move(control));
 
     top += 20.f + margin;
