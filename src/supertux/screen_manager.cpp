@@ -54,6 +54,10 @@ ScreenManager::ScreenManager(VideoSystem& video_system, InputManager& input_mana
   m_actions(),
   m_screen_fade(),
   m_screen_stack()
+#if 0
+  ,
+  m_chat(new Chat())
+#endif
 {
 }
 
@@ -268,6 +272,10 @@ ScreenManager::draw(Compositor& compositor, FPS_Stats& fps_statistics)
     draw_player_pos(context);
   }
 
+#if 0
+  m_chat->draw(context);
+#endif
+
   // render everything
   compositor.render();
 }
@@ -278,6 +286,10 @@ ScreenManager::update_gamelogic(float dt_sec)
   const Controller& controller = m_input_manager.get_controller();
 
   SquirrelVirtualMachine::current()->update(g_game_time);
+
+#if 0
+  m_chat->update(dt_sec);
+#endif
 
   if (!m_screen_stack.empty())
   {
@@ -302,6 +314,11 @@ ScreenManager::process_events()
   auto session = GameSession::current();
   while (SDL_PollEvent(&event))
   {
+#if 0
+    if (m_chat->event(event))
+      continue;
+#endif
+
     m_input_manager.process_event(event);
 
     m_menu_manager->event(event);

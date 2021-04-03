@@ -56,6 +56,9 @@ public:
   /** Monospace font for the script editor engine */
   static FontPtr editor_font;
 
+  /** Font used for the multiplayer chat */
+  static FontPtr chat_font;
+
   static SurfacePtr checkbox;
   static SurfacePtr checkbox_checked;
   static SurfacePtr back;

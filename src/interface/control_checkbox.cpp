@@ -46,14 +46,14 @@ ControlCheckbox::draw(DrawingContext& context)
   context.color().draw_filled_rect(m_rect,
                                    theme.bkg_color,
                                    theme.round_corner,
-                                   LAYER_GUI);
+                                   m_layer);
   if (*m_value) {
     context.color().draw_text(theme.font,
                               "X", 
                               Vector((m_rect.get_left() + m_rect.get_right()) / 2 + 1.f,
                                      (m_rect.get_top() + m_rect.get_bottom()) / 2 - theme.font->get_height() / 2),
                               FontAlignment::ALIGN_CENTER,
-                              LAYER_GUI,
+                              m_layer,
                               theme.txt_color);
   }
 }

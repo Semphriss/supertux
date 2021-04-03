@@ -100,7 +100,7 @@ ControlEnum<T>::draw(DrawingContext& context)
 
   context.color().draw_filled_rect(m_rect,
                                    theme.bkg_color,
-                                   LAYER_GUI);
+                                   m_layer);
 
   std::string label;
   auto it = std::find_if(m_options.begin(), m_options.end(), [this](const auto &a) { return a.first == *m_value; });
@@ -116,22 +116,22 @@ ControlEnum<T>::draw(DrawingContext& context)
                                    (m_rect.get_top() + m_rect.get_bottom()) / 2 -
                                     theme.font->get_height() / 2),
                             FontAlignment::ALIGN_LEFT,
-                            LAYER_GUI + 1,
+                            m_layer + 1,
                             theme.txt_color);
   int i = 0;
   if (m_open_list) {
     for (const auto& option : m_options) {
       i++;
       Rectf box = m_rect.moved(Vector(0.f, m_rect.get_height() * float(i)));
-      context.color().draw_filled_rect(box.grown(2.f).moved(Vector(0,4.f)), Color(0.f, 0.f, 0.f, 0.1f), 2.f, LAYER_GUI + 4);
-      context.color().draw_filled_rect(box.grown(4.f).moved(Vector(0,4.f)), Color(0.f, 0.f, 0.f, 0.1f), 2.f, LAYER_GUI + 4);
-      context.color().draw_filled_rect(box.grown(6.f).moved(Vector(0,4.f)), Color(0.f, 0.f, 0.f, 0.1f), 2.f, LAYER_GUI + 4);
+      context.color().draw_filled_rect(box.grown(2.f).moved(Vector(0,4.f)), Color(0.f, 0.f, 0.f, 0.1f), 2.f, m_layer + 4);
+      context.color().draw_filled_rect(box.grown(4.f).moved(Vector(0,4.f)), Color(0.f, 0.f, 0.f, 0.1f), 2.f, m_layer + 4);
+      context.color().draw_filled_rect(box.grown(6.f).moved(Vector(0,4.f)), Color(0.f, 0.f, 0.f, 0.1f), 2.f, m_layer + 4);
       context.color().draw_filled_rect(box,
                                        (box.contains(m_mouse_pos)
                                          || option.first == *m_value)
                                            ? Color(0.75f, 0.75f, 0.7f, 1.f)
                                            : Color(0.5f, 0.5f, 0.5f, 1.f),
-                                       LAYER_GUI + 5);
+                                       m_layer + 5);
 
       std::string label2 = option.second;
 
@@ -142,7 +142,7 @@ ControlEnum<T>::draw(DrawingContext& context)
                                         theme.font->get_height() / 2 +
                                         m_rect.get_height() * float(i)),
                                 FontAlignment::ALIGN_LEFT,
-                                LAYER_GUI + 6,
+                                m_layer + 6,
                                 theme.txt_color);
     }
   }

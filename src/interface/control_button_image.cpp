@@ -44,7 +44,7 @@ ControlButtonImage::draw(DrawingContext& context)
   context.color().draw_filled_rect(m_rect,
                                    theme.bkg_color,
                                    theme.round_corner,
-                                   LAYER_GUI);
+                                   m_layer);
 
   float w = static_cast<float>(m_sprite->get_width());
   float h = static_cast<float>(m_sprite->get_height());
@@ -67,7 +67,7 @@ ControlButtonImage::draw(DrawingContext& context)
     y = m_rect.get_middle().y - h / 2.f;
   }
 
-  m_sprite->draw(context.color(), Rectf(x, y, x + w, y + h), LAYER_GUI + 1);
+  m_sprite->draw(context.color(), Rectf(x, y, x + w, y + h), m_layer + 1);
 
   if (m_mouse_hover && !m_btn_label.empty())
     draw_tooltip(context, m_btn_label);

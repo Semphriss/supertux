@@ -49,8 +49,8 @@ ControlScrollbar::draw(DrawingContext& context)
 
   auto theme = get_current_theme();
 
-  context.color().draw_filled_rect(m_rect, theme.bkg_color, theme.round_corner, LAYER_GUI + 5);
-  context.color().draw_filled_rect(get_bar_rect(), theme.txt_color, theme.round_corner, LAYER_GUI + 5);
+  context.color().draw_filled_rect(m_rect, theme.bkg_color, theme.round_corner, m_layer + 5);
+  context.color().draw_filled_rect(get_bar_rect(), theme.txt_color, theme.round_corner, m_layer + 5);
 }
 
 bool

@@ -29,6 +29,7 @@ InterfaceControl::InterfaceControl() :
   m_enabled(true),
   m_visible(true),
   m_theme(),
+  m_layer(LAYER_GUI),
   m_has_focus(),
   m_mouse_hover(false),
   m_mouse_down(false),
@@ -45,6 +46,7 @@ InterfaceControl::InterfaceControl(InterfaceThemeSet theme) :
   m_enabled(true),
   m_visible(true),
   m_theme(theme),
+  m_layer(LAYER_GUI),
   m_has_focus(),
   m_mouse_hover(false),
   m_mouse_down(false),
@@ -114,15 +116,15 @@ InterfaceControl::draw_tooltip(DrawingContext& context, const std::string& text)
 
   context.color().draw_filled_rect(box,
                                    Color(.1f, .1f, .1f, .8f),
-                                   LAYER_GUI + 10);
+                                   m_layer + 10);
   context.color().draw_filled_rect(box.grown(-2.f),
                                    Color(1.f, 1.f, 1.f, .1f),
-                                   LAYER_GUI + 10);
+                                   m_layer + 10);
   context.color().draw_text(Resources::control_font,
                             text,
                             pos + Vector(5.f, 5.f),
                             FontAlignment::ALIGN_LEFT,
-                            LAYER_GUI + 11,
+                            m_layer + 11,
                             Color::WHITE);
 }
 

@@ -86,7 +86,11 @@ public:
   /** Whether this control is visible on the screen. */
   bool m_visible;
 
+  /** The graphical settings for this control (colors, fonts...) */
   InterfaceThemeSet m_theme;
+
+  /** The layer on which to render this control */
+  int m_layer;
 
 protected:
   /** Whether or not the user has this InterfaceControl as focused. */

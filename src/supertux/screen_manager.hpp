@@ -21,6 +21,9 @@
 #include <memory>
 
 #include "squirrel/squirrel_thread_queue.hpp"
+#if 0
+#include "supertux/chat.hpp"
+#endif
 #include "supertux/screen.hpp"
 #include "util/currenton.hpp"
 
@@ -87,6 +90,9 @@ private:
 
   std::unique_ptr<ScreenFade> m_screen_fade;
   std::vector<std::unique_ptr<Screen> > m_screen_stack;
+#if 0
+  std::unique_ptr<Chat> m_chat;
+#endif
 };
 
 #endif

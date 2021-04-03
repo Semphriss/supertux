@@ -74,7 +74,7 @@ ControlTextarea::draw(DrawingContext& context)
   context.color().draw_filled_rect(m_rect,
                                    theme.bkg_color,
                                    theme.round_corner,
-                                   LAYER_GUI);
+                                   m_layer);
 
   if (m_caret_pos != m_secondary_caret_pos) {
     int caret_1 = std::min(m_caret_pos, m_secondary_caret_pos),
@@ -96,7 +96,7 @@ ControlTextarea::draw(DrawingContext& context)
                                             ),
                                       m_has_focus ? Color(1.f, 1.f, .9f, 0.75f)
                                                   : Color(1.f, 1.f, .9f, 0.5f),
-                                      LAYER_GUI);
+                                      m_layer);
     }
   }
 
@@ -115,7 +115,7 @@ ControlTextarea::draw(DrawingContext& context)
                               m_rect.p1() + Vector(lgt + 6.f,
                                   hgt + theme.font->get_height() + 4.f),
                               theme.txt_color,
-                              LAYER_GUI + 1);
+                              m_layer + 1);
   }
 
   context.pop_transform();
@@ -134,7 +134,7 @@ ControlTextarea::draw_text(DrawingContext& context)
                             Vector(m_rect.get_left() + 5.f - m_h_scrollbar.m_progress + m_right_margin,
                                    m_rect.get_top() + 5.f - m_v_scrollbar.m_progress),
                             FontAlignment::ALIGN_LEFT,
-                            LAYER_GUI + 1,
+                            m_layer + 1,
                             theme.txt_color);
 }
 
