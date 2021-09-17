@@ -142,7 +142,7 @@ bool no_water = true;
 Player::Player(PlayerStatus& player_status, const std::string& name_) :
   ExposedObject<Player, scripting::Player>(this),
   m_deactivated(false),
-  m_controller(&InputManager::current()->get_controller()),
+  m_controller(&InputManager::current()->get_player_controller()),
   m_scripting_controller(new CodeController()),
   m_player_status(player_status),
   m_duck(false),

@@ -26,6 +26,7 @@
 InputManager::InputManager(KeyboardConfig& keyboard_config,
                            JoystickConfig& joystick_config) :
   controller(new Controller),
+  player_controller(new Controller),
   m_use_game_controller(joystick_config.m_use_game_controller),
   keyboard_manager(new KeyboardManager(this, keyboard_config)),
   joystick_manager(new JoystickManager(this, joystick_config)),
@@ -47,6 +48,18 @@ Controller&
 InputManager::get_controller()
 {
   return *controller;
+}
+
+const Controller&
+InputManager::get_player_controller() const
+{
+  return *player_controller;
+}
+
+Controller&
+InputManager::get_player_controller()
+{
+  return *player_controller;
 }
 
 void
