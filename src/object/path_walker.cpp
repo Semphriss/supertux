@@ -210,13 +210,13 @@ PathWalker::goback_node()
 void
 PathWalker::backup(Writer& writer) const
 {
-  throw std::runtime_error("PathWalker::backup not implemented");
+  //throw std::runtime_error("PathWalker::backup not implemented");
 }
 
 void
 PathWalker::restore(const ReaderMapping& reader)
 {
-  throw std::runtime_error("PathWalker::restore not implemented");
+  //throw std::runtime_error("PathWalker::restore not implemented");
 }
 
 /* EOF */

@@ -45,6 +45,7 @@ public:
   void clear();
 
   std::string to_string() const { return m_backup_data.str(); }
+  void set_string(const std::string& s) { clear(); m_backup_data << s; }
 
   Level* get_level() const { return m_level; }
   void set_level(Level* level) { m_level = level; }

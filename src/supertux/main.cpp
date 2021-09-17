@@ -545,7 +545,13 @@ Main::launch_game(const CommandLineArguments& args)
           session->record_demo(g_config->record_demo);
 
         if (args.test_client)
+        {
           session->try_connect("127.0.0.1", 3474);
+          if (args.network_master)
+          {
+            session->m_network_master = true;
+          }
+        }
 
         m_screen_manager->push_screen(std::move(session));
       }
@@ -578,7 +584,7 @@ Main::launch_game(const CommandLineArguments& args)
                          "Open Store's Telegram at https://open-store.io/telegram"));
 #endif
 
-  m_screen_manager->run(static_cast<bool>(args.headless.get()));
+  m_screen_manager->run(static_cast<bool>(args.headless));
 }
 
 int

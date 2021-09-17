@@ -82,7 +82,7 @@ GameSession::GameSession(const std::string& levelfile_, Savegame& savegame, Stat
   m_active(false),
   m_end_seq_started(false),
   m_current_cutscene_text(),
-  m_savestate()
+  m_savestate(),
   m_client(),
   m_remote_controllers()
 {
@@ -370,6 +370,14 @@ GameSession::update(float dt_sec, const Controller& controller)
     }
 
     m_client->send("UPD_PLAYER " + ctrl_state);
+
+    if (m_network_master)
+    {
+      Savestate netsave(m_level.get());
+      netsave.save();
+      std::string data = netsave.to_string();
+      m_client->send("UPD_SECTOR " + data);
+    }
   }
 
   // Set active flag
@@ -713,6 +721,16 @@ GameSession::try_connect(std::string ip, short port)
           {
             this->m_remote_controllers[remote].set_control(static_cast<Control>(i), seq[i] == '1');
           }
+        }
+        else if (command.substr(0, 10) == "UPD_SECTOR")
+        {
+          if (this->m_network_master)
+            return;
+
+          std::string lvdata = command.substr(11);
+          Savestate netload(this->m_level.get());
+          netload.set_string(lvdata);
+          netload.restore();
         }
       }
       catch(...)

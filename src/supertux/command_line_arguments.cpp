@@ -425,6 +425,10 @@ CommandLineArguments::parse_args(int argc, char** argv)
     {
       test_client = true;
     }
+    else if (arg == "--network-master")
+    {
+      network_master = true;
+    }
     else if (arg[0] != '-')
     {
       filenames.push_back(arg);

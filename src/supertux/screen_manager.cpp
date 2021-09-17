@@ -595,8 +595,8 @@ ScreenManager::loop_iter()
     elapsed_ticks -= ms_per_step;
   }
 
-  if ((steps > 0 && !m_screen_stack.empty())
-      || g_debug.draw_redundant_frames && !s_headless) {
+  if (((steps > 0 && !m_screen_stack.empty())
+      || g_debug.draw_redundant_frames) && !s_headless) {
     // Draw a frame
     Compositor compositor(m_video_system);
     draw(compositor, *m_fps_statistics);
