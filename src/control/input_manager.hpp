@@ -57,8 +57,12 @@ public:
   const Controller& get_controller() const;
   Controller& get_controller();
 
+  const Controller& get_player_controller() const;
+  Controller& get_player_controller();
+
 private:
   std::unique_ptr<Controller> controller;
+  std::unique_ptr<Controller> player_controller;
 
 public:
   bool& m_use_game_controller;

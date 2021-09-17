@@ -51,6 +51,7 @@ GameSession::GameSession(const std::string& levelfile_, Savegame& savegame, Stat
   GameSessionRecorder(),
   reset_button(false),
   reset_checkpoint_button(false),
+  m_network_master(false),
   m_level(),
   m_old_level(),
   m_statistics_backdrop(Surface::from_file("images/engine/menu/score-backdrop.png")),
@@ -80,7 +81,9 @@ GameSession::GameSession(const std::string& levelfile_, Savegame& savegame, Stat
   m_max_ice_bullets_at_start(),
   m_active(false),
   m_end_seq_started(false),
-  m_current_cutscene_text()
+  m_current_cutscene_text(),
+  m_client(),
+  m_remote_controllers()
 {
   if (restart_level() != 0)
     throw std::runtime_error ("Initializing the level failed.");
@@ -323,6 +326,40 @@ GameSession::leave()
 void
 GameSession::update(float dt_sec, const Controller& controller)
 {
+  InputManager::current()->get_player_controller().update();
+  InputManager::current()->get_player_controller().reset();
+
+  for (const auto& ctrl : m_remote_controllers)
+  {
+    for(int i = 0; i < static_cast<int>(Control::CONTROLCOUNT); i++)
+    {
+      if(ctrl.second.hold(static_cast<Control>(i)))
+      {
+        InputManager::current()->get_player_controller().set_control(static_cast<Control>(i), true);
+      }
+    }
+  }
+
+  for(int i = 0; i < static_cast<int>(Control::CONTROLCOUNT); i++)
+  {
+    if(controller.hold(static_cast<Control>(i)))
+    {
+      InputManager::current()->get_player_controller().set_control(static_cast<Control>(i), true);
+    }
+  }
+
+  if (m_client && !m_client->is_closed())
+  {
+    std::string ctrl_state = "";
+
+    for(int i = 0; i < static_cast<int>(Control::CONTROLCOUNT); i++)
+    {
+      ctrl_state += std::to_string(controller.hold(static_cast<Control>(i)));
+    }
+
+    m_client->send("UPD_PLAYER " + ctrl_state);
+  }
+
   // Set active flag
   if (!m_active)
   {
@@ -618,6 +655,71 @@ GameSession::drawstatus(DrawingContext& context)
   }
 
   m_level->m_stats.draw_ingame_stats(context, m_game_pause);
+}
+
+void
+GameSession::try_connect(std::string ip, short port)
+{
+  try
+  {
+    m_client = new network::Client(port, ip, [this](network::Connection* c, const std::string& data) {
+      try
+      {
+        std::string remote = data.substr(0, 36);
+        std::string command = data.substr(38);
+
+        if (command.substr(0, 10) == "ADD_PLAYER")
+        {
+          this->m_remote_controllers[remote].update();
+        }
+        else if (command.substr(0, 10) == "DEL_PLAYER")
+        {
+          this->m_remote_controllers.erase(data.substr(11));
+        }
+        else if (command.substr(0, 10) == "UPD_PLAYER")
+        {
+          std::string seq = command.substr(11);
+
+          if (seq.size() != static_cast<size_t>(Control::CONTROLCOUNT))
+          {
+            log_warning << "Malformed sequence received from remote host, ignoring [" << seq << "]" << std::endl;
+            return;
+          }
+
+          this->m_remote_controllers[remote].update();
+          for (int i = 0; i < static_cast<int>(Control::CONTROLCOUNT); i++)
+          {
+            this->m_remote_controllers[remote].set_control(static_cast<Control>(i), seq[i] == '1');
+          }
+        }
+      }
+      catch(...)
+      {
+        // :(
+      }
+    });
+
+    m_client->init();
+  }
+  catch (std::exception& e)
+  {
+    log_warning << "Could not connect to server: " << e.what() << std::endl;
+  }
+  catch (...)
+  {
+    log_warning << "Could not connect to server (unknown error)" << std::endl;
+  }
+}
+
+void
+GameSession::disconnect()
+{
+  if (!m_client)
+    return;
+
+  m_client->close();
+  m_client->destroy();
+  m_client = nullptr;
 }
 
 /* EOF */

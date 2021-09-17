@@ -545,6 +545,10 @@ Main::launch_game(const CommandLineArguments& args)
 
         if (!g_config->record_demo.empty())
           session->record_demo(g_config->record_demo);
+
+        if (args.test_client)
+          session->try_connect("127.0.0.1", 3474);
+
         m_screen_manager->push_screen(std::move(session));
       }
     }

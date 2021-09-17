@@ -57,7 +57,6 @@ Connection::init()
 void
 Connection::start_reading()
 {
-  log_warning << "Called start_reading()" << std::endl;
   m_ready_for_deletion = false;
   boost::asio::async_read_until(*m_socket, m_buffer, DELIMITER,
               boost::bind(&Connection::handle_read,

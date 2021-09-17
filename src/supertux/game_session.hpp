@@ -21,7 +21,9 @@
 #include <vector>
 #include <squirrel.h>
 
+#include "control/controller.hpp"
 #include "math/vector.hpp"
+#include "network/client.hpp"
 #include "squirrel/squirrel_scheduler.hpp"
 #include "supertux/game_object.hpp"
 #include "supertux/game_session_recorder.hpp"
@@ -94,6 +96,9 @@ public:
 
   void set_scheduler(SquirrelScheduler& new_scheduler);
 
+  void try_connect(std::string ip, short port);
+  void disconnect();
+
 private:
   void check_end_conditions();
 
@@ -101,6 +106,9 @@ private:
   void draw_pause(DrawingContext& context);
 
   void on_escape_press(bool force_quick_respawn);
+
+public:
+  bool m_network_master;
 
 private:
   std::unique_ptr<Level> m_level;
@@ -156,6 +164,9 @@ private:
   bool m_end_seq_started;
 
   std::unique_ptr<GameObject> m_current_cutscene_text;
+
+  network::Client* m_client; // Optional and self-destructing, so raw pointer
+  std::unordered_map<std::string, Controller> m_remote_controllers;
 
 private:
   GameSession(const GameSession&) = delete;
