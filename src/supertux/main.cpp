@@ -546,7 +546,16 @@ Main::launch_game(const CommandLineArguments& args)
 
         if (args.test_client)
         {
-          session->try_connect("127.0.0.1", 3474);
+          std::string ip = *args.network_ip;
+          int port = 3474;
+
+          if (ip.find(':'))
+          {
+            port = std::stoi(ip.substr(ip.find(':') + 1));
+            ip.erase(ip.find(':'));
+          }
+
+          session->try_connect(ip, port);
           if (args.network_master)
           {
             session->m_network_master = true;

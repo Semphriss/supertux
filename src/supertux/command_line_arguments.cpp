@@ -55,7 +55,9 @@ CommandLineArguments::CommandLineArguments() :
   resave(),
   headless(),
   test_server(),
-  test_client()
+  test_client(),
+  network_master(),
+  network_ip()
 {
 }
 
@@ -424,6 +426,11 @@ CommandLineArguments::parse_args(int argc, char** argv)
     else if (arg == "--test-client")
     {
       test_client = true;
+      if (++i >= argc) {
+        throw std::runtime_error("--test-client needs an IP address with optionally a port number");
+      } else {
+        network_ip = argv[i];
+      }
     }
     else if (arg == "--network-master")
     {
