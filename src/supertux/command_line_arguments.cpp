@@ -55,7 +55,9 @@ CommandLineArguments::CommandLineArguments() :
   resave(),
   headless(),
   test_server(),
-  test_client()
+  test_client(),
+  network_master(),
+  network_ip()
 {
 }
 
@@ -143,7 +145,7 @@ CommandLineArguments::print_help(const char* arg0) const
     << _("  --server              [TODO] Start as a server and load configuration automatically" ) << "\n"
     << _("  --headless                   Launch without graphical interface" ) << "\n"
     << _("  --test-server                Starts SuperTux as a test server instance" ) << "\n"
-    << _("  --test-client                Starts SuperTux as a test client instance" ) << "\n"
+    << _("  --test-client IP[:PORT]      Starts SuperTux as a test client instance" ) << "\n"
     << "\n"
     << _("Environment variables:") << "\n"
     << _("  SUPERTUX2_USER_DIR           Directory for user data (savegames, etc.)" ) << "\n"
@@ -423,6 +425,11 @@ CommandLineArguments::parse_args(int argc, char** argv)
     else if (arg == "--test-client")
     {
       test_client = true;
+      if (++i >= argc) {
+        throw std::runtime_error("--test-client needs an IP address with optionally a port number");
+      } else {
+        network_ip = argv[i];
+      }
     }
     else if (arg[0] != '-')
     {
