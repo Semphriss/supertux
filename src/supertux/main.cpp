@@ -551,13 +551,13 @@ Main::launch_game(const CommandLineArguments& args)
           std::string ip = *args.network_ip;
           int port = 3474;
 
-          if (ip.find(':'))
+          if (ip.find(':') != std::string::npos)
           {
             port = std::stoi(ip.substr(ip.find(':') + 1));
             ip.erase(ip.find(':'));
           }
 
-          session->try_connect(ip, port);
+          session->try_connect(ip, static_cast<short>(port));
           if (args.network_master)
           {
             session->m_network_master = true;
