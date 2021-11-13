@@ -17,25 +17,45 @@
 #ifndef HEADER_SUPERTUX_UTIL_UUID_HPP
 #define HEADER_SUPERTUX_UTIL_UUID_HPP
 
-#include <boost/lexical_cast.hpp>
-#include <boost/uuid/uuid.hpp>
-#include <boost/uuid/uuid_generators.hpp>
-#include <boost/uuid/uuid_io.hpp>
+// Source: https://stackoverflow.com/questions/24365331/how-can-i-generate-uuid-in-c-without-using-boost-library
+// (archive) https://web.archive.org/web/20211020152043/https://stackoverflow.com/questions/24365331/how-can-i-generate-uuid-in-c-without-using-boost-library
+#include <random>
+#include <sstream>
 
-class UUID
-{
-private:
-  UUID() = delete;
-public:
-  static std::string create_uuid() {
-    boost::uuids::uuid uuid = generator();
-    return boost::uuids::to_string(uuid);
+namespace UUID {
+  static std::random_device              rd;
+  static std::mt19937                    gen(rd());
+  static std::uniform_int_distribution<> dis(0, 15);
+  static std::uniform_int_distribution<> dis2(8, 11);
+
+  // UUID v4
+  std::string create_uuid() {
+    std::stringstream ss;
+    int i;
+    ss << std::hex;
+    for (i = 0; i < 8; i++) {
+        ss << dis(gen);
+    }
+    ss << "-";
+    for (i = 0; i < 4; i++) {
+        ss << dis(gen);
+    }
+    ss << "-4";
+    for (i = 0; i < 3; i++) {
+        ss << dis(gen);
+    }
+    ss << "-";
+    ss << dis2(gen);
+    for (i = 0; i < 3; i++) {
+        ss << dis(gen);
+    }
+    ss << "-";
+    for (i = 0; i < 12; i++) {
+        ss << dis(gen);
+    };
+    return ss.str();
   }
-private:
-  static boost::uuids::random_generator generator;
-};
-
-boost::uuids::random_generator UUID::generator;
+}
 
 #endif
 
