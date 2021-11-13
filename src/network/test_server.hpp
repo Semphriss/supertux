@@ -27,6 +27,10 @@
 
 class TestServer final : public Screen
 {
+private:
+  static bool handle_websocket_header(network::Connection* connection,
+                                      const std::string& data);
+
 public:
   TestServer();
   virtual ~TestServer();

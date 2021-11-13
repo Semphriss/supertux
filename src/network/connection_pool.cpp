@@ -30,10 +30,13 @@ void
 ConnectionPool::send_all(const std::string& data)
 {
   clear_closed_connections();
-  for (auto c = m_connections.begin(); c != m_connections.end(); ++c) {
+  for (auto& c : m_connections) {
     try {
-      (*c)->send(data);
-    } catch (...) {}
+      c->send(data);
+    } catch (const std::exception& e) {
+      // log_info << "Couldn't send data to " << c->get_uuid() << ": "
+      //          << e.what() << std::endl;
+    }
   }
 }
 
@@ -41,11 +44,14 @@ void
 ConnectionPool::send_all_except(const std::string& data, Connection* connection)
 {
   clear_closed_connections();
-  for (auto c = m_connections.begin(); c != m_connections.end(); ++c) {
-    if (*connection != **c) {
+  for (auto& c : m_connections) {
+    if (*connection != *c) {
       try {
-        (*c)->send(data);
-      } catch (...) {}
+        c->send(data);
+      } catch (const std::exception& e) {
+        // log_info << "Couldn't send data to " << c->get_uuid() << ": "
+        //          << e.what() << std::endl;
+      }
     }
   }
 }
