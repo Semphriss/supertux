@@ -1658,4 +1658,395 @@
       (mask "0110")
     )
   )
+  (autotileset
+    (name "ghost_forest")
+    (default 1433)
+    (autotile
+      (id 1423)
+      (solid #f)
+      (mask "*****011")
+    )
+    (autotile
+      (id 1424)
+      (solid #f)
+      (mask "*****111")
+      (alt-id
+        (id 1425)
+        (weight 0.5)
+      )
+    )
+    (autotile
+      (id 1426)
+      (solid #f)
+      (mask "*****110")
+    )
+    (autotile
+      (id 1427)
+      (solid #t)
+      (mask "*0*01011")
+    )
+    (autotile
+      (id 1428)
+      (solid #t)
+      (mask "*0*11111")
+      (alt-id
+        (id 1429)
+        (weight 0.5)
+      )
+    )
+    (autotile
+      (id 1430)
+      (solid #t)
+      (mask "*0*10110")
+    )
+    (autotile
+      (id 1431)
+      (solid #t)
+      (mask "*1101011")
+      (alt-id
+        (id 1435)
+        (weight 0.5)
+      )
+    )
+    (autotile
+      (id 1432)
+      (solid #t)
+      (mask "11111111")
+      (alt-id
+        (id 1433)
+        (weight 0.1)
+      )
+      (alt-id
+        (id 1436)
+        (weight 0.3)
+      )
+      (alt-id
+        (id 1437)
+        (weight 0.3)
+      )
+    )
+    (autotile
+      (id 1434)
+      (solid #t)
+      (mask "11*10110")
+      (alt-id
+        (id 1438)
+        (weight 0.5)
+      )
+    )
+    (autotile
+      (id 1439)
+      (solid #t)
+      (mask "*1101*0*")
+    )
+    (autotile
+      (id 1440)
+      (solid #t)
+      (mask "11111*0*")
+      (alt-id
+        (id 1441)
+        (weight 0.5)
+      )
+    )
+    (autotile
+      (id 1442)
+      (solid #t)
+      (mask "11*10*0*")
+    )
+    (autotile
+      (id 3923)
+      (solid #t)
+      (mask "*0*01*0*")
+    )
+    (autotile
+      (id 3924)
+      (solid #t)
+      (mask "*0*11*0*")
+      (alt-id
+        (id 3925)
+        (weight 0.5)
+      )
+    )
+    (autotile
+      (id 3926)
+      (solid #t)
+      (mask "*0*10*0*")
+    )
+    (autotile
+      (id 3417)
+      (solid #t)
+      (mask "*1*00111")
+    )
+    (autotile
+      (id 3373)
+      (solid #t)
+      (mask "*1101111")
+    )
+    (autotile
+      (id 3374)
+      (solid #t)
+      (mask "11*10111")
+    )
+    (autotile
+      (id 3375)
+      (solid #t)
+      (mask "*0*01111")
+    )
+    (autotile
+      (id 3378)
+      (solid #t)
+      (mask "01011010")
+    )
+    (autotile
+      (id 3379)
+      (solid #t)
+      (mask "01111111")
+    )
+    (autotile
+      (id 3380)
+      (solid #t)
+      (mask "11011111")
+    )
+    (autotile
+      (id 3381)
+      (solid #t)
+      (mask "01111110")
+    )
+    (autotile
+      (id 3376)
+      (solid #t)
+      (mask "*0*10111")
+    )
+    (autotile
+      (id 3377)
+      (solid #f)
+      (mask "*****010")
+    )
+    (autotile
+      (id 3414)
+      (solid #t)
+      (mask "11111110")
+    )
+    (autotile
+      (id 3415)
+      (solid #t)
+      (mask "11111011")
+    )
+    (autotile
+      (id 3382)
+      (solid #t)
+      (mask "11011011")
+    )
+    (autotile
+      (id 3383)
+      (solid #t)
+      (mask "*0*00010")
+    )
+    (autotile
+      (id 3398)
+      (solid #t)
+      (mask "*0*00111")
+    )
+    (autotile
+      (id 3399)
+      (solid #t)
+      (mask "*1*00010")
+    )
+    (autotile
+      (id 3400)
+      (solid #t)
+      (mask "01011111")
+    )
+    (autotile
+      (id 3401)
+      (solid #t)
+      (mask "11111010")
+    )
+    (autotile
+      (id 3402)
+      (solid #t)
+      (mask "*1*00*0*")
+    )
+    (autotile
+      (id 3403)
+      (solid #t)
+      (mask "*0*00*0*")
+    )
+    ;; 3404, 3405 and 4383 are transition tiles from grassed to grassless
+    ;; 491 to 498 are grassless
+    (autotile
+      (id 4384)
+      (solid #t)
+      (mask "*0*01010")
+    )
+    (autotile
+      (id 4385)
+      (solid #t)
+      (mask "*0*11110")
+    )
+    (autotile
+      (id 4386)
+      (solid #t)
+      (mask "*0*11011")
+    )
+    (autotile
+      (id 4387)
+      (solid #t)
+      (mask "*0*10010")
+    )
+    (autotile
+      (id 4388)
+      (solid #t)
+      (mask "*1001011")
+    )
+    (autotile
+      (id 4389)
+      (solid #t)
+      (mask "*1001010")
+    )
+    (autotile
+      (id 4390)
+      (solid #t)
+      (mask "01*10010")
+    )
+    (autotile
+      (id 4391)
+      (solid #t)
+      (mask "01*10110")
+    )
+    (autotile
+      (id 4392)
+      (solid #t)
+      (mask "01011*0*")
+    )
+    (autotile
+      (id 4393)
+      (solid #t)
+      (mask "*1101010")
+    )
+    (autotile
+      (id 4394)
+      (solid #t)
+      (mask "11*10010")
+    )
+    (autotile
+      (id 4395)
+      (solid #t)
+      (mask "*0*11010")
+    )
+    (autotile
+      (id 4396)
+      (solid #t)
+      (mask "*1001*0*")
+    )
+    (autotile
+      (id 4397)
+      (solid #t)
+      (mask "11011*0*")
+    )
+    (autotile
+      (id 4398)
+      (solid #t)
+      (mask "01111*0*")
+    )
+    (autotile
+      (id 4399)
+      (solid #t)
+      (mask "01*10*0*")
+    )
+    (autotile
+      (id 4400)
+      (solid #t)
+      (mask "11011010")
+    )
+    (autotile
+      (id 4401)
+      (solid #t)
+      (mask "01111010")
+    )
+    ;; 4402 and 4403 are transitions from grassed to grassless
+    (autotile
+      (id 4404)
+      (solid #t)
+      (mask "01011110")
+    )
+    (autotile
+      (id 4405)
+      (solid #t)
+      (mask "01011011")
+    )
+    (autotile
+      (id 4406)
+      (solid #t)
+      (mask "*0*01110")
+    )
+    (autotile
+      (id 4407)
+      (solid #t)
+      (mask "*0*10011")
+    )
+    ;; 4408 and 4409 are transitions to grassless
+    (autotile
+      (id 4410)
+      (solid #t)
+      (mask "11011110")
+    )
+    (autotile
+      (id 4411)
+      (solid #t)
+      (mask "01111011")
+    )
+    (autotile
+      (id 4412)
+      (solid #t)
+      (mask "11*10011")
+    )
+    (autotile
+      (id 4413)
+      (solid #t)
+      (mask "*1101110")
+    )
+    (autotile
+      (id 4414)
+      (solid #t)
+      (mask "01*10011")
+    )
+    (autotile
+      (id 4415)
+      (solid #t)
+      (mask "*1001110")
+    )
+    (autotile
+      (id 4416)
+      (solid #t)
+      (mask "01*10111")
+    )
+    (autotile
+      (id 4417)
+      (solid #t)
+      (mask "*1001111")
+    )
+    ;; 4418 and 4419 transition grassless...
+    (autotile
+      (id 4420)
+      (solid #t)
+      (mask "*1*00011")
+    )
+    (autotile
+      (id 4421)
+      (solid #t)
+      (mask "*1*00110")
+    )
+    (autotile
+      (id 4422)
+      (solid #t)
+      (mask "*0*00011")
+    )
+    (autotile
+      (id 4423)
+      (solid #t)
+      (mask "*0*00110")
+    )
+    ;; 4424 to 4433 - grassless...
+  )
 )
