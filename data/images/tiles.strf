@@ -22,7 +22,7 @@
    ;; next-id: 4700
   
   ;; free/skipped ids (please use before any other): 63, 126, 131, 134, 135, 160, 1357, 1539, 2153, 2459, 2927, 2932, 3054, 3058, 4036
-  ;; Tile ids: 70 - 74, 2080 - 2084, 3667 - 3680 are reserved! 2212(2266) - 2379, 2174 - 2177
+  ;; Tile ids: 70 - 74, 217 - 240, 2080 - 2084, 3667 - 3680 are reserved! 2212(2306) - 2379, 2174 - 2177
  
   (tilegroup
     (name (_ "Snow"))
@@ -1078,6 +1078,7 @@
 	  2245 2246 2250 2252
 	  2247 2248 2251 2253
 	  2230 2231 2240 2249
+	  295  296  297  298
 	  
 	  2257 1489 2255 0
 	  1482 1476 2254 0
@@ -1127,16 +1128,26 @@
 
       3098 3099 3102 3103
       3100 3101 3104 3105
-
+	  
+	  2268 2269 2270 2271
+	  2272 2273 2274 2275
+	  2276 2277 2278 2279
+	  2280 2281 2282 2283
+	  2284 2285 2286 0
+	  2287 2288 2289 2290
+	  2291 2292 2293 2294
+	  2295 2296 2297 2298
+	  2299 2300 2301 2302
+	  2303 2304 2305 2306
+	  
       3114 3115 3116 3117
       3121 3106 3107 3123
       3122 3108 3109 3127
       3131 3132 3133 3134
-
-      3118 3119 0 0
-      3124 3125 0 0
-      3128 3129 0 0
-      3135 3136 0 0
+      3118 3119 2266 2267
+      3124 3125 0    0
+      3128 3129 0    0
+      3135 3136 0    0
     )
   )
   
@@ -1186,7 +1197,6 @@
     (name (_ "Miscellaneous"))
     (tiles
       130  129  127  0
-      295  296  297  298
       227  1809 1812 2047
       81   1810 1813 2048
       0    1811 1814 2049
@@ -2251,51 +2261,17 @@
   )
 
   (tiles
-    (width 5)
-    (height 5)
+    (width 2)
+    (height 2)
     (ids
-      217 218 238 219 220
-      221 222 223 224 225
-      241 226 227 228 239
-      229 230 231 232 233
-      234 235 240 236 237
-    )
+	  295 297
+	  296 298
+	)
     (attributes
-      1042 1026 1026 1026 1042
-      1026 1026 1042 1026 1026
-      1026 1042 1024 1042 1026
-      1026 1026 1042 1026 1026
-      1042 1026 1026 1026 1042
+      1024 1024
+	  1024 1024
     )
-    (datas
-      2 0 0 0 0
-      2 1 3 2 3
-      2 0 0 1 3
-      2 3 2 0 3
-      1 1 1 1 3
-    )
-    (images "tiles/blocks/spikes-all.png")
-  )
-
-  (tile
-    (id 295)
-    (images "creatures/spike/up.png")
-    (hurts #t)
-  )
-  (tile
-    (id 296)
-    (images "creatures/spike/right.png")
-    (hurts #t)
-  )
-  (tile
-    (id 297)
-    (images "creatures/spike/down.png")
-    (hurts #t)
-  )
-  (tile
-    (id 298)
-    (images "creatures/spike/left.png")
-    (hurts #t)
+	(images "tiles/castle/ruin_spikes.png")
   )
 
   (tiles
@@ -3334,38 +3310,23 @@
     )
     (solid #t)
   )
-  (tile
-    (id 1569)
-    (images
-      "tiles/forest/pogonia/pogonia-1.png"
-      "tiles/forest/pogonia/pogonia-2.png"
-      "tiles/forest/pogonia/pogonia-3.png"
-      "tiles/forest/pogonia/pogonia-4.png")
-    (hurts #t)
-    (solid #f)
-    (fps 2)
-  )
 
   (tiles
     (width 2)
-    (height 2)
+    (height 3)
     (ids
-      1570 1571
-      1572 1573
+      1569 1571
+	  1570 1573
+      1572 1574
     )
-    (image "tiles/forest/pogonia/base.png")
+	(atrributes
+	  1024 0
+	  1024 1024
+	  0    1024
+	)
+    (images "tiles/forest/pogonia.png")
   )
-  (tile
-    (id 1574)
-    (images
-      "tiles/forest/pogonia/pogonia-1-flip.png"
-      "tiles/forest/pogonia/pogonia-2-flip.png"
-      "tiles/forest/pogonia/pogonia-3-flip.png"
-      "tiles/forest/pogonia/pogonia-4-flip.png")
-    (hurts #t)
-    (solid #f)
-    (fps 2)
-  )
+
   (tiles
     (width 2)
     (height 2)
@@ -4268,7 +4229,7 @@
 	 2178 2115 3039 2119
 	 2114 3038 2120 3040)
     (attributes
-	 1024 0 1024 0
+	 1024 0    1024 0
 	 0    1024 0    1024)
     (images
       "tiles/snow/spike.png"))
@@ -4277,11 +4238,12 @@
     (width  8)
     (height 3)
     (ids
-     2179 2180 2181 2182   2183 2184 2185 2186
-     2187 2188 2189 2190   2191 2192 2193 2194
-     2195 2196 2197 2198   2199 2200 2201 2202)
-
-    (image "tiles/snow/background3.png"))
+     2179 2180 2181 2182 2183 2184 2185 2186
+     2187 2188 2189 2190 2191 2192 2193 2194
+     2195 2196 2197 2198 2199 2200 2201 2202
+	)
+    (images "tiles/snow/background3.png")
+  )
 
   (tiles
     (width  3)
@@ -4718,7 +4680,8 @@
 
 
   (tiles
-    (width 4)(height 5)
+    (width 4)
+	(height 5)
     (ids
       3068 3069 3070 3071
       3072 3073 3074 3075
@@ -4735,10 +4698,9 @@
     )
     (image "tiles/halloween/base.png")
   )
-
-
   (tiles
-    (width 2)(height 4)
+    (width 2)
+	(height 4)
     (ids
       3088 3089
       3090 3091
@@ -4753,9 +4715,27 @@
     )
     (image "tiles/halloween/inner.png")
   )
+  (tiles
+    (width 4)
+	(height 10)
+    (ids
+      2268 2269 2270 2271
+	  2272 2273 2274 2275
+	  2276 2277 2278 2279
+	  2280 2281 2282 2283
+	  2284 2285 2286 0
+	  2287 2288 2289 2290
+	  2291 2292 2293 2294
+	  2295 2296 2297 2298
+	  2299 2300 2301 2302
+	  2303 2304 2305 2306
+    )
+    (image "tiles/halloween/halloween_extra.png")
+  )
 
   (tiles
-    (width 2)(height 2)
+    (width 2)
+	(height 2)
     (ids
       3094 3095
       3096 3097
@@ -4769,7 +4749,8 @@
 
 
   (tiles
-    (width 2)(height 2)
+    (width 2)
+	(height 2)
     (ids
       3098 3099
       3100 3101
@@ -4782,31 +4763,23 @@
   )
 
   (tiles
-    (width 2)(height 2)
+    (width 2)
+	(height 2)
     (ids
       3102 3103
       3104 3105
      )
-    (attributes
-      0 0
-      0 0
-    )
     (image "tiles/halloween/innerdarkness.png")
   )
 
   (tiles
-    (width 6)(height 4)
+    (width 7)
+	(height 4)
     (ids
-      3114 3115 3116 3117 3118 3119
-      3121 3106 3107 3123 3124 3125
-      3122 3108 3109 3127 3128 3129
-      3131 3132 3133 3134 3135 3136
-    )
-    (attributes
-      0 0 0 0 0 0
-      0 0 0 0 0 0
-      0 0 0 0 0 0
-      0 0 0 0 0 0
+      3114 3115 3116 3117 3118 3119 2266
+      3121 3106 3107 3123 3124 3125 2267
+      3122 3108 3109 3127 3128 3129 0
+      3131 3132 3133 3134 3135 3136 0
     )
     (image "tiles/halloween/darkness.png")
   )
